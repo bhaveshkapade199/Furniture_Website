@@ -1,0 +1,138 @@
+<div class="gallery-page">
+  <!-- Page Header -->
+  <section class="page-header">
+    <div class="header-content">
+      <h1>Furniture Gallery</h1>
+      <p>Browse our exclusive collection. Share links directly with clients!</p>
+    </div>
+  </section>
+
+  <!-- Filters Bar -->
+  <section class="filters-section">
+    <div class="container">
+      <div class="filters-row">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input
+            type="text"
+            placeholder="Search furniture..."
+            [(ngModel)]="searchText"
+            (input)="applyFilters()"
+          />
+        </div>
+        <div class="category-filters">
+          @for (cat of categories; track cat) {
+            <button
+              [class.active]="selectedCategory === cat"
+              (click)="filterByCategory(cat)"
+            >{{ cat }}</button>
+          }
+        </div>
+      </div>
+      <div class="results-count">
+        @if (loading) {
+          Loading…
+        } @else {
+          Showing {{ filteredItems.length }} of {{ allItems.length }} items
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Gallery Grid -->
+  <section class="gallery-section">
+    <div class="container">
+      @if (loading) {
+        <div class="no-results">
+          <span>⏳</span>
+          <h3>Loading furniture…</h3>
+        </div>
+      }
+
+      @if (!loading && filteredItems.length === 0) {
+        <div class="no-results">
+          <span>🔍</span>
+          <h3>No furniture found</h3>
+          <p>Try a different search or category</p>
+        </div>
+      }
+
+      <div class="gallery-grid">
+        @for (item of filteredItems; track item._id || item.id || item.name) {
+          <div class="gallery-card" (click)="openItem(item)">
+            <div class="card-img">
+              <img [src]="item.imageUrl" [alt]="item.name" loading="lazy" />
+              <div class="card-overlay">
+                <button class="overlay-btn" (click)="openItem(item)">👁️ View Details</button>
+              </div>
+              <span class="card-category">{{ item.category }}</span>
+              @if (item.videoUrl) {
+                <span class="video-badge" style="position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.75); color: #fff; font-size: 0.75rem; padding: 3px 8px; border-radius: 6px;">🎥 Video</span>
+              }
+            </div>
+            <div class="card-body">
+              <h3>{{ item.name }}</h3>
+              <p>{{ item.description }}</p>
+              <div class="card-footer">
+                <span class="card-price">{{ item.price }}</span>
+                <div class="share-actions">
+                  <button
+                    class="share-btn copy-btn"
+                    (click)="copyLink(item, $event)"
+                    [title]="isCopied(item) ? 'Copied!' : 'Copy Link'"
+                  >
+                    {{ isCopied(item) ? '✅ Copied!' : '🔗 Copy Link' }}
+                  </button>
+                  <button
+                    class="share-btn wa-btn"
+                    (click)="shareOnWhatsApp(item)"
+                    title="Share on WhatsApp"
+                  >
+                    📱 Share
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Lightbox Modal -->
+@if (selectedItem) {
+  <div class="modal-overlay" (click)="closeItem()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <button class="modal-close" (click)="closeItem()">✕</button>
+      <div class="modal-content">
+        <div class="modal-img">
+          @if (selectedItem.videoUrl) {
+            <video [src]="selectedItem.videoUrl" controls [poster]="selectedItem.imageUrl" style="width: 100%; border-radius: 12px; margin-bottom: 10px;"></video>
+          }
+          <img [src]="selectedItem.imageUrl" [alt]="selectedItem.name" />
+        </div>
+        <div class="modal-info">
+          <span class="modal-category">{{ selectedItem.category }}</span>
+          <h2>{{ selectedItem.name }}</h2>
+          <div class="modal-price">{{ selectedItem.price }}</div>
+          <p>{{ selectedItem.description }}</p>
+          <div class="modal-share">
+            <h4>📤 Share with Client</h4>
+            <div class="share-link-box">
+              <input type="text" [value]="'http://localhost:4200/gallery?id=' + getItemId(selectedItem)" readonly />
+              <button (click)="copyLink(selectedItem, $event)">
+                {{ isCopied(selectedItem) ? '✅' : '📋 Copy' }}
+              </button>
+            </div>
+            <div class="modal-actions">
+              <button class="wa-share-btn" (click)="shareOnWhatsApp(selectedItem)">
+                📱 Send on WhatsApp
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+}

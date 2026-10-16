@@ -1,0 +1,116 @@
+<div class="about-page">
+  <!-- Hero -->
+  <section class="about-hero">
+    <div class="hero-inner">
+      <span class="badge">🏆 Our Story</span>
+      <h1>Crafting Dreams Since 2010</h1>
+      <p>We are a family-owned furniture business dedicated to transforming your living spaces with handcrafted, premium quality furniture.</p>
+    </div>
+  </section>
+
+  <!-- Story Section -->
+  <section class="section story-section">
+    <div class="container">
+      <div class="story-grid">
+        <div class="story-text">
+          <span class="section-tag">📖 Our Story</span>
+          <h2>Who We Are</h2>
+          <p>Bhavesh Furniture was founded in 2010 by Bhavesh Patel in Ahmedabad, Gujarat with a simple vision — to provide every Indian family with beautiful, durable furniture at honest prices.</p>
+          <p>Starting with a small workshop and a handful of skilled craftsmen, we have grown into one of the most trusted furniture brands in Gujarat, serving over 5000 happy customers across India.</p>
+          <p>Our furniture is crafted using premium quality wood (Sheesham, Teak, and Pine), high-grade fabrics, and Italian hardware to ensure durability and elegance.</p>
+          <div class="story-highlights">
+            <div class="highlight">
+              <strong>🏠 On-Site Crafting</strong>
+              <span>Built at Your Home</span>
+            </div>
+            <div class="highlight">
+              <strong>📐 ₹200 Visit</strong>
+              <span>Space Measurement</span>
+            </div>
+            <div class="highlight">
+              <strong>🪵 Solid Hardwood</strong>
+              <span>Sheesham & Teak</span>
+            </div>
+          </div>
+        </div>
+        <div class="story-image">
+          <img src="https://images.unsplash.com/photo-1567016432779-094069958ea5?w=700" alt="Our Workshop" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Work Info / Services -->
+  <section class="section services-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">⚙️ What We Do</span>
+        <h2>Our Services & On-Site Process</h2>
+        <p>From initial space inspection (₹200 charge) to full-team on-site furniture completion at your home</p>
+      </div>
+      <div class="services-grid">
+        @for (item of workInfo; track item._id || item.id || item.title) {
+          <div class="service-card">
+            <div class="service-icon">{{ item.icon }}</div>
+            <h3>{{ item.title }}</h3>
+            <p>{{ item.description }}</p>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Timeline -->
+  <section class="section timeline-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">📅 Our Journey</span>
+        <h2>Milestones</h2>
+      </div>
+      <div class="timeline">
+        @for (item of timeline; track item.year; let i = $index) {
+          <div class="timeline-item" [class.right]="i % 2 !== 0">
+            <div class="timeline-content">
+              <div class="timeline-year">{{ item.year }}</div>
+              <p>{{ item.event }}</p>
+            </div>
+            <div class="timeline-dot"></div>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Team -->
+  <section class="section team-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">👥 The Team</span>
+        <h2>Meet Our Experts</h2>
+        <p>Passionate professionals dedicated to your perfect furniture experience</p>
+      </div>
+      <div class="team-grid">
+        @for (member of team; track member._id || member.id || member.name) {
+          <div class="team-card">
+            @if (member.imageUrl) {
+              <img [src]="member.imageUrl" [alt]="member.name" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin: 0 auto 15px; border: 3px solid #b07d4b;" />
+            } @else {
+              <div class="team-avatar">{{ member.emoji || '👨‍💼' }}</div>
+            }
+            <h3>{{ member.name }}</h3>
+            <p class="team-role">{{ member.role }}</p>
+            @if (member.experience) {
+              <span class="team-exp">{{ member.experience }} experience</span>
+            }
+            @if (member.specialty) {
+              <span class="team-special">🎯 {{ member.specialty }}</span>
+            }
+          </div>
+        }
+      </div>
+      <div style="text-align: center; margin-top: 30px;">
+        <a routerLink="/team" class="btn-primary" style="display: inline-block; padding: 10px 24px; background: #b07d4b; color: #fff; border-radius: 25px; text-decoration: none; font-weight: 600;">View Dedicated Team Page →</a>
+      </div>
+    </div>
+  </section>
+</div>

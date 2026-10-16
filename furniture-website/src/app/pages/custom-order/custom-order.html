@@ -1,0 +1,310 @@
+<div class="custom-order-page">
+
+  <!-- ─── Page Header ─── -->
+  <section class="page-header">
+    <div class="header-content">
+      <div class="header-badge">🪑 Custom Furniture</div>
+      <h1>Make Your Dream Furniture</h1>
+      <p>Tell us exactly what you need — we'll craft it on-site at your home</p>
+      <div class="header-tags">
+        <span>✅ 100% Custom</span>
+        <span>🏠 On-Site Visit ₹200</span>
+        <span>⭐ 15+ Years Experience</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── How It Works ─── -->
+  <section class="how-section">
+    <div class="container">
+      <h2 class="section-title">How It Works</h2>
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <div class="step-icon">📝</div>
+          <h4>Fill This Form</h4>
+          <p>Share your furniture requirements, budget, and contact details below.</p>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <div class="step-icon">📞</div>
+          <h4>We Call You Back</h4>
+          <p>Our team contacts you within 24 hours to understand your needs better.</p>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <div class="step-icon">🏠</div>
+          <h4>Home Visit (₹200)</h4>
+          <p>Our expert visits your home, measures the space, and provides a free detailed quote.</p>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step-card">
+          <div class="step-num">4</div>
+          <div class="step-icon">🪑</div>
+          <h4>Furniture Crafted</h4>
+          <p>Our master craftsmen build your perfect furniture on-site at your home.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Main Form ─── -->
+  <section class="form-section">
+    <div class="container">
+      @if (!submitted) {
+        <div class="form-layout">
+
+          <!-- Form Card -->
+          <div class="form-card">
+            <div class="form-card-header">
+              <h2>🛠️ Your Furniture Request</h2>
+              <p>Fill in as much detail as possible. Our craftsmen will tailor everything to your needs.</p>
+            </div>
+
+            @if (errorMsg) {
+              <div class="error-banner">⚠️ {{ errorMsg }}</div>
+            }
+
+            <!-- ── Section 1: Personal Details ── -->
+            <div class="form-section-block">
+              <div class="section-label">
+                <span class="section-dot">👤</span> Your Details
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Full Name <span class="req">*</span></label>
+                  <input type="text" [(ngModel)]="form.name" name="name"
+                         placeholder="e.g. Rahul Sharma" />
+                </div>
+                <div class="form-group">
+                  <label>Phone / WhatsApp <span class="req">*</span></label>
+                  <input type="tel" [(ngModel)]="form.phone" name="phone"
+                         placeholder="+91 98765 43210" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Email Address <span class="req">*</span></label>
+                  <input type="email" [(ngModel)]="form.email" name="email"
+                         placeholder="rahul@email.com" />
+                </div>
+                <div class="form-group">
+                  <label>City</label>
+                  <input type="text" [(ngModel)]="form.city" name="city"
+                         placeholder="e.g. Ahmedabad, Surat, Rajkot" />
+                </div>
+              </div>
+              <div class="form-group full-width">
+                <label>Full Address (for Home Visit)</label>
+                <input type="text" [(ngModel)]="form.address" name="address"
+                       placeholder="Flat/House No., Street, Area, City, Pincode" />
+              </div>
+            </div>
+
+            <!-- ── Section 2: Furniture Requirements ── -->
+            <div class="form-section-block">
+              <div class="section-label">
+                <span class="section-dot">🪑</span> Furniture Requirements
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Furniture Type <span class="req">*</span></label>
+                  <select [(ngModel)]="form.furnitureType" name="furnitureType">
+                    <option value="">-- Select Furniture Type --</option>
+                    @for (type of furnitureTypes; track type) {
+                      <option [value]="type">{{ type }}</option>
+                    }
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Preferred Wood Type</label>
+                  <select [(ngModel)]="form.woodType" name="woodType">
+                    <option value="">-- Select Wood (optional) --</option>
+                    @for (wood of woodTypes; track wood) {
+                      <option [value]="wood">{{ wood }}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Room Dimensions / Size</label>
+                  <input type="text" [(ngModel)]="form.dimensions" name="dimensions"
+                         placeholder="e.g. 12ft x 10ft room, or 6ft wide wall" />
+                </div>
+                <div class="form-group">
+                  <label>Color / Finish Preference</label>
+                  <input type="text" [(ngModel)]="form.colorFinish" name="colorFinish"
+                         placeholder="e.g. Walnut Polish, White Laminate, Natural Teak" />
+                </div>
+              </div>
+              <div class="form-group full-width">
+                <label>Describe Your Requirements in Detail <span class="req">*</span></label>
+                <textarea rows="5" [(ngModel)]="form.description" name="description"
+                  placeholder="Example: I need a 5-seater L-shaped sofa for my 15x12 living room. I want it in grey fabric with wooden legs. Need storage under seating if possible. The wall color is white..."></textarea>
+              </div>
+              <div class="form-group full-width">
+                <label>Reference / Inspiration Image URL (optional)</label>
+                <input type="text" [(ngModel)]="form.referenceImageUrl" name="referenceImageUrl"
+                       placeholder="Paste a link to any image you like from Google, Pinterest, etc." />
+                <small>Share any image that inspires your design vision</small>
+              </div>
+            </div>
+
+            <!-- ── Section 3: Budget & Urgency ── -->
+            <div class="form-section-block">
+              <div class="section-label">
+                <span class="section-dot">💰</span> Budget & Timeline
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Budget Range</label>
+                  <select [(ngModel)]="form.budgetRange" name="budgetRange">
+                    <option value="">-- Select Budget Range --</option>
+                    @for (b of budgetRanges; track b) {
+                      <option [value]="b">{{ b }}</option>
+                    }
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Urgency / Timeline</label>
+                  <select [(ngModel)]="form.urgency" name="urgency">
+                    <option value="flexible">🟢 Flexible (No Rush)</option>
+                    <option value="within_month">🟡 Within This Month</option>
+                    <option value="urgent">🔴 Urgent (Within a Week)</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Home Visit Toggle -->
+              <div class="visit-toggle">
+                <label class="toggle-label">
+                  <input type="checkbox" [(ngModel)]="form.homeVisitNeeded" name="homeVisitNeeded" />
+                  <span class="toggle-text">
+                    🏠 I want a <strong>Home Visit</strong> for accurate space measurement & free quotation
+                    <span class="visit-badge">₹200 visit charge</span>
+                  </span>
+                </label>
+                @if (form.homeVisitNeeded) {
+                  <div class="visit-info">
+                    ✅ A specialist will visit your home, measure the exact space, and provide a detailed quotation tailored to your room.
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Submit -->
+            <div class="form-submit">
+              <button class="submit-btn" (click)="submit()"
+                      [disabled]="!isValid || submitting">
+                @if (submitting) {
+                  <span>⏳ Submitting your request...</span>
+                } @else {
+                  <span>🚀 Submit My Furniture Request</span>
+                }
+              </button>
+              <p class="submit-note">
+                ⚡ We respond within 24 hours · 📞 Or call us directly:
+                <a href="tel:+919876543210">+91 98765 43210</a>
+              </p>
+            </div>
+          </div>
+
+          <!-- Info Sidebar -->
+          <div class="sidebar">
+            <div class="sidebar-card why-card">
+              <h3>💎 Why Choose Us?</h3>
+              <ul class="why-list">
+                <li><span>🏠</span> On-site crafting at your home</li>
+                <li><span>📐</span> Perfect fit for your exact room</li>
+                <li><span>🌳</span> Premium termite-treated wood</li>
+                <li><span>🎨</span> 200+ custom design styles</li>
+                <li><span>✅</span> 100% quality guarantee</li>
+                <li><span>📋</span> Transparent honest pricing</li>
+                <li><span>⭐</span> 5000+ happy customers</li>
+              </ul>
+            </div>
+
+            <div class="sidebar-card contact-card">
+              <h3>📞 Quick Contact</h3>
+              <a href="https://wa.me/919876543210?text=Hello%2C%20I%20want%20to%20make%20custom%20furniture"
+                 target="_blank" class="whatsapp-btn">
+                💬 WhatsApp Now
+              </a>
+              <a href="tel:+919876543210" class="call-btn">
+                📞 Call +91 98765 43210
+              </a>
+            </div>
+
+            <div class="sidebar-card hours-card">
+              <h3>🕐 Business Hours</h3>
+              <div class="hours-list">
+                <div><span>Mon – Sat</span><span>10 AM – 8 PM</span></div>
+                <div><span>Sunday</span><span>11 AM – 6 PM</span></div>
+              </div>
+            </div>
+
+            <div class="sidebar-card gallery-card">
+              <h3>🖼️ See Our Work</h3>
+              <p>Browse our gallery of 200+ completed projects</p>
+              <a routerLink="/gallery" class="gallery-link">View Gallery →</a>
+            </div>
+          </div>
+        </div>
+
+      } @else {
+        <!-- Success Screen -->
+        <div class="success-screen">
+          <div class="success-card">
+            <div class="success-anim">✅</div>
+            <h2>Request Submitted Successfully!</h2>
+            <p class="success-sub">Thank you <strong>{{ form.name }}</strong>! We've received your custom furniture request.</p>
+
+            <div class="success-details">
+              <div class="success-detail">
+                <span class="detail-icon">🪑</span>
+                <div>
+                  <strong>Furniture Type</strong>
+                  <span>{{ form.furnitureType }}</span>
+                </div>
+              </div>
+              <div class="success-detail">
+                <span class="detail-icon">📞</span>
+                <div>
+                  <strong>We'll Call</strong>
+                  <span>{{ form.phone }}</span>
+                </div>
+              </div>
+              <div class="success-detail">
+                <span class="detail-icon">⏱️</span>
+                <div>
+                  <strong>Response Time</strong>
+                  <span>Within 24 Hours</span>
+                </div>
+              </div>
+              @if (form.homeVisitNeeded) {
+                <div class="success-detail">
+                  <span class="detail-icon">🏠</span>
+                  <div>
+                    <strong>Home Visit</strong>
+                    <span>Requested (₹200 charge)</span>
+                  </div>
+                </div>
+              }
+            </div>
+
+            <div class="success-actions">
+              <a href="https://wa.me/919876543210?text=Hello%2C%20I%20just%20submitted%20a%20furniture%20request%20for%20{{ form.furnitureType }}"
+                 target="_blank" class="whatsapp-btn">💬 Chat on WhatsApp</a>
+              <button class="new-btn" (click)="resetForm()">Submit Another Request</button>
+              <a routerLink="/" class="home-btn">Back to Home</a>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+
+</div>

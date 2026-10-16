@@ -1,0 +1,137 @@
+<div class="team-page">
+  <!-- Hero Section -->
+  <section class="team-hero">
+    <div class="hero-inner">
+      <span class="badge">👥 The Artisans & Leaders</span>
+      <h1>Meet Our Master Craftsmen & Team</h1>
+      <p>Decades of collective experience in fine woodworking, luxury upholstery, modular design, and client satisfaction.</p>
+    </div>
+  </section>
+
+  <!-- Team Grid Section -->
+  <section class="section team-grid-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">✨ Dedicated Experts</span>
+        <h2>Our Craftsmanship Specialists</h2>
+        <p>Every piece of furniture from Bhavesh Furniture is touched by the hands of these skilled professionals.</p>
+      </div>
+
+      @if (loading) {
+        <div class="loading-state">
+          <span>⏳</span>
+          <p>Loading our team members...</p>
+        </div>
+      }
+
+      <div class="team-cards-grid">
+        @for (member of teamMembers; track member._id || member.id || member.name) {
+          <div class="team-card">
+            <div class="card-avatar-wrapper">
+              @if (member.imageUrl) {
+                <img [src]="member.imageUrl" [alt]="member.name" class="member-photo" />
+              } @else {
+                <div class="member-emoji-avatar">{{ member.emoji || '👨‍💼' }}</div>
+              }
+              @if (member.experience) {
+                <span class="exp-badge">⭐ {{ member.experience }}</span>
+              }
+            </div>
+
+            <div class="card-content">
+              <h3>{{ member.name }}</h3>
+              <p class="member-role">{{ member.role }}</p>
+              @if (member.specialty) {
+                <div class="specialty-tag">🎯 {{ member.specialty }}</div>
+              }
+              <p class="member-desc">{{ member.description }}</p>
+
+              @if (member.phone) {
+                <div class="card-contact">
+                  <a [href]="'tel:' + member.phone" class="phone-link">
+                    <span>📞</span> {{ member.phone }}
+                  </a>
+                  <a [href]="'https://wa.me/' + member.phone.replace(' ', '').replace('+', '')" target="_blank" class="wa-btn" title="Chat on WhatsApp">
+                    💬 WhatsApp
+                  </a>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Team In Action / Videos Section -->
+  @if (videos.length > 0) {
+    <section class="section team-videos-section">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag">🎬 In The Workshop</span>
+          <h2>Watch Our Team at Work</h2>
+          <p>Step inside our Ahmedabad workshop and witness the artistry, precision, and passion in every cut and polish.</p>
+        </div>
+
+        <div class="videos-grid">
+          @for (vid of videos; track vid._id || vid.id || vid.title) {
+            <div class="video-card">
+              <div class="video-wrapper">
+                <video [src]="vid.videoUrl" controls [poster]="vid.thumbnailUrl || ''" preload="metadata"></video>
+              </div>
+              <div class="video-info">
+                @if (vid.category) {
+                  <span class="vid-category">{{ vid.category }}</span>
+                }
+                <h4>{{ vid.title }}</h4>
+                <p>{{ vid.description }}</p>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- Values Section -->
+  <section class="section values-section">
+    <div class="container">
+      <div class="values-grid">
+        <div class="value-card">
+          <span class="value-icon">🪵</span>
+          <h3>Grade-A Hardwoods</h3>
+          <p>Hand-selected Seasoned Sheesham, Teak, and Pine with complete anti-termite treatment.</p>
+        </div>
+        <div class="value-card">
+          <span class="value-icon">🧵</span>
+          <h3>Luxury Upholstery</h3>
+          <p>High GSM velvet, leatherette, and breathable linen stitched to perfection with heavy-duty thread.</p>
+        </div>
+        <div class="value-card">
+          <span class="value-icon">📐</span>
+          <h3>Custom Measurements</h3>
+          <p>Every home is unique. Our team takes precision laser measurements to build made-to-fit pieces.</p>
+        </div>
+        <div class="value-card">
+          <span class="value-icon">🤝</span>
+          <h3>Direct Master Access</h3>
+          <p>Direct communication with Bhavesh Patel and our design heads throughout your order lifecycle.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="team-cta">
+    <div class="container">
+      <div class="cta-box">
+        <h2>Want our team to craft custom furniture for your home?</h2>
+        <p>Book a home space inspection & quotation visit (₹200 visit charge). Our master craftsman visits your house, and our complete artisan team builds your furniture on-site!</p>
+        <div class="cta-actions">
+          <a routerLink="/contact" class="btn-primary">Book ₹200 Home Visit</a>
+          <a href="https://wa.me/919876543210?text=Hello%20Team%2C%20I%20want%20to%20book%20a%20home%20visit%20inspection%20for%20custom%20furniture" target="_blank" class="btn-secondary">💬 Chat on WhatsApp</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

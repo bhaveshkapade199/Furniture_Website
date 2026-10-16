@@ -1,0 +1,819 @@
+<div class="admin-page">
+
+  <!-- ==================== LOGIN SCREEN ==================== -->
+  @if (!isLoggedIn) {
+    <div class="login-screen">
+      <div class="login-card">
+        <div class="login-logo">🪑</div>
+        <h2>Admin Portal</h2>
+        <p>Bhavesh Furniture Management System</p>
+
+        @if (loginError) {
+          <div class="error-msg">{{ loginError }}</div>
+        }
+
+        <form (ngSubmit)="login()">
+          <div class="form-group">
+            <label>Admin Password</label>
+            <input
+              type="password"
+              placeholder="Enter admin password"
+              [(ngModel)]="password"
+              name="password"
+              autofocus
+            />
+          </div>
+          <button type="submit" class="login-btn">Login to Dashboard</button>
+          <div class="login-hint">Default password: <code>bhavesh&#64;admin123</code></div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- ==================== DASHBOARD ==================== -->
+  @if (isLoggedIn) {
+    <!-- Admin Header -->
+    <header class="admin-header">
+      <div class="admin-header-inner">
+        <div class="admin-logo">
+          <span>🪑</span>
+          <div>
+            <div class="al-name">Bhavesh Furniture</div>
+            <div class="al-tag">Admin Panel</div>
+          </div>
+        </div>
+
+        <div class="admin-stats">
+          <div class="a-stat">
+            <strong>{{ furnitureItems.length }}</strong>
+            <span>Items / Photos</span>
+          </div>
+          <div class="a-stat">
+            <strong>{{ videos.length }}</strong>
+            <span>Videos</span>
+          </div>
+          <div class="a-stat">
+            <strong>{{ teamMembers.length }}</strong>
+            <span>Team</span>
+          </div>
+          <div class="a-stat">
+            <strong>{{ feedbacks.length }}</strong>
+            <span>Feedback</span>
+          </div>
+        </div>
+
+        <button class="logout-btn" (click)="logout()">🚪 Logout</button>
+      </div>
+    </header>
+
+    <!-- Admin Tabs -->
+    <nav class="admin-tabs">
+      <button [class.active]="activeTab === 'gallery'" (click)="setTab('gallery')">
+        🛋️ Furniture & Photos ({{ furnitureItems.length }})
+      </button>
+      <button [class.active]="activeTab === 'videos'" (click)="setTab('videos')">
+        🎥 Videos Showcase ({{ videos.length }})
+      </button>
+      <button [class.active]="activeTab === 'workinfo'" (click)="setTab('workinfo')">
+        ⚙️ Work Information ({{ workInfoItems.length }})
+      </button>
+      <button [class.active]="activeTab === 'team'" (click)="setTab('team')">
+        👥 Team Members ({{ teamMembers.length }})
+      </button>
+      <button [class.active]="activeTab === 'feedback'" (click)="setTab('feedback')">
+        💬 Feedback ({{ feedbacks.length }})
+        @if (newFeedbackCount > 0) {
+          <span class="badge">{{ newFeedbackCount }}</span>
+        }
+      </button>
+      <button [class.active]="activeTab === 'orders'" (click)="setTab('orders')">
+        🛠️ Custom Orders ({{ customOrders.length }})
+        @if (newOrdersCount > 0) {
+          <span class="badge">{{ newOrdersCount }}</span>
+        }
+      </button>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="admin-content">
+
+      <!-- Upload Status Banner -->
+      @if (uploadMsg) {
+        <div class="upload-alert">
+          <span>ℹ️</span> {{ uploadMsg }}
+        </div>
+      }
+
+      <!-- ================================================================ -->
+      <!-- TAB 1: FURNITURE & PHOTOS                                       -->
+      <!-- ================================================================ -->
+      @if (activeTab === 'gallery') {
+        <div class="tab-header">
+          <div>
+            <h2>Furniture & Photos Management</h2>
+            <p>Upload photos, set prices, add optional video walkthroughs, and share direct product links.</p>
+          </div>
+          @if (!showAddItemForm) {
+            <button class="add-btn" (click)="openAddItemForm()">+ Add New Furniture Photo</button>
+          }
+        </div>
+
+        <!-- Add / Edit Form -->
+        @if (showAddItemForm) {
+          <div class="form-card">
+            <h3>{{ editingItem ? '✏️ Edit Furniture Item' : '➕ Add Furniture Item & Photo' }}</h3>
+            @if (itemSaved) {
+              <div class="success-msg">✓ Item successfully saved!</div>
+            }
+
+            <div class="form-grid">
+              <div class="form-fields">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Item Name *</label>
+                    <input type="text" [(ngModel)]="newItem.name" placeholder="e.g. Royal Teak 5-Seater Sofa" />
+                  </div>
+                  <div class="form-group">
+                    <label>Category *</label>
+                    <select [(ngModel)]="newItem.category">
+                      @for (c of categories; track c) {
+                        <option [value]="c">{{ c }}</option>
+                      }
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Price *</label>
+                    <input type="text" [(ngModel)]="newItem.price" placeholder="e.g. ₹45,000" />
+                  </div>
+                  <div class="form-group">
+                    <label>Optional Video Demonstration (URL)</label>
+                    <input type="text" [(ngModel)]="newItem.videoUrl" (input)="onVideoUrlChange()" placeholder="e.g. https://domain.com/video.mp4" />
+                  </div>
+                </div>
+
+                <!-- Photo Upload Section -->
+                <div class="form-group">
+                  <label>📸 Upload Photo from Computer</label>
+                  <input type="file" accept="image/*" (change)="onItemPhotoFile($event)" />
+                  <small>Upload direct JPG, PNG, or WEBP photo. File will be saved to MongoDB backend server.</small>
+                </div>
+
+                <div class="form-group">
+                  <label>Or Enter Photo URL</label>
+                  <input type="text" [(ngModel)]="newItem.imageUrl" (input)="onImageUrlChange()" placeholder="https://..." />
+                </div>
+
+                <!-- Video Upload Section -->
+                <div class="form-group">
+                  <label>🎥 Or Upload Video File (Optional)</label>
+                  <input type="file" accept="video/*" (change)="onItemVideoFile($event)" />
+                  <small>Upload an MP4 or WebM video file showcasing this furniture.</small>
+                </div>
+
+                <div class="form-group">
+                  <label>Description</label>
+                  <textarea rows="3" [(ngModel)]="newItem.description" placeholder="Material, wood type, foam quality, dimensions..."></textarea>
+                </div>
+
+                <div class="form-actions">
+                  <button class="save-btn" (click)="saveItem()" [disabled]="!newItem.name || !newItem.imageUrl || !newItem.price">
+                    {{ editingItem ? 'Save Changes' : 'Publish Furniture' }}
+                  </button>
+                  <button class="cancel-btn" (click)="cancelItemForm()">Cancel</button>
+                </div>
+              </div>
+
+              <!-- Live Preview Card -->
+              <div class="form-preview">
+                <label>Photo & Video Preview</label>
+                @if (previewImage) {
+                  <img [src]="previewImage" alt="Preview" class="preview-img" />
+                } @else {
+                  <div class="preview-placeholder">
+                    <span>🛋️</span>
+                    <p>Photo preview will appear here</p>
+                  </div>
+                }
+
+                @if (previewVideo) {
+                  <div style="margin-top: 10px;">
+                    <label>Video Preview</label>
+                    <video [src]="previewVideo" controls class="preview-video"></video>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- Items Listing -->
+        <div class="items-grid">
+          @for (item of furnitureItems; track item._id || item.id || item.name) {
+            <div class="item-card">
+              <div class="item-img">
+                <img [src]="item.imageUrl" [alt]="item.name" />
+                <span class="item-cat">{{ item.category }}</span>
+                @if (item.videoUrl) {
+                  <span class="item-has-vid">🎥 Video</span>
+                }
+              </div>
+              <div class="item-body">
+                <h4>{{ item.name }}</h4>
+                <p>{{ item.description }}</p>
+                <div class="item-price">{{ item.price }}</div>
+                <div class="item-actions">
+                  <button class="action-btn edit" (click)="editItem(item)">✏️ Edit</button>
+                  <button class="action-btn copy" (click)="copyShareLink(item)">🔗 Share Link</button>
+                  <button class="action-btn delete" (click)="deleteItem(item)">🗑️ Delete</button>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- ================================================================ -->
+      <!-- TAB 2: VIDEOS SHOWCASE ("videon")                                -->
+      <!-- ================================================================ -->
+      @if (activeTab === 'videos') {
+        <div class="tab-header">
+          <div>
+            <h2>Videos Showcase Management</h2>
+            <p>Upload videos of workshop crafting, sofa manufacturing, and completed client installations.</p>
+          </div>
+          @if (!showAddVideoForm) {
+            <button class="add-btn" (click)="openAddVideoForm()">+ Upload New Video</button>
+          }
+        </div>
+
+        @if (showAddVideoForm) {
+          <div class="form-card">
+            <h3>{{ editingVideo ? '✏️ Edit Video' : '➕ Upload Video / Add Video Link' }}</h3>
+            @if (videoSaved) {
+              <div class="success-msg">✓ Video successfully saved!</div>
+            }
+
+            <div class="form-grid">
+              <div class="form-fields">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Video Title *</label>
+                    <input type="text" [(ngModel)]="newVideo.title" placeholder="e.g. Master Sofa Crafting Process" />
+                  </div>
+                  <div class="form-group">
+                    <label>Category</label>
+                    <select [(ngModel)]="newVideo.category">
+                      <option value="Workshop">Workshop & Crafting</option>
+                      <option value="Installation">Installation & Delivery</option>
+                      <option value="Completed Project">Completed Project</option>
+                      <option value="Client Review">Client Review</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Video File Upload -->
+                <div class="form-group">
+                  <label>🎥 Upload Video File (.mp4, .webm)</label>
+                  <input type="file" accept="video/*" (change)="onVideoFile($event)" />
+                  <small>Upload direct video file from your computer to MongoDB backend.</small>
+                </div>
+
+                <div class="form-group">
+                  <label>Or Enter Video URL</label>
+                  <input type="text" [(ngModel)]="newVideo.videoUrl" placeholder="https://..." />
+                </div>
+
+                <div class="form-group">
+                  <label>Thumbnail / Cover Photo (Upload or URL)</label>
+                  <input type="file" accept="image/*" (change)="onVideoThumbnailFile($event)" style="margin-bottom: 8px;" />
+                  <input type="text" [(ngModel)]="newVideo.thumbnailUrl" placeholder="https://..." />
+                </div>
+
+                <div class="form-group">
+                  <label>Description</label>
+                  <textarea rows="3" [(ngModel)]="newVideo.description" placeholder="Explain what happens in this video..."></textarea>
+                </div>
+
+                <div class="form-actions">
+                  <button class="save-btn" (click)="saveVideo()" [disabled]="!newVideo.title || !newVideo.videoUrl">
+                    {{ editingVideo ? 'Save Changes' : 'Publish Video' }}
+                  </button>
+                  <button class="cancel-btn" (click)="cancelVideoForm()">Cancel</button>
+                </div>
+              </div>
+
+              <!-- Video Preview -->
+              <div class="form-preview">
+                <label>Video Player Preview</label>
+                @if (newVideo.videoUrl) {
+                  <video [src]="newVideo.videoUrl" controls [poster]="newVideo.thumbnailUrl || ''" class="preview-video"></video>
+                } @else {
+                  <div class="preview-placeholder">
+                    <span>🎬</span>
+                    <p>Video player preview will appear here</p>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        }
+
+        <div class="video-admin-grid">
+          @for (vid of videos; track vid._id || vid.id || vid.title) {
+            <div class="video-admin-card">
+              <div class="video-admin-player">
+                <video [src]="vid.videoUrl" controls [poster]="vid.thumbnailUrl || ''"></video>
+              </div>
+              <div class="video-admin-body">
+                <span class="video-admin-cat">{{ vid.category }}</span>
+                <h4>{{ vid.title }}</h4>
+                <p>{{ vid.description }}</p>
+                <div class="item-actions">
+                  <button class="action-btn edit" (click)="editVideo(vid)">✏️ Edit</button>
+                  <button class="action-btn delete" (click)="deleteVideo(vid)">🗑️ Delete</button>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- ================================================================ -->
+      <!-- TAB 3: WORK INFORMATION                                          -->
+      <!-- ================================================================ -->
+      @if (activeTab === 'workinfo') {
+        <div class="tab-header">
+          <div>
+            <h2>Work Information & Services Management</h2>
+            <p>Customize the services, offerings, and quality assurances shown on the website.</p>
+          </div>
+          @if (!showAddWorkForm) {
+            <button class="add-btn" (click)="openAddWorkForm()">+ Add Work Info</button>
+          }
+        </div>
+
+        @if (showAddWorkForm) {
+          <div class="form-card">
+            <h3>{{ editingWork ? '✏️ Edit Work Information' : '➕ Add Work Information' }}</h3>
+            @if (workSaved) {
+              <div class="success-msg">✓ Service information saved!</div>
+            }
+
+            <div class="form-grid">
+              <div class="form-fields">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Title *</label>
+                    <input type="text" [(ngModel)]="newWork.title" placeholder="e.g. Home Space Visit & Measurement (₹200)" />
+                  </div>
+                  <div class="form-group">
+                    <label>Display Icon (Emoji)</label>
+                    <input type="text" [(ngModel)]="newWork.icon" placeholder="🏠, 👥, 🪑, 🌳, 🛡️, 📋" />
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label>Optional Photo for this Work</label>
+                  <input type="file" accept="image/*" (change)="onWorkPhotoFile($event)" style="margin-bottom: 6px;" />
+                  <input type="text" [(ngModel)]="newWork.imageUrl" placeholder="Or photo URL https://..." />
+                </div>
+
+                <div class="form-group">
+                  <label>Optional Video Demonstration URL</label>
+                  <input type="text" [(ngModel)]="newWork.videoUrl" placeholder="https://..." />
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Display Order (Priority)</label>
+                    <input type="number" [(ngModel)]="newWork.order" min="1" max="99" />
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label>Description *</label>
+                  <textarea rows="3" [(ngModel)]="newWork.description" placeholder="Explain this service or feature in detail..."></textarea>
+                </div>
+
+                <div class="form-actions">
+                  <button class="save-btn" (click)="saveWork()" [disabled]="!newWork.title || !newWork.description">
+                    {{ editingWork ? 'Save Changes' : 'Add Service' }}
+                  </button>
+                  <button class="cancel-btn" (click)="cancelWorkForm()">Cancel</button>
+                </div>
+              </div>
+
+              <!-- Preview -->
+              <div class="form-preview">
+                <label>Card Preview</label>
+                <div class="work-card" style="box-shadow: none;">
+                  <div class="work-icon">{{ newWork.icon || '🪑' }}</div>
+                  <div class="work-body">
+                    <h4>{{ newWork.title || 'Service Title' }}</h4>
+                    <p>{{ newWork.description || 'Description will appear here...' }}</p>
+                  </div>
+                </div>
+                @if (newWork.imageUrl) {
+                  <img [src]="newWork.imageUrl" alt="Preview" class="preview-img" style="margin-top: 10px;" />
+                }
+              </div>
+            </div>
+          </div>
+        }
+
+        <div class="work-grid">
+          @for (item of workInfoItems; track item._id || item.id || item.title) {
+            <div class="work-card">
+              <div class="work-icon">{{ item.icon }}</div>
+              <div class="work-body">
+                <h4>{{ item.title }}</h4>
+                <p>{{ item.description }}</p>
+                @if (item.videoUrl) {
+                  <small style="color: #0891b2;">🎥 Video linked</small>
+                }
+              </div>
+              <div class="work-actions">
+                <button class="action-btn edit" (click)="editWork(item)">✏️ Edit</button>
+                <button class="action-btn delete" (click)="deleteWork(item)">🗑️ Delete</button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- ================================================================ -->
+      <!-- TAB 4: TEAM MEMBERS ("team session")                             -->
+      <!-- ================================================================ -->
+      @if (activeTab === 'team') {
+        <div class="tab-header">
+          <div>
+            <h2>Team Members Management ("Team Session")</h2>
+            <p>Add, edit, or remove master craftsmen, designers, and managers shown on the website.</p>
+          </div>
+          @if (!showAddTeamForm) {
+            <button class="add-btn" (click)="openAddTeamForm()">+ Add Team Member</button>
+          }
+        </div>
+
+        @if (teamActionMsg) {
+          <div class="success-msg" style="margin-bottom: 20px;">
+            {{ teamActionMsg }}
+          </div>
+        }
+
+        @if (showAddTeamForm) {
+          <div class="form-card">
+            <h3>{{ editingTeam ? '✏️ Edit Team Member' : '➕ Add New Team Member' }}</h3>
+            @if (teamSaved) {
+              <div class="success-msg">✓ Team member saved!</div>
+            }
+
+            <div class="form-grid">
+              <div class="form-fields">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Full Name *</label>
+                    <input type="text" [(ngModel)]="newTeam.name" placeholder="e.g. Bhavesh Patel" />
+                  </div>
+                  <div class="form-group">
+                    <label>Role / Designation *</label>
+                    <input type="text" [(ngModel)]="newTeam.role" placeholder="e.g. Master Craftsman & Founder" />
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Experience</label>
+                    <input type="text" [(ngModel)]="newTeam.experience" placeholder="e.g. 15+ Years" />
+                  </div>
+                  <div class="form-group">
+                    <label>Specialty / Department</label>
+                    <input type="text" [(ngModel)]="newTeam.specialty" placeholder="e.g. Sofa Set & Teak Wood" />
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Phone / WhatsApp</label>
+                    <input type="text" [(ngModel)]="newTeam.phone" placeholder="e.g. +91 98765 43210" />
+                  </div>
+                  <div class="form-group">
+                    <label>Avatar Emoji (If no photo)</label>
+                    <input type="text" [(ngModel)]="newTeam.emoji" placeholder="👨‍🔨, 🎨, 🍳, 🛕, 🤝, ✅" />
+                  </div>
+                </div>
+
+                <!-- Team Photo Upload -->
+                <div class="form-group">
+                  <label>📸 Upload Member Photo</label>
+                  <input type="file" accept="image/*" (change)="onTeamPhotoFile($event)" style="margin-bottom: 6px;" />
+                  <input type="text" [(ngModel)]="newTeam.imageUrl" placeholder="Or enter Photo URL https://..." />
+                  <small>Upload a clear portrait photo of the team member.</small>
+                </div>
+
+                <div class="form-group">
+                  <label>Biography / Description</label>
+                  <textarea rows="3" [(ngModel)]="newTeam.description" placeholder="Brief background, mastery, achievements..."></textarea>
+                </div>
+
+                <div class="form-actions">
+                  <button class="save-btn" (click)="saveTeam()" [disabled]="!newTeam.name || !newTeam.role">
+                    {{ editingTeam ? 'Save Changes' : 'Add Team Member' }}
+                  </button>
+                  <button class="cancel-btn" (click)="cancelTeamForm()">Cancel</button>
+                </div>
+              </div>
+
+              <!-- Preview -->
+              <div class="form-preview">
+                <label>Card Preview</label>
+                <div class="team-admin-card" style="box-shadow: none;">
+                  <div class="team-admin-top">
+                    @if (newTeam.imageUrl) {
+                      <img [src]="newTeam.imageUrl" alt="Preview" class="team-admin-photo" />
+                    } @else {
+                      <div class="team-admin-emoji">{{ newTeam.emoji || '👨‍💼' }}</div>
+                    }
+                  </div>
+                  <div class="team-admin-body">
+                    <h4>{{ newTeam.name || 'Member Name' }}</h4>
+                    <div class="team-admin-role">{{ newTeam.role || 'Designation' }}</div>
+                    <div class="team-admin-meta">
+                      <span>⭐ {{ newTeam.experience || '5+ Years' }}</span>
+                      <span>🎯 {{ newTeam.specialty || 'Woodwork' }}</span>
+                    </div>
+                    <p>{{ newTeam.description || 'Description will appear here...' }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+
+        <div class="team-admin-grid">
+          @for (member of teamMembers; track member._id || member.id || member.name) {
+            <div class="team-admin-card">
+              <div class="team-admin-top">
+                @if (member.imageUrl) {
+                  <img [src]="member.imageUrl" [alt]="member.name" class="team-admin-photo" />
+                } @else {
+                  <div class="team-admin-emoji">{{ member.emoji || '👨‍💼' }}</div>
+                }
+              </div>
+              <div class="team-admin-body">
+                <h4>{{ member.name }}</h4>
+                <div class="team-admin-role">{{ member.role }}</div>
+                <div class="team-admin-meta">
+                  @if (member.experience) {
+                    <span>⭐ {{ member.experience }}</span>
+                  }
+                  @if (member.specialty) {
+                    <span>🎯 {{ member.specialty }}</span>
+                  }
+                </div>
+                <p>{{ member.description }}</p>
+                <div class="item-actions">
+                  <button class="action-btn edit" (click)="editTeam(member)">✏️ Edit</button>
+                  <button class="action-btn delete" (click)="deleteTeam(member)">🗑️ Delete</button>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- ================================================================ -->
+      <!-- TAB 5: FEEDBACK                                                  -->
+      <!-- ================================================================ -->
+      @if (activeTab === 'feedback') {
+        <div class="tab-header">
+          <div>
+            <h2>Customer Inquiries & Feedback</h2>
+            <p>Read customer messages, ratings, and inquiries submitted via the Contact page.</p>
+          </div>
+        </div>
+
+        @if (feedbacks.length === 0) {
+          <div class="empty-state">
+            <span>💬</span>
+            <h3>No feedback yet</h3>
+            <p>Customer submissions will appear here.</p>
+          </div>
+        }
+
+        <div class="feedback-list">
+          @for (fb of feedbacks; track fb._id || fb.id) {
+            <div class="feedback-card" [class.unread]="fb.status === 'new'">
+              <div class="fb-header">
+                <div class="fb-user">
+                  <div class="fb-avatar">{{ fb.name.charAt(0).toUpperCase() }}</div>
+                  <div>
+                    <strong>{{ fb.name }}</strong>
+                    <span>{{ fb.email }}</span>
+                  </div>
+                </div>
+                <div class="fb-meta">
+                  <div class="fb-stars">{{ getStars(fb.rating) }}</div>
+                  <div class="fb-date">{{ fb.date | date:'dd MMM yyyy' }}</div>
+                  @if (fb.status === 'new') {
+                    <span class="new-badge">NEW</span>
+                  }
+                </div>
+              </div>
+              <p class="fb-message">{{ fb.message }}</p>
+              <div class="fb-actions">
+                @if (fb.status === 'new') {
+                  <button class="action-btn edit" (click)="markRead(fb)">✓ Mark as Read</button>
+                }
+                <button class="action-btn delete" (click)="deleteFeedback(fb)">🗑️ Delete</button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- ================================================================ -->
+      <!-- TAB 6: CUSTOM ORDERS (Make Furniture Requests)                    -->
+      <!-- ================================================================ -->
+      @if (activeTab === 'orders') {
+        <div class="tab-header">
+          <div>
+            <h2>🛠️ Custom Furniture Orders</h2>
+            <p>Users who want custom furniture crafted at their home. Review, contact, and quote them.</p>
+          </div>
+          <div class="order-filter-row">
+            <select class="order-filter-select" [(ngModel)]="orderStatusFilter" (change)="filterOrders()">
+              <option value="">All Statuses</option>
+              <option value="new">🆕 New</option>
+              <option value="contacted">📞 Contacted</option>
+              <option value="quoted">💰 Quoted</option>
+              <option value="in_progress">⚙️ In Progress</option>
+              <option value="completed">✅ Completed</option>
+              <option value="cancelled">❌ Cancelled</option>
+            </select>
+          </div>
+        </div>
+
+        @if (orderActionMsg) {
+          <div class="success-msg" style="margin-bottom: 20px;">{{ orderActionMsg }}</div>
+        }
+
+        @if (customOrders.length === 0) {
+          <div class="empty-state">
+            <span>🛠️</span>
+            <h3>No custom orders yet</h3>
+            <p>When users submit furniture requests, they'll appear here.</p>
+          </div>
+        }
+
+        <!-- Order Detail Modal -->
+        @if (selectedOrder) {
+          <div class="order-modal-overlay" (click)="closeOrderDetail()">
+            <div class="order-modal" (click)="$event.stopPropagation()">
+              <div class="order-modal-header">
+                <div>
+                  <h3>📋 Order from {{ selectedOrder.name }}</h3>
+                  <div class="order-modal-sub">{{ selectedOrder.email }} · {{ selectedOrder.phone }}</div>
+                </div>
+                <button class="modal-close" (click)="closeOrderDetail()">✕</button>
+              </div>
+
+              <div class="order-modal-body">
+                <!-- Customer Info -->
+                <div class="order-detail-section">
+                  <h4>👤 Customer Details</h4>
+                  <div class="order-detail-grid">
+                    <div><label>Name</label><span>{{ selectedOrder.name }}</span></div>
+                    <div><label>Phone</label><span>{{ selectedOrder.phone }}</span></div>
+                    <div><label>Email</label><span>{{ selectedOrder.email }}</span></div>
+                    <div><label>City</label><span>{{ selectedOrder.city || '—' }}</span></div>
+                    <div class="full"><label>Address</label><span>{{ selectedOrder.address || '—' }}</span></div>
+                  </div>
+                </div>
+
+                <!-- Furniture Requirements -->
+                <div class="order-detail-section">
+                  <h4>🪑 Furniture Requirements</h4>
+                  <div class="order-detail-grid">
+                    <div><label>Type</label><span>{{ selectedOrder.furnitureType }}</span></div>
+                    <div><label>Wood Type</label><span>{{ selectedOrder.woodType || '—' }}</span></div>
+                    <div><label>Dimensions</label><span>{{ selectedOrder.dimensions || '—' }}</span></div>
+                    <div><label>Color/Finish</label><span>{{ selectedOrder.colorFinish || '—' }}</span></div>
+                    <div><label>Budget</label><span>{{ selectedOrder.budgetRange || '—' }}</span></div>
+                    <div><label>Timeline</label><span>{{ getUrgencyLabel(selectedOrder.urgency) }}</span></div>
+                    <div><label>Home Visit</label><span>{{ selectedOrder.homeVisitNeeded ? '✅ Yes (₹200)' : '❌ No' }}</span></div>
+                    <div class="full"><label>Description</label><span>{{ selectedOrder.description }}</span></div>
+                    @if (selectedOrder.referenceImageUrl) {
+                      <div class="full">
+                        <label>Reference Image</label>
+                        <a [href]="selectedOrder.referenceImageUrl" target="_blank" style="color: #0891b2; word-break: break-all;">{{ selectedOrder.referenceImageUrl }}</a>
+                      </div>
+                    }
+                  </div>
+                </div>
+
+                <!-- Admin Actions -->
+                <div class="order-detail-section">
+                  <h4>⚙️ Admin Actions</h4>
+                  <div class="order-detail-grid">
+                    <div>
+                      <label>Update Status</label>
+                      <select [(ngModel)]="selectedOrder.status" style="padding: 8px; border: 1.5px solid #e2d5c5; border-radius: 8px;">
+                        <option value="new">🆕 New</option>
+                        <option value="contacted">📞 Contacted</option>
+                        <option value="quoted">💰 Quoted</option>
+                        <option value="in_progress">⚙️ In Progress</option>
+                        <option value="completed">✅ Completed</option>
+                        <option value="cancelled">❌ Cancelled</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label>Quoted Price (₹)</label>
+                      <input type="text" [(ngModel)]="selectedOrder.quotedPrice"
+                             placeholder="e.g. ₹55,000"
+                             style="padding: 8px; border: 1.5px solid #e2d5c5; border-radius: 8px; width: 100%;" />
+                    </div>
+                    <div class="full">
+                      <label>Admin Notes</label>
+                      <textarea rows="3" [(ngModel)]="selectedOrder.adminNotes"
+                        placeholder="Internal notes about this order, client preferences, measurements taken..."
+                        style="padding: 8px; border: 1.5px solid #e2d5c5; border-radius: 8px; width: 100%; font-family: inherit; resize: vertical;"></textarea>
+                    </div>
+                  </div>
+                  <div class="order-modal-actions">
+                    <button class="action-btn edit" (click)="saveOrderNotes(selectedOrder)">💾 Save Changes</button>
+                    <a [href]="'tel:' + selectedOrder.phone" class="action-btn copy">📞 Call Client</a>
+                    <a [href]="'https://wa.me/91' + selectedOrder.phone.replace(/[^0-9]/g, '') + '?text=Hello ' + selectedOrder.name + ', regarding your custom furniture request for ' + selectedOrder.furnitureType"
+                       target="_blank" class="action-btn copy">💬 WhatsApp</a>
+                    <button class="action-btn delete" (click)="deleteOrder(selectedOrder)">🗑️ Delete</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- Orders List -->
+        <div class="orders-grid">
+          @for (order of customOrders; track order._id || order.id) {
+            <div class="order-card" [class.order-new]="order.status === 'new'">
+              <div class="order-card-header">
+                <div class="order-user">
+                  <div class="order-avatar">{{ order.name.charAt(0).toUpperCase() }}</div>
+                  <div>
+                    <strong>{{ order.name }}</strong>
+                    <span>{{ order.phone }}</span>
+                  </div>
+                </div>
+                <div class="order-meta-right">
+                  <span class="order-status-badge" [class]="getStatusBadgeClass(order.status)">
+                    {{ order.status || 'new' }}
+                  </span>
+                  @if (order.urgency === 'urgent') {
+                    <span class="urgency-badge urgent">🔴 URGENT</span>
+                  } @else if (order.urgency === 'within_month') {
+                    <span class="urgency-badge month">🟡 This Month</span>
+                  }
+                </div>
+              </div>
+
+              <div class="order-card-body">
+                <div class="order-furniture-type">🪑 {{ order.furnitureType }}</div>
+                <div class="order-info-chips">
+                  @if (order.budgetRange) {
+                    <span class="chip">💰 {{ order.budgetRange }}</span>
+                  }
+                  @if (order.city) {
+                    <span class="chip">📍 {{ order.city }}</span>
+                  }
+                  @if (order.homeVisitNeeded) {
+                    <span class="chip">🏠 Visit Needed</span>
+                  }
+                  @if (order.woodType) {
+                    <span class="chip">🌳 {{ order.woodType.split(' ')[0] }}</span>
+                  }
+                </div>
+                <p class="order-desc">{{ order.description | slice:0:140 }}{{ order.description.length > 140 ? '...' : '' }}</p>
+                @if (order.quotedPrice) {
+                  <div class="order-quoted">💰 Quoted: <strong>{{ order.quotedPrice }}</strong></div>
+                }
+              </div>
+
+              <div class="order-card-footer">
+                <div class="order-date">{{ order.createdAt | date:'dd MMM yyyy, hh:mm a' }}</div>
+                <div class="order-actions">
+                  <button class="action-btn edit" (click)="viewOrder(order)">👁️ View & Manage</button>
+                  <button class="action-btn delete" (click)="deleteOrder(order)">🗑️</button>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+    </div>
+  }
+</div>
