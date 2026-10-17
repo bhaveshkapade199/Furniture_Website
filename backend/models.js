@@ -6,7 +6,7 @@ const FurnitureSchema = new mongoose.Schema({
   description:   { type: String, default: '' },
   imageUrl:      { type: String, required: true },
   videoUrl:      { type: String, default: '' },
-  price:         { type: String, required: true },
+  price:         { type: String, default: '' },
   shareableLink: { type: String },
   dateAdded:     { type: Date, default: Date.now }
 });

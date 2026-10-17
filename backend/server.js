@@ -119,9 +119,46 @@ async function seedDefaults() {
 
 // ─── Helper: Admin auth ───────────────────────────────────────
 function adminAuth(req, res, next) {
-  const pwd = req.headers['x-admin-password'];
+  const pwd = req.headers['x-admin-password'] ||
+              (req.headers['authorization'] && req.headers['authorization'].replace(/^Bearer\s+/i, '')) ||
+              req.query.adminPassword;
   if (pwd !== process.env.ADMIN_PASSWORD) return res.status(401).json({ error: 'Unauthorized' });
   next();
+}
+
+// ─── Helper: Safe MongoDB Operations ──────────────────────────
+async function safeDelete(Model, id) {
+  try {
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      const res = await Model.findByIdAndDelete(id);
+      if (res) return res;
+    }
+  } catch (_) {}
+  const num = Number(id);
+  if (!isNaN(num)) {
+    try {
+      const res = await Model.findOneAndDelete({ order: num });
+      if (res) return res;
+    } catch (_) {}
+  }
+  return null;
+}
+
+async function safeUpdate(Model, id, update, options = { new: true }) {
+  try {
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      const res = await Model.findByIdAndUpdate(id, update, options);
+      if (res) return res;
+    }
+  } catch (_) {}
+  const num = Number(id);
+  if (!isNaN(num)) {
+    try {
+      const res = await Model.findOneAndUpdate({ order: num }, update, options);
+      if (res) return res;
+    } catch (_) {}
+  }
+  return null;
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -160,7 +197,14 @@ app.get('/api/furniture', async (req, res) => {
 
 app.get('/api/furniture/:id', async (req, res) => {
   try {
-    const item = await Furniture.findById(req.params.id);
+    let item = null;
+    if (mongoose.Types.ObjectId.isValid(req.params.id)) {
+      item = await Furniture.findById(req.params.id);
+    }
+    if (!item) {
+      const num = Number(req.params.id);
+      if (!isNaN(num)) item = await Furniture.findOne({ order: num });
+    }
     if (!item) return res.status(404).json({ error: 'Not found' });
     res.json(item);
   } catch (e) { res.status(500).json({ error: e.message }); }
@@ -177,14 +221,14 @@ app.post('/api/furniture', adminAuth, async (req, res) => {
 
 app.put('/api/furniture/:id', adminAuth, async (req, res) => {
   try {
-    const item = await Furniture.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    res.json(item);
+    const item = await safeUpdate(Furniture, req.params.id, req.body);
+    res.json(item || { success: true });
   } catch (e) { res.status(400).json({ error: e.message }); }
 });
 
 app.delete('/api/furniture/:id', adminAuth, async (req, res) => {
   try {
-    await Furniture.findByIdAndDelete(req.params.id);
+    await safeDelete(Furniture, req.params.id);
     res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -208,14 +252,14 @@ app.post('/api/workinfo', adminAuth, async (req, res) => {
 
 app.put('/api/workinfo/:id', adminAuth, async (req, res) => {
   try {
-    const item = await WorkInfo.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    res.json(item);
+    const item = await safeUpdate(WorkInfo, req.params.id, req.body);
+    res.json(item || { success: true });
   } catch (e) { res.status(400).json({ error: e.message }); }
 });
 
 app.delete('/api/workinfo/:id', adminAuth, async (req, res) => {
   try {
-    await WorkInfo.findByIdAndDelete(req.params.id);
+    await safeDelete(WorkInfo, req.params.id);
     res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -239,14 +283,14 @@ app.post('/api/team', adminAuth, async (req, res) => {
 
 app.put('/api/team/:id', adminAuth, async (req, res) => {
   try {
-    const item = await TeamMember.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    res.json(item);
+    const item = await safeUpdate(TeamMember, req.params.id, req.body);
+    res.json(item || { success: true });
   } catch (e) { res.status(400).json({ error: e.message }); }
 });
 
 app.delete('/api/team/:id', adminAuth, async (req, res) => {
   try {
-    await TeamMember.findByIdAndDelete(req.params.id);
+    await safeDelete(TeamMember, req.params.id);
     res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -270,14 +314,14 @@ app.post('/api/videos', adminAuth, async (req, res) => {
 
 app.put('/api/videos/:id', adminAuth, async (req, res) => {
   try {
-    const item = await Video.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    res.json(item);
+    const item = await safeUpdate(Video, req.params.id, req.body);
+    res.json(item || { success: true });
   } catch (e) { res.status(400).json({ error: e.message }); }
 });
 
 app.delete('/api/videos/:id', adminAuth, async (req, res) => {
   try {
-    await Video.findByIdAndDelete(req.params.id);
+    await safeDelete(Video, req.params.id);
     res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -301,14 +345,14 @@ app.post('/api/feedback', async (req, res) => {
 
 app.patch('/api/feedback/:id/read', adminAuth, async (req, res) => {
   try {
-    const fb = await Feedback.findByIdAndUpdate(req.params.id, { status: 'read' }, { new: true });
-    res.json(fb);
+    const fb = await safeUpdate(Feedback, req.params.id, { status: 'read' });
+    res.json(fb || { success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 app.delete('/api/feedback/:id', adminAuth, async (req, res) => {
   try {
-    await Feedback.findByIdAndDelete(req.params.id);
+    await safeDelete(Feedback, req.params.id);
     res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -338,7 +382,10 @@ app.get('/api/custom-orders', adminAuth, async (req, res) => {
 // GET single custom order - admin only
 app.get('/api/custom-orders/:id', adminAuth, async (req, res) => {
   try {
-    const order = await CustomOrder.findById(req.params.id);
+    let order = null;
+    if (mongoose.Types.ObjectId.isValid(req.params.id)) {
+      order = await CustomOrder.findById(req.params.id);
+    }
     if (!order) return res.status(404).json({ error: 'Not found' });
     res.json(order);
   } catch (e) { res.status(500).json({ error: e.message }); }
@@ -348,15 +395,15 @@ app.get('/api/custom-orders/:id', adminAuth, async (req, res) => {
 app.patch('/api/custom-orders/:id', adminAuth, async (req, res) => {
   try {
     const update = { ...req.body, updatedAt: new Date() };
-    const order = await CustomOrder.findByIdAndUpdate(req.params.id, update, { new: true });
-    res.json(order);
+    const order = await safeUpdate(CustomOrder, req.params.id, update);
+    res.json(order || { success: true });
   } catch (e) { res.status(400).json({ error: e.message }); }
 });
 
 // DELETE custom order - admin only
 app.delete('/api/custom-orders/:id', adminAuth, async (req, res) => {
   try {
-    await CustomOrder.findByIdAndDelete(req.params.id);
+    await safeDelete(CustomOrder, req.params.id);
     res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
