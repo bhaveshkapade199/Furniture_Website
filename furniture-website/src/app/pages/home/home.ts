@@ -7,14 +7,14 @@ export interface ShowcaseSlide {
   url: string;
   name: string;
   category: 'Sofa Set' | 'TV Unit' | string;
-  price: string;
+  price?: string;
 }
 
 export interface HeroSlide {
   url: string;
   title: string;
   tag: string;
-  price: string;
+  price?: string;
 }
 
 @Component({

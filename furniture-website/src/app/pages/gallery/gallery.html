@@ -74,7 +74,9 @@
               <h3>{{ item.name }}</h3>
               <p>{{ item.description }}</p>
               <div class="card-footer">
-                <span class="card-price">{{ item.price }}</span>
+                @if (item.price) {
+                  <span class="card-price">{{ item.price }}</span>
+                }
                 <div class="share-actions">
                   <button
                     class="share-btn copy-btn"
@@ -115,7 +117,9 @@
         <div class="modal-info">
           <span class="modal-category">{{ selectedItem.category }}</span>
           <h2>{{ selectedItem.name }}</h2>
-          <div class="modal-price">{{ selectedItem.price }}</div>
+          @if (selectedItem.price) {
+            <div class="modal-price">{{ selectedItem.price }}</div>
+          }
           <p>{{ selectedItem.description }}</p>
           <div class="modal-share">
             <h4>📤 Share with Client</h4>

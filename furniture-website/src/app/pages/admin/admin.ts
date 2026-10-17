@@ -204,7 +204,7 @@ export class Admin implements OnInit, OnDestroy {
       description: item.description || '',
       imageUrl: item.imageUrl,
       videoUrl: item.videoUrl || '',
-      price: item.price
+      price: item.price || ''
     };
     this.previewImage = item.imageUrl;
     this.previewVideo = item.videoUrl || '';
@@ -277,7 +277,7 @@ export class Admin implements OnInit, OnDestroy {
   }
 
   saveItem() {
-    if (!this.newItem.name || !this.newItem.imageUrl || !this.newItem.price) return;
+    if (!this.newItem.name || !this.newItem.imageUrl) return;
     const id = this.editingItem?._id || (this.editingItem?.id as any);
     if (this.editingItem && id) {
       this.furnitureService.updateFurnitureItem(String(id), this.newItem).subscribe(() => {

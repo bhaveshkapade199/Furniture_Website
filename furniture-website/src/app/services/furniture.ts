@@ -11,7 +11,7 @@ export interface FurnitureItem {
   description: string;
   imageUrl: string;
   videoUrl?: string;
-  price: string;
+  price?: string;
   shareableLink?: string;
   dateAdded?: Date;
 }

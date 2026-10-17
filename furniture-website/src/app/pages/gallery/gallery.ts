@@ -80,7 +80,8 @@ export class Gallery implements OnInit {
   shareOnWhatsApp(item: FurnitureItem) {
     const id = this.getItemId(item);
     const link = window.location.origin + '/gallery?id=' + id;
-    const msg = `Check out this ${item.name} - ${item.price}\n${link}`;
+    const priceText = item.price ? ` - ${item.price}` : '';
+    const msg = `Check out this ${item.name}${priceText}\n${link}`;
     window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
   }
 

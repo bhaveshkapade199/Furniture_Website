@@ -149,8 +149,10 @@
                     <span class="slide-tagline">100% Customized For Your Room Dimensions</span>
                   </div>
                   <div class="slide-price-box">
-                    <span class="price-caption">Starting at</span>
-                    <span class="slide-cost">{{ slide.price }}</span>
+                    @if (slide.price) {
+                      <span class="price-caption">Starting at</span>
+                      <span class="slide-cost">{{ slide.price }}</span>
+                    }
                   </div>
                 </div>
               </div>
@@ -344,7 +346,9 @@
         <div class="showcase-slide-info">
           <div class="slide-title-wrap">
             <h4>{{ slide.name }}</h4>
-            <span class="slide-price">{{ slide.price }}</span>
+            @if (slide.price) {
+              <span class="slide-price">{{ slide.price }}</span>
+            }
           </div>
           <div class="slide-actions">
             <a routerLink="/gallery" [queryParams]="{cat: slide.category}" class="slide-link">View Collection →</a>
@@ -387,7 +391,7 @@
           <h3>{{ item.name }}</h3>
           <p>{{ item.description }}</p>
           <div class="product-footer">
-            <span class="price">{{ item.price }}</span>
+            <span class="price">{{ item.price || '' }}</span>
             <a routerLink="/gallery" class="btn-view">Details →</a>
           </div>
         </div>

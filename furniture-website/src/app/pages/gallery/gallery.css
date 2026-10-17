@@ -163,16 +163,18 @@
 .card-img {
   position: relative;
   overflow: hidden;
-  height: 270px;
-  background: #f0fdfa;
+  width: 100%;
+  height: 280px;
+  background: #f1f5f9;
 }
 
 .card-img img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
   display: block;
-  transition: transform 0.6s ease;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .gallery-card:hover .card-img img {
@@ -379,18 +381,28 @@
 
 .modal-content {
   display: grid;
-  grid-template-columns: 1.1fr 1fr;
+  grid-template-columns: 1.15fr 1fr;
+  align-items: stretch;
 }
 
 .modal-img {
-  background: #f0fdfa;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 440px;
+  background: #f1f5f9;
+  display: flex;
+  flex-direction: column;
 }
 
 .modal-img img {
   width: 100%;
   height: 100%;
-  min-height: 380px;
+  flex: 1 1 auto;
+  min-height: 100%;
   object-fit: cover;
+  object-position: center;
+  display: block;
   border-radius: 24px 0 0 24px;
 }
 
@@ -549,10 +561,16 @@
   .modal-content {
     grid-template-columns: 1fr;
   }
+  .modal-img {
+    height: auto;
+    min-height: 250px;
+  }
   .modal-img img {
     border-radius: 20px 20px 0 0;
-    min-height: 200px;
-    max-height: 280px;
+    width: 100%;
+    height: 280px;
+    object-fit: cover;
+    object-position: center;
   }
   .modal-info {
     padding: 22px 20px;
