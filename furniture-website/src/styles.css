@@ -10,51 +10,76 @@
   padding: 0;
 }
 
-/* Luxury Color Palette & Design Tokens */
+/* Color Palette & Design Tokens — Pure White & Normal Cyan Theme */
 :root {
-  /* Brand Luxury Golds */
-  --gold-300: #e8d09b;
-  --gold-400: #d4af37;
-  --gold-500: #c4a265;
-  --gold-600: #b08d50;
-  --gold-700: #8c6830;
-  --gold-glow: rgba(196, 162, 101, 0.4);
-  --gold-glow-subtle: rgba(196, 162, 101, 0.15);
+  /* Crisp Clean Whites */
+  --color-white: #ffffff;
 
-  /* Deep Noble Woods & Espresso */
-  --wood-900: #120b06;
-  --wood-800: #1d1209;
-  --wood-700: #2c1a0e;
-  --wood-600: #3d2c1e;
-  --wood-500: #5a3d28;
-  --wood-400: #8b4513;
+  /* Normal Cyan Palette */
+  --cyan-50: #f0fdfa;
+  --cyan-100: #ecfeff;
+  --cyan-200: #cffafe;
+  --cyan-300: #67e8f9;
+  --cyan-400: #22d3ee;
+  --cyan-500: #06b6d4; /* Normal Cyan Primary */
+  --cyan-600: #0891b2;
+  --cyan-700: #0e7490;
+  --cyan-800: #155e75;
+  --cyan-900: #164e63;
+  --cyan-glow: rgba(6, 182, 212, 0.45);
+  --cyan-glow-subtle: rgba(6, 182, 212, 0.16);
+
+  /* Ice Aqua Highlights */
+  --ice-100: #ecfeff;
+  --ice-200: #cffafe;
+  --ice-300: #a5f3fc;
+
+  /* Backward Compatible Aliases */
+  --gold-300: #67e8f9;
+  --gold-400: #22d3ee;
+  --gold-500: #06b6d4;
+  --gold-600: #0891b2;
+  --gold-700: #0e7490;
+  --gold-glow: rgba(6, 182, 212, 0.45);
+  --gold-glow-subtle: rgba(6, 182, 212, 0.16);
+
+  --wood-900: #0f172a;
+  --wood-800: #1e293b;
+  --wood-700: #334155;
+  --wood-600: #475569;
+  --wood-500: #0891b2;
+  --wood-400: #06b6d4;
 
   /* Typography Colors */
-  --text-main: #24170d;
-  --text-muted: #6e5c4d;
-  --text-subtle: #948070;
-  --text-light: #fdfaf6;
+  --text-main: #0f172a;
+  --text-muted: #475569;
+  --text-subtle: #64748b;
+  --text-light: #ffffff;
 
-  /* Backgrounds & Cream Neutrals */
-  --bg-canvas: #faf6f0;
+  /* Backgrounds & Clean White Surfaces */
+  --bg-canvas: #ffffff;
   --bg-card: #ffffff;
-  --bg-card-subtle: #fbf7f1;
-  --bg-surface: #f4ecdf;
-  --border-light: #ebd8c2;
-  --border-accent: #dfc49e;
+  --bg-card-subtle: #f0fdfa;
+  --bg-surface: #ffffff;
+  --border-light: #e2e8f0;
+  --border-accent: #cffafe;
 
-  /* Luxury Gradients */
-  --grad-gold: linear-gradient(135deg, #d4af37 0%, #c4a265 50%, #9e7a3b 100%);
-  --grad-gold-soft: linear-gradient(135deg, #fbf3e5 0%, #f4e3c9 100%);
-  --grad-dark: linear-gradient(135deg, #130a05 0%, #22140a 50%, #341e10 100%);
-  --grad-dark-glass: linear-gradient(135deg, rgba(22, 12, 6, 0.95) 0%, rgba(45, 26, 13, 0.92) 100%);
+  /* Theme Gradients — Pure White & Cyan */
+  --grad-cyan: linear-gradient(135deg, #06b6d4 0%, #0891b2 50%, #0e7490 100%);
+  --grad-cyan-soft: linear-gradient(135deg, #ecfeff 0%, #e0f7fa 50%, #ffffff 100%);
+  --grad-gold: linear-gradient(135deg, #06b6d4 0%, #0891b2 50%, #0e7490 100%);
+  --grad-gold-soft: linear-gradient(135deg, #ecfeff 0%, #e0f7fa 50%, #ffffff 100%);
+  --grad-dark: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%);
+  --grad-dark-glass: linear-gradient(135deg, rgba(8, 145, 178, 0.95) 0%, rgba(6, 182, 212, 0.92) 100%);
 
   /* Shadows */
-  --shadow-sm: 0 2px 8px rgba(33, 19, 10, 0.05);
-  --shadow-md: 0 8px 24px rgba(33, 19, 10, 0.08);
-  --shadow-lg: 0 16px 40px rgba(33, 19, 10, 0.12);
-  --shadow-gold: 0 8px 28px rgba(196, 162, 101, 0.35);
-  --shadow-gold-hover: 0 14px 38px rgba(196, 162, 101, 0.55);
+  --shadow-sm: 0 2px 8px rgba(6, 182, 212, 0.05);
+  --shadow-md: 0 8px 24px rgba(6, 182, 212, 0.08);
+  --shadow-lg: 0 16px 40px rgba(6, 182, 212, 0.12);
+  --shadow-cyan: 0 8px 28px rgba(6, 182, 212, 0.35);
+  --shadow-cyan-hover: 0 14px 38px rgba(6, 182, 212, 0.55);
+  --shadow-gold: 0 8px 28px rgba(6, 182, 212, 0.35);
+  --shadow-gold-hover: 0 14px 38px rgba(6, 182, 212, 0.55);
 
   /* Fonts */
   --font-serif: 'Playfair Display', Georgia, serif;
@@ -78,20 +103,20 @@ body {
   max-width: 100%;
 }
 
-/* Luxury Custom Scrollbar */
+/* Custom Scrollbar — Pure White & Cyan */
 ::-webkit-scrollbar {
   width: 9px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1e6d7;
+  background: #f8fafc;
 }
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #d4af37, #b08d50);
+  background: linear-gradient(180deg, var(--cyan-500), var(--cyan-600));
   border-radius: 6px;
-  border: 2px solid #f1e6d7;
+  border: 2px solid #f8fafc;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #b08d50, #8c6830);
+  background: linear-gradient(180deg, var(--cyan-600), var(--cyan-700));
 }
 
 /* Headings */
@@ -117,7 +142,7 @@ img, video {
 
 /* Selection */
 ::selection {
-  background: var(--gold-500);
+  background: var(--cyan-500);
   color: #ffffff;
 }
 
@@ -145,10 +170,19 @@ img, video {
 
 @keyframes pulseGoldGlow {
   0%, 100% {
-    box-shadow: 0 0 0 0 rgba(196, 162, 101, 0.45), 0 8px 24px rgba(196, 162, 101, 0.25);
+    box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.45), 0 8px 24px rgba(6, 182, 212, 0.25);
   }
   50% {
-    box-shadow: 0 0 0 10px rgba(196, 162, 101, 0), 0 12px 32px rgba(196, 162, 101, 0.45);
+    box-shadow: 0 0 0 10px rgba(6, 182, 212, 0), 0 12px 32px rgba(6, 182, 212, 0.45);
+  }
+}
+
+@keyframes pulseCyanGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.45), 0 8px 24px rgba(6, 182, 212, 0.25);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(6, 182, 212, 0), 0 12px 32px rgba(6, 182, 212, 0.45);
   }
 }
 
@@ -247,14 +281,14 @@ img, video {
 .wa-tooltip {
   position: absolute;
   right: 76px;
-  background: var(--grad-dark-glass);
-  color: #fff;
+  background: #ffffff;
+  color: #0f172a;
   padding: 9px 16px;
   border-radius: 14px;
   font-size: 13px;
   white-space: nowrap;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-  border: 1px solid rgba(220, 180, 120, 0.35);
+  box-shadow: 0 10px 30px rgba(6, 182, 212, 0.2);
+  border: 1.5px solid #06b6d4;
   backdrop-filter: blur(12px);
   pointer-events: none;
   opacity: 0;
@@ -267,7 +301,7 @@ img, video {
 }
 
 .wa-tooltip strong {
-  color: var(--gold-300);
+  color: #0891b2;
   font-weight: 700;
   font-size: 13px;
   display: flex;
@@ -287,7 +321,7 @@ img, video {
 }
 
 .wa-tooltip small {
-  color: rgba(255, 255, 255, 0.78);
+  color: #64748b;
   font-size: 11px;
 }
 
@@ -308,8 +342,99 @@ img, video {
   .wa-float {
     bottom: 20px;
     right: 20px;
-    width: 54px;
-    height: 54px;
+    width: 52px;
+    height: 52px;
     font-size: 24px;
   }
+}
+
+@media (max-width: 480px) {
+  .wa-float {
+    bottom: 16px;
+    right: 16px;
+    width: 48px;
+    height: 48px;
+    font-size: 22px;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   UNIVERSAL RESPONSIVE UTILITIES & MOBILE UX
+════════════════════════════════════════════════════════════════ */
+
+/* Prevent horizontal scroll leakage globally */
+html, body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Ensure all containers adapt seamlessly */
+.container,
+.nav-container,
+.footer-container {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 1024px) {
+  .container,
+  .footer-container {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .container,
+  .footer-container {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+  
+  /* Mobile Typography scaling */
+  h1 { font-size: clamp(2rem, 5.5vw, 3.2rem) !important; }
+  h2 { font-size: clamp(1.65rem, 4.5vw, 2.4rem) !important; }
+  h3 { font-size: clamp(1.25rem, 3.5vw, 1.7rem) !important; }
+}
+
+@media (max-width: 480px) {
+  .container,
+  .footer-container {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
+/* Fluid responsive text wrapping */
+h1, h2, h3, h4, h5, h6, p, span, a, label {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+
+/* Mobile inputs: 16px font prevents mobile iOS auto-zoom on focus */
+@media (max-width: 768px) {
+  input[type="text"],
+  input[type="password"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="number"],
+  input[type="search"],
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Responsive tables & horizontal scrollers */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Touch-friendly buttons */
+button, .btn, a[role="button"] {
+  touch-action: manipulation;
 }

@@ -7,11 +7,11 @@
 }
 
 .page-header {
-  background: linear-gradient(135deg, #130a05 0%, #26160b 50%, #361f10 100%);
+  background: linear-gradient(135deg, #0891b2 0%, #06b6d4 50%, #22d3ee 100%);
   padding: 80px 24px;
   text-align: center;
   color: #fff;
-  border-bottom: 2px solid rgba(212, 175, 55, 0.3);
+  border-bottom: 2px solid rgba(6, 182, 212, 0.3);
 }
 
 .page-header h1 {
@@ -25,7 +25,7 @@
 
 .page-header p {
   font-size: 1.15rem;
-  color: #e5cbaf;
+  color: #cffafe;
 }
 
 .section {
@@ -75,14 +75,14 @@
   border-radius: 16px;
   padding: 18px 22px;
   border: 1.5px solid var(--border-light);
-  box-shadow: 0 4px 16px rgba(35, 20, 10, 0.04);
+  box-shadow: 0 4px 16px rgba(6, 182, 212, 0.04);
   transition: all 0.3s ease;
 }
 
 .info-card:hover {
   transform: translateY(-3px);
-  border-color: #d4af37;
-  box-shadow: 0 10px 26px rgba(196, 162, 101, 0.18);
+  border-color: #06b6d4;
+  box-shadow: 0 10px 26px rgba(6, 182, 212, 0.18);
 }
 
 .info-icon {
@@ -106,13 +106,13 @@
 }
 
 .info-card a {
-  color: #8c5b29;
+  color: #0891b2;
   text-decoration: none;
   font-weight: 700;
 }
 
 .info-card a:hover {
-  color: #d4af37;
+  color: #06b6d4;
 }
 
 .quick-links {
@@ -147,12 +147,12 @@
 
 .quick-link.call {
   background: var(--wood-800);
-  color: #ffd89b;
-  border: 1px solid rgba(212, 175, 55, 0.4);
+  color: #cffafe;
+  border: 1px solid rgba(6, 182, 212, 0.4);
 }
 
 .quick-link.call:hover {
-  background: #361f10;
+  background: #06b6d4;
   transform: translateY(-2px);
   color: #fff;
 }
@@ -162,7 +162,7 @@
   background: #fff;
   border-radius: 24px;
   padding: 42px 38px;
-  box-shadow: 0 12px 36px rgba(35, 20, 10, 0.08);
+  box-shadow: 0 12px 36px rgba(6, 182, 212, 0.08);
   border: 1.5px solid var(--border-light);
 }
 
@@ -203,11 +203,11 @@
 .form-group textarea {
   width: 100%;
   padding: 13px 18px;
-  border: 1.5px solid #ebd8c2;
+  border: 1.5px solid #e2e8f0;
   border-radius: 12px;
   font-size: 14.5px;
   color: var(--wood-900);
-  background: #fdfaf6;
+  background: #ffffff;
   outline: none;
   transition: all 0.25s ease;
   box-sizing: border-box;
@@ -216,9 +216,9 @@
 
 .form-group input:focus,
 .form-group textarea:focus {
-  border-color: #d4af37;
+  border-color: #06b6d4;
   background: #fff;
-  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.18);
+  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.18);
 }
 
 .form-group textarea {
@@ -254,13 +254,13 @@
 .rating-label {
   font-size: 14px;
   font-weight: 800;
-  color: #8c5b29;
+  color: #0891b2;
   margin-left: 10px;
 }
 
 .submit-btn {
   width: 100%;
-  background: linear-gradient(135deg, #d4af37 0%, #c4a265 50%, #9e7a3b 100%);
+  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 50%, #9e7a3b 100%);
   color: #fff;
   border: none;
   padding: 16px;
@@ -269,13 +269,13 @@
   font-weight: 800;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 8px 24px rgba(196, 162, 101, 0.4);
+  box-shadow: 0 8px 24px rgba(6, 182, 212, 0.4);
   margin-top: 10px;
 }
 
 .submit-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 12px 30px rgba(196, 162, 101, 0.55);
+  box-shadow: 0 12px 30px rgba(6, 182, 212, 0.55);
 }
 
 .submit-btn:disabled {
@@ -289,7 +289,7 @@
   border-radius: 24px;
   padding: 60px 40px;
   text-align: center;
-  box-shadow: 0 12px 36px rgba(35, 20, 10, 0.08);
+  box-shadow: 0 12px 36px rgba(6, 182, 212, 0.08);
   border: 1.5px solid var(--border-light);
 }
 
@@ -315,7 +315,7 @@
 
 .btn-primary {
   display: inline-block;
-  background: linear-gradient(135deg, #d4af37, #b08d50);
+  background: linear-gradient(135deg, #06b6d4, #0e7490);
   color: #fff;
   padding: 14px 34px;
   border: none;
@@ -324,12 +324,12 @@
   font-weight: 700;
   cursor: pointer;
   transition: all 0.25s ease;
-  box-shadow: 0 6px 20px rgba(196, 162, 101, 0.35);
+  box-shadow: 0 6px 20px rgba(6, 182, 212, 0.35);
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 26px rgba(196, 162, 101, 0.5);
+  box-shadow: 0 10px 26px rgba(6, 182, 212, 0.5);
 }
 
 @media (max-width: 992px) {
@@ -340,13 +340,39 @@
 }
 
 @media (max-width: 600px) {
+  .page-header {
+    padding: 48px 18px 36px;
+  }
   .page-header h1 {
-    font-size: 2.3rem;
+    font-size: 2.05rem;
+  }
+  .section {
+    padding: 45px 0;
+  }
+  .contact-info-col h2 {
+    font-size: 1.85rem;
   }
   .form-row {
     grid-template-columns: 1fr;
+    gap: 14px;
   }
   .form-card {
-    padding: 28px 22px;
+    padding: 22px 18px;
+    border-radius: 18px;
+  }
+  .info-card {
+    padding: 16px 14px;
+    gap: 12px;
+  }
+  .quick-links {
+    flex-direction: column;
+    width: 100%;
+  }
+  .quick-link {
+    width: 100%;
+    justify-content: center;
+  }
+  .btn-submit {
+    width: 100%;
   }
 }

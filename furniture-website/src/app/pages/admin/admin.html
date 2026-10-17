@@ -4,9 +4,9 @@
   @if (!isLoggedIn) {
     <div class="login-screen">
       <div class="login-card">
-        <div class="login-logo">🪑</div>
+        <img src="/rk-logo.png" alt="Rk Furniture" class="login-logo-img" />
         <h2>Admin Portal</h2>
-        <p>Bhavesh Furniture Management System</p>
+        <p>Rk Furniture Management System</p>
 
         @if (loginError) {
           <div class="error-msg">{{ loginError }}</div>
@@ -24,7 +24,6 @@
             />
           </div>
           <button type="submit" class="login-btn">Login to Dashboard</button>
-          <div class="login-hint">Default password: <code>bhavesh&#64;admin123</code></div>
         </form>
       </div>
     </div>
@@ -36,9 +35,9 @@
     <header class="admin-header">
       <div class="admin-header-inner">
         <div class="admin-logo">
-          <span>🪑</span>
+          <img src="/rk-logo.png" alt="Rk Furniture" class="admin-logo-img" />
           <div>
-            <div class="al-name">Bhavesh Furniture</div>
+            <div class="al-name">Rk Furniture</div>
             <div class="al-tag">Admin Panel</div>
           </div>
         </div>
@@ -721,7 +720,7 @@
                   <div class="order-detail-grid">
                     <div>
                       <label>Update Status</label>
-                      <select [(ngModel)]="selectedOrder.status" style="padding: 8px; border: 1.5px solid #e2d5c5; border-radius: 8px;">
+                      <select [(ngModel)]="selectedOrder.status" style="padding: 8px; border: 1.5px solid #cffafe; border-radius: 8px;">
                         <option value="new">🆕 New</option>
                         <option value="contacted">📞 Contacted</option>
                         <option value="quoted">💰 Quoted</option>
@@ -734,13 +733,13 @@
                       <label>Quoted Price (₹)</label>
                       <input type="text" [(ngModel)]="selectedOrder.quotedPrice"
                              placeholder="e.g. ₹55,000"
-                             style="padding: 8px; border: 1.5px solid #e2d5c5; border-radius: 8px; width: 100%;" />
+                             style="padding: 8px; border: 1.5px solid #cffafe; border-radius: 8px; width: 100%;" />
                     </div>
                     <div class="full">
                       <label>Admin Notes</label>
                       <textarea rows="3" [(ngModel)]="selectedOrder.adminNotes"
                         placeholder="Internal notes about this order, client preferences, measurements taken..."
-                        style="padding: 8px; border: 1.5px solid #e2d5c5; border-radius: 8px; width: 100%; font-family: inherit; resize: vertical;"></textarea>
+                        style="padding: 8px; border: 1.5px solid #cffafe; border-radius: 8px; width: 100%; font-family: inherit; resize: vertical;"></textarea>
                     </div>
                   </div>
                   <div class="order-modal-actions">

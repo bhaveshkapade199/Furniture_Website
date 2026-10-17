@@ -4,7 +4,7 @@
 
 <!-- Luxury Announcement Marquee Ribbon -->
 <div class="luxury-marquee-bar">
-  <div class="marquee-track">
+  <!-- <div class="marquee-track">
     <span>✨ 100% Handcrafted Teak & Sheesham Wood</span>
     <span class="marquee-sep">✦</span>
     <span>🏠 ₹200 On-Site Space Laser Inspection</span>
@@ -24,127 +24,167 @@
     <span>👑 15+ Years Royal Woodworking Mastery</span>
     <span class="marquee-sep">✦</span>
     <span>⭐ 5,000+ Luxury Homes Completed in Gujarat</span>
-  </div>
+  </div> -->
 </div>
 
 <!-- ════════════════════════════════════════════════════════════════
      HERO SECTION
 ════════════════════════════════════════════════════════════════ -->
-<section class="hero">
-  <div class="hero-bg-glow"></div>
-  <div class="hero-bg-glow-secondary"></div>
+<section class="hero-section-wrapper">
+  <div class="hero-bg-overlay"></div>
+  <div class="hero">
+    <div class="hero-bg-glow"></div>
+    <div class="hero-bg-glow-secondary"></div>
 
-  <div class="hero-content">
-    <div class="hero-badge">
-      <span class="badge-dot"></span>
-      <span>Bespoke Luxury Furniture Since 2010</span>
-    </div>
-
-    <h1>
-      Transform Your Space Into A
-      <span class="title-serif">Living Masterpiece</span>
-    </h1>
-
-    <p class="hero-description">
-      We don't sell generic mass-produced furniture. Our master craftsmen visit your home, inspect your space, and construct <strong>100% custom-tailored furniture directly on-site</strong> with Grade-A seasoned Teak and Sheesham wood.
-    </p>
-
-    <div class="hero-buttons">
-      <a routerLink="/custom-order" class="btn-gold-glow">
-        <span class="btn-text">🪑 Make Your Furniture</span>
-        <span class="btn-arrow">→</span>
-      </a>
-      <a routerLink="/gallery" class="btn-outline-luxury">
-        <span>Explore Collection</span>
-      </a>
-    </div>
-
-    <!-- Home Visit Offer Pill -->
-    <div class="visit-highlight-pill">
-      <div class="pill-icon">🏠</div>
-      <div class="pill-text">
-        <strong>Home Space Laser Inspection: Only ₹200</strong>
-        <span>Expert visits your home, measures the layout, & provides instant transparent quote</span>
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="badge-dot"></span>
+        <span>Rk Furniture • Bespoke Studio Since 2010</span>
       </div>
-    </div>
 
-    <!-- Trust Badges Row -->
-    <div class="hero-trust-grid">
-      <div class="trust-item">
-        <span class="trust-icon">🪵</span>
-        <div class="trust-meta">
-          <strong>Grade-A Solid Wood</strong>
-          <span>Teak & Sheesham</span>
+      <h1>
+        Transform Your Space With
+        <span class="title-brand">Rk Furniture</span>
+        <span class="title-serif">Living Masterpiece</span>
+      </h1>
+
+      <p class="hero-description">
+        We don't sell generic mass-produced furniture. At <strong>Rk Furniture</strong>, our master craftsmen visit your
+        home, inspect your space, and construct <strong>100% custom-tailored furniture directly on-site</strong> with
+        Grade-A seasoned Teak and Sheesham wood.
+      </p>
+
+      <div class="hero-buttons">
+        <a routerLink="/custom-order" class="btn-gold-glow">
+          <span class="btn-text">🪑 Make Your Furniture</span>
+          <span class="btn-arrow">→</span>
+        </a>
+        <a routerLink="/gallery" class="btn-outline-luxury">
+          <span>Explore Collection</span>
+        </a>
+      </div>
+
+      <!-- Home Visit Offer Pill -->
+      <div class="visit-highlight-pill">
+        <div class="pill-icon">🏠</div>
+        <div class="pill-text">
+          <strong>Home Space Laser Inspection: Only ₹200</strong>
+          <span>Expert visits your home, measures the layout, & provides instant transparent quote</span>
         </div>
       </div>
-      <div class="trust-item">
-        <span class="trust-icon">👥</span>
-        <div class="trust-meta">
-          <strong>On-Site Crafting</strong>
-          <span>Built at your house</span>
+
+      <!-- Trust Badges Row -->
+      <div class="hero-trust-grid">
+        <div class="trust-item">
+          <span class="trust-icon">🪵</span>
+          <div class="trust-meta">
+            <strong>Grade-A Solid Wood</strong>
+            <span>Teak & Sheesham</span>
+          </div>
         </div>
-      </div>
-      <div class="trust-item">
-        <span class="trust-icon">🛡️</span>
-        <div class="trust-meta">
-          <strong>Termite Proof</strong>
-          <span>10-Year Warranty</span>
+        <div class="trust-item">
+          <span class="trust-icon">👥</span>
+          <div class="trust-meta">
+            <strong>On-Site Crafting</strong>
+            <span>Built at your house</span>
+          </div>
+        </div>
+        <div class="trust-item">
+          <span class="trust-icon">🛡️</span>
+          <div class="trust-meta">
+            <strong>Termite Proof</strong>
+            <span>10-Year Warranty</span>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Hero Visual Slider -->
-  <div class="hero-visual">
-    <div class="hero-carousel-frame" (mouseenter)="pauseHero()" (mouseleave)="resumeHero()">
-      <!-- Sliding Track -->
-      <div class="hero-slider" [style.transform]="'translateX(-' + (currentHeroIndex * 100) + '%)'">
-        @for (slide of heroSlides; track slide.url; let idx = $index) {
-          <div class="hero-slide">
-            <img [src]="slide.url" [alt]="slide.title" />
-            <div class="hero-slide-overlay"></div>
-            <div class="hero-slide-caption">
-              <span class="slide-tag">{{ slide.tag }}</span>
-              <div class="slide-title-price">
-                <h4>{{ slide.title }}</h4>
-                <span class="slide-cost">{{ slide.price }}</span>
+    <!-- Hero Visual Showcase -->
+    <div class="hero-visual">
+      <!-- Ambient Studio Backlight Halo -->
+      <div class="hero-visual-aura"></div>
+      <div class="hero-visual-glow-ring"></div>
+
+      <!-- Floating Top-Left Atelier Badge -->
+      <div class="hero-float-badge float-top-left">
+        <div class="pulse-indicator">
+          <span class="pulse-live-dot"></span>
+        </div>
+        <div class="float-badge-content">
+          <strong class="float-title">RK Live Atelier</strong>
+          <span class="float-sub">Handcrafted Direct On-Site</span>
+        </div>
+      </div>
+
+      <!-- Floating Top-Right Rating Card -->
+      <div class="hero-float-badge float-top-right">
+        <div class="stars-gold">★★★★★</div>
+        <div class="float-badge-content">
+          <strong class="float-title">4.9/5 Rating</strong>
+          <span class="float-sub">5,000+ Bespoke Homes</span>
+        </div>
+      </div>
+
+      <!-- Main Crystal Glass Chassis -->
+      <div class="hero-visual-chassis">
+        <div class="hero-carousel-frame" (mouseenter)="pauseHero()" (mouseleave)="resumeHero()">
+          <!-- Sliding Track -->
+          <div class="hero-slider" [style.transform]="'translateX(-' + (currentHeroIndex * 100) + '%)'">
+            @for (slide of heroSlides; track slide.url; let idx = $index) {
+            <div class="hero-slide">
+              <img [src]="slide.url" [alt]="slide.title" />
+              <div class="hero-slide-overlay"></div>
+              <div class="hero-slide-caption">
+                <div class="caption-top-chips">
+                  <span class="slide-tag">{{ slide.tag }}</span>
+                  <span class="slide-mat-tag">✨ Seasoned Teak & Sheesham</span>
+                </div>
+                <div class="slide-title-price">
+                  <div class="slide-info-text">
+                    <h4>{{ slide.title }}</h4>
+                    <span class="slide-tagline">100% Customized For Your Room Dimensions</span>
+                  </div>
+                  <div class="slide-price-box">
+                    <span class="price-caption">Starting at</span>
+                    <span class="slide-cost">{{ slide.price }}</span>
+                  </div>
+                </div>
               </div>
             </div>
+            }
           </div>
-        }
-      </div>
 
-      <!-- Arrow Controls -->
-      <button class="hero-arrow prev" (click)="prevHeroSlide()" aria-label="Previous Slide">‹</button>
-      <button class="hero-arrow next" (click)="nextHeroSlide()" aria-label="Next Slide">›</button>
+          <!-- Arrow Controls -->
+          <button class="hero-arrow prev" (click)="prevHeroSlide()" aria-label="Previous Slide">‹</button>
+          <button class="hero-arrow next" (click)="nextHeroSlide()" aria-label="Next Slide">›</button>
 
-      <!-- Carousel Progress Bar & Dots -->
-      <div class="hero-dots">
-        @for (slide of heroSlides; track slide.url; let i = $index) {
-          <button
-            class="hero-dot"
-            [class.active]="i === currentHeroIndex"
-            (click)="setHeroSlide(i)"
-            [attr.aria-label]="'Go to slide ' + (i + 1)"
-          ></button>
-        }
-      </div>
-
-      <!-- Floating Award Badge -->
-      <div class="hero-floating-badge">
-        <div class="badge-stars">★★★★★</div>
-        <div class="badge-title">#1 Custom Furniture Studio</div>
-        <div class="badge-loc">Ahmedabad • Pan-Gujarat</div>
-      </div>
-
-      <!-- Floating Artisan Tag -->
-      <div class="hero-artisan-tag">
-        <span class="artisan-emoji">👨‍🔨</span>
-        <div>
-          <strong>Handcrafted On-Site</strong>
-          <small>Precision German Joinery</small>
+          <!-- Carousel Progress Bar & Dots -->
+          <div class="hero-dots">
+            @for (slide of heroSlides; track slide.url; let i = $index) {
+            <button class="hero-dot" [class.active]="i === currentHeroIndex" (click)="setHeroSlide(i)"
+              [attr.aria-label]="'Go to slide ' + (i + 1)"></button>
+            }
+          </div>
         </div>
       </div>
+
+      <!-- Floating Bottom-Left On-Site Visit Badge -->
+      <!-- <div class="hero-float-badge float-bottom-left">
+      <span class="badge-icon-bubble">🏠</span>
+      <div class="float-badge-content">
+        <strong class="float-title">₹200 Home Space Visit</strong>
+        <span class="float-sub">Laser Measurement & Quote</span>
+      </div>
+    </div>
+
+    Floating Bottom-Right Quality Seal
+      <div class="hero-float-badge float-bottom-right">
+        <span class="badge-icon-bubble">🛡️</span>
+        <div class="float-badge-content">
+          <strong class="float-title">10-Year Warranty</strong>
+          <span class="float-sub">Termite Proof Guarantee</span>
+        </div>
+      </div> -->
     </div>
   </div>
 </section>
@@ -156,11 +196,11 @@
   <div class="container">
     <div class="stats-grid">
       @for (stat of stats; track stat.label) {
-        <div class="stat-card">
-          <div class="stat-glow"></div>
-          <div class="stat-value">{{ stat.value }}</div>
-          <div class="stat-label">{{ stat.label }}</div>
-        </div>
+      <div class="stat-card">
+        <div class="stat-glow"></div>
+        <div class="stat-value">{{ stat.value }}</div>
+        <div class="stat-label">{{ stat.label }}</div>
+      </div>
       }
     </div>
   </div>
@@ -174,7 +214,8 @@
     <div class="section-header">
       <span class="section-tag">🛠️ How On-Site Crafting Works</span>
       <h2>Our 3-Step Bespoke Experience</h2>
-      <p>Because every house layout is unique, we build directly at your home for a tailored, millimeter-perfect fit.</p>
+      <p>Because every house layout is unique, we build directly at your home for a tailored, millimeter-perfect fit.
+      </p>
     </div>
 
     <div class="process-steps-grid">
@@ -189,7 +230,8 @@
         </div>
         <div class="price-chip">₹200 VISIT CHARGE</div>
         <h3>Home Space Visit & Measurement</h3>
-        <p>Our master craftsman visits your house with laser measuring tools. We inspect the room space, understand your lifestyle & preferred wood, and draft a transparent quotation.</p>
+        <p>Our master craftsman visits your house with laser measuring tools. We inspect the room space, understand your
+          lifestyle & preferred wood, and draft a transparent quotation.</p>
         <div class="step-footer">
           <span>✓ Laser Dimension Accuracy</span>
         </div>
@@ -206,7 +248,8 @@
         </div>
         <div class="price-chip gold">DESIGN APPROVAL</div>
         <h3>Wood & Material Selection</h3>
-        <p>Choose from seasoned Teak, Sheesham, Italian upholstery fabrics, anti-scratch laminates, and German soft-close hydraulic hardware that match your interior aesthetic.</p>
+        <p>Choose from seasoned Teak, Sheesham, Italian upholstery fabrics, anti-scratch laminates, and German
+          soft-close hydraulic hardware that match your interior aesthetic.</p>
         <div class="step-footer">
           <span>✓ 100% Customized Material</span>
         </div>
@@ -223,7 +266,8 @@
         </div>
         <div class="price-chip green">ON-SITE BUILDING</div>
         <h3>Full Team Crafts At Your Home</h3>
-        <p>Once finalized, our entire team of artisans arrives directly at your home with specialized tools to cut, assemble, polish, and install your furniture for zero gaps and a lifetime fit.</p>
+        <p>Once finalized, our entire team of artisans arrives directly at your home with specialized tools to cut,
+          assemble, polish, and install your furniture for zero gaps and a lifetime fit.</p>
         <div class="step-footer">
           <span>✓ Finished In Front Of You</span>
         </div>
@@ -256,15 +300,15 @@
 
     <div class="categories-grid">
       @for (cat of categories; track cat.name) {
-        <a routerLink="/gallery" [queryParams]="{cat: cat.name}" class="cat-card">
-          <div class="cat-shine"></div>
-          <div class="cat-emoji-wrap">
-            <span class="cat-emoji">{{ cat.emoji }}</span>
-          </div>
-          <div class="cat-name">{{ cat.name }}</div>
-          <div class="cat-count-pill">{{ cat.count }}+ Designs</div>
-          <span class="cat-arrow">Explore →</span>
-        </a>
+      <a routerLink="/gallery" [queryParams]="{cat: cat.name}" class="cat-card">
+        <div class="cat-shine"></div>
+        <div class="cat-emoji-wrap">
+          <span class="cat-emoji">{{ cat.emoji }}</span>
+        </div>
+        <div class="cat-name">{{ cat.name }}</div>
+        <div class="cat-count-pill">{{ cat.count }}+ Designs</div>
+        <span class="cat-arrow">Explore →</span>
+      </a>
       }
     </div>
   </div>
@@ -285,25 +329,25 @@
   <div class="auto-scroll-wrapper" (mouseenter)="isPaused = true" (mouseleave)="isPaused = false">
     <div class="auto-scroll-track" [class.paused]="isPaused">
       @for (slide of autoScrollSlides; track $index) {
-        <div class="showcase-slide">
-          <div class="slide-img-wrap">
-            <img [src]="slide.url" [alt]="slide.name" loading="lazy" />
-            <div class="slide-gradient-shade"></div>
-            <span class="slide-badge" [class.tv-badge]="slide.category === 'TV Unit'">
-              {{ slide.category === 'TV Unit' ? '📺 TV Unit' : '🛋️ Sofa Set' }}
-            </span>
+      <div class="showcase-slide">
+        <div class="slide-img-wrap">
+          <img [src]="slide.url" [alt]="slide.name" loading="lazy" />
+          <div class="slide-gradient-shade"></div>
+          <span class="slide-badge" [class.tv-badge]="slide.category === 'TV Unit'">
+            {{ slide.category === 'TV Unit' ? '📺 TV Unit' : '🛋️ Sofa Set' }}
+          </span>
+        </div>
+        <div class="showcase-slide-info">
+          <div class="slide-title-wrap">
+            <h4>{{ slide.name }}</h4>
+            <span class="slide-price">{{ slide.price }}</span>
           </div>
-          <div class="showcase-slide-info">
-            <div class="slide-title-wrap">
-              <h4>{{ slide.name }}</h4>
-              <span class="slide-price">{{ slide.price }}</span>
-            </div>
-            <div class="slide-actions">
-              <a routerLink="/gallery" [queryParams]="{cat: slide.category}" class="slide-link">View Collection →</a>
-              <a routerLink="/custom-order" class="slide-custom-btn">Make This</a>
-            </div>
+          <div class="slide-actions">
+            <a routerLink="/gallery" [queryParams]="{cat: slide.category}" class="slide-link">View Collection →</a>
+            <a routerLink="/custom-order" class="slide-custom-btn">Make This</a>
           </div>
         </div>
+      </div>
       }
     </div>
   </div>
@@ -327,23 +371,23 @@
 
     <div class="products-grid">
       @for (item of featuredItems; track item._id || item.id || item.name) {
-        <div class="product-card">
-          <div class="product-img">
-            <img [src]="item.imageUrl" [alt]="item.name" />
-            <span class="product-category">{{ item.category }}</span>
-            <div class="product-hover-overlay">
-              <a routerLink="/custom-order" class="btn-order-hover">Craft Similar For My Room</a>
-            </div>
-          </div>
-          <div class="product-info">
-            <h3>{{ item.name }}</h3>
-            <p>{{ item.description }}</p>
-            <div class="product-footer">
-              <span class="price">{{ item.price }}</span>
-              <a routerLink="/gallery" class="btn-view">Details →</a>
-            </div>
+      <div class="product-card">
+        <div class="product-img">
+          <img [src]="item.imageUrl" [alt]="item.name" />
+          <span class="product-category">{{ item.category }}</span>
+          <div class="product-hover-overlay">
+            <a routerLink="/custom-order" class="btn-order-hover">Craft Similar For My Room</a>
           </div>
         </div>
+        <div class="product-info">
+          <h3>{{ item.name }}</h3>
+          <p>{{ item.description }}</p>
+          <div class="product-footer">
+            <span class="price">{{ item.price }}</span>
+            <a routerLink="/gallery" class="btn-view">Details →</a>
+          </div>
+        </div>
+      </div>
       }
     </div>
 
@@ -366,12 +410,12 @@
 
     <div class="services-grid">
       @for (item of workInfo; track item._id || item.id || item.title) {
-        <div class="service-card">
-          <div class="service-icon-box">{{ item.icon }}</div>
-          <h3>{{ item.title }}</h3>
-          <p>{{ item.description }}</p>
-          <div class="service-gold-line"></div>
-        </div>
+      <div class="service-card">
+        <div class="service-icon-box">{{ item.icon }}</div>
+        <h3>{{ item.title }}</h3>
+        <p>{{ item.description }}</p>
+        <div class="service-gold-line"></div>
+      </div>
       }
     </div>
   </div>
@@ -381,30 +425,30 @@
      WORKSHOP VIDEOS SECTION
 ════════════════════════════════════════════════════════════════ -->
 @if (videos.length > 0) {
-  <section class="section home-videos-section">
-    <div class="container">
-      <div class="section-header">
-        <span class="section-tag">🎬 Live From The Workshop</span>
-        <h2>Master Woodworking In Motion</h2>
-        <p>Watch our artisans transform raw seasoned timber into heirloom furniture pieces</p>
-      </div>
-
-      <div class="home-videos-grid">
-        @for (vid of videos; track vid._id || vid.id || vid.title) {
-          <div class="video-card">
-            <div class="video-frame">
-              <video [src]="vid.videoUrl" controls [poster]="vid.thumbnailUrl || ''"></video>
-            </div>
-            <div class="video-card-body">
-              <span class="video-category-tag">{{ vid.category }}</span>
-              <h4>{{ vid.title }}</h4>
-              <p>{{ vid.description }}</p>
-            </div>
-          </div>
-        }
-      </div>
+<section class="section home-videos-section">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag">🎬 Live From The Workshop</span>
+      <h2>Master Woodworking In Motion</h2>
+      <p>Watch our artisans transform raw seasoned timber into heirloom furniture pieces</p>
     </div>
-  </section>
+
+    <div class="home-videos-grid">
+      @for (vid of videos; track vid._id || vid.id || vid.title) {
+      <div class="video-card">
+        <div class="video-frame">
+          <video [src]="vid.videoUrl" controls [poster]="vid.thumbnailUrl || ''"></video>
+        </div>
+        <div class="video-card-body">
+          <span class="video-category-tag">{{ vid.category }}</span>
+          <h4>{{ vid.title }}</h4>
+          <p>{{ vid.description }}</p>
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+</section>
 }
 
 <!-- ════════════════════════════════════════════════════════════════
@@ -420,23 +464,23 @@
 
     <div class="team-grid">
       @for (member of team; track member._id || member.id || member.name) {
-        <div class="team-card">
-          <div class="team-avatar-wrap">
-            @if (member.imageUrl) {
-              <img [src]="member.imageUrl" [alt]="member.name" class="team-photo-img" />
-            } @else {
-              <div class="team-avatar">{{ member.emoji || '👨‍💼' }}</div>
-            }
-            @if (member.experience) {
-              <div class="team-exp-badge">{{ member.experience }}</div>
-            }
-          </div>
-          <div class="team-body">
-            <h4>{{ member.name }}</h4>
-            <span class="team-role">{{ member.role }}</span>
-            <p>{{ member.description }}</p>
-          </div>
+      <div class="team-card">
+        <div class="team-avatar-wrap">
+          @if (member.imageUrl) {
+          <img [src]="member.imageUrl" [alt]="member.name" class="team-photo-img" />
+          } @else {
+          <div class="team-avatar">{{ member.emoji || '👨‍💼' }}</div>
+          }
+          @if (member.experience) {
+          <div class="team-exp-badge">{{ member.experience }}</div>
+          }
         </div>
+        <div class="team-body">
+          <h4>{{ member.name }}</h4>
+          <span class="team-role">{{ member.role }}</span>
+          <p>{{ member.description }}</p>
+        </div>
+      </div>
       }
     </div>
 
@@ -458,7 +502,8 @@
         <div class="cta-badge">👑 Bespoke Home Furniture Service</div>
         <h2>Want Custom Furniture Made Specifically For Your Home?</h2>
         <p>
-          Skip standard showroom sizes that don't fit your room. Tell us your vision, and our master craftsman will visit your home for a comprehensive space inspection & tailored estimate (₹200 visit charge).
+          Skip standard showroom sizes that don't fit your room. Tell us your vision, and our master craftsman will
+          visit your home for a comprehensive space inspection & tailored estimate (₹200 visit charge).
         </p>
 
         <ul class="cta-perks">
@@ -468,11 +513,13 @@
           </li>
           <li>
             <span class="perk-check">✓</span>
-            <span><strong>100% On-Site Handcrafting:</strong> Complete artisan team visits your home with materials</span>
+            <span><strong>100% On-Site Handcrafting:</strong> Complete artisan team visits your home with
+              materials</span>
           </li>
           <li>
             <span class="perk-check">✓</span>
-            <span><strong>Genuine Hardwood:</strong> Seasoned Sheesham, Teak, and Pine with heavy Italian fittings</span>
+            <span><strong>Genuine Hardwood:</strong> Seasoned Sheesham, Teak, and Pine with heavy Italian
+              fittings</span>
           </li>
           <li>
             <span class="perk-check">✓</span>
@@ -484,9 +531,9 @@
           <a routerLink="/custom-order" class="btn-gold-glow">
             <span>Make Custom Furniture Online →</span>
           </a>
-          <a href="https://wa.me/919876543210?text=Hello%20Bhavesh%20Furniture%2C%20I%20want%20to%20book%20a%20home%20space%20visit%20inspection."
-             target="_blank" class="btn-whatsapp-luxury">
-            <span>💬 WhatsApp Bhavesh Directly</span>
+          <a href="https://wa.me/919876543210?text=Hello%20Rk%20Furniture%2C%20I%20want%20to%20book%20a%20home%20space%20visit%20inspection."
+            target="_blank" class="btn-whatsapp-luxury">
+            <span>💬 WhatsApp Rk Furniture Directly</span>
           </a>
         </div>
       </div>
@@ -513,11 +560,11 @@
                 <strong>Book ₹200 Home Visit</strong>
               </div>
             </a>
-            <a href="mailto:bhaveshfurniture@gmail.com" class="cb-item">
+            <a href="mailto:rkfurniture@gmail.com" class="cb-item">
               <span class="cb-icon">✉️</span>
               <div>
                 <small>Email Inquiries</small>
-                <strong>bhaveshfurniture&#64;gmail.com</strong>
+                <strong>rkfurniture&#64;gmail.com</strong>
               </div>
             </a>
           </div>

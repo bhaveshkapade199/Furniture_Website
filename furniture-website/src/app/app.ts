@@ -20,5 +20,5 @@ import { Footer } from './components/footer/footer';
   `]
 })
 export class App {
-  title = 'Bhavesh Furniture';
+  title = 'Rk Furniture';
 }

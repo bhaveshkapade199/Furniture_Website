@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FurnitureService, FurnitureItem, Feedback, WorkInfo, TeamMember, VideoItem, CustomOrder } from '../../services/furniture';
@@ -11,7 +11,7 @@ type AdminTab = 'gallery' | 'videos' | 'workinfo' | 'team' | 'feedback' | 'order
   templateUrl: './admin.html',
   styleUrl: './admin.css'
 })
-export class Admin implements OnInit {
+export class Admin implements OnInit, OnDestroy {
   isLoggedIn = false;
   password = '';
   loginError = '';
@@ -63,12 +63,15 @@ export class Admin implements OnInit {
   constructor(private furnitureService: FurnitureService) {}
 
   ngOnInit() {
-    this.isLoggedIn = this.furnitureService.isAdminLoggedIn();
-    if (this.isLoggedIn) {
-      this.furnitureService.setAdminPassword('bhavesh@admin123');
-      this.loadData();
-    }
+    // For strict security: always require password authentication upon opening Admin Panel
+    this.furnitureService.adminLogout();
+    this.isLoggedIn = false;
     this.categories = this.furnitureService.getCategories();
+  }
+
+  ngOnDestroy() {
+    // Automatically revoke admin session when leaving the admin panel
+    this.logout();
   }
 
   // ---- Auth ----
@@ -78,7 +81,7 @@ export class Admin implements OnInit {
       this.loginError = '';
       this.loadData();
     } else {
-      this.loginError = 'Incorrect password. Try: bhavesh@admin123';
+      this.loginError = 'Incorrect password. Access denied.';
     }
   }
 
@@ -591,11 +594,12 @@ export class Admin implements OnInit {
   deleteTeam(member: TeamMember) {
     const id = String(member._id || member.id);
     if (confirm(`Are you sure you want to remove team member "${member.name}"?`)) {
+      this.teamMembers = this.teamMembers.filter(m => String(m._id || m.id) !== id);
       this.furnitureService.deleteTeamMember(id).subscribe({
         next: () => {
-          this.furnitureService.getTeamMembers().subscribe(team => this.teamMembers = team);
           this.teamActionMsg = `✓ Team member "${member.name}" was removed successfully.`;
           setTimeout(() => this.teamActionMsg = '', 3000);
+          this.furnitureService.getTeamMembers().subscribe(team => this.teamMembers = team);
         },
         error: () => {
           this.furnitureService.getTeamMembers().subscribe(team => this.teamMembers = team);

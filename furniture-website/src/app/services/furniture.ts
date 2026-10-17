@@ -100,9 +100,8 @@ export class FurnitureService {
   private adminPassword = '';
 
   constructor(private http: HttpClient) {
-    if (this.isAdminLoggedIn()) {
-      this.adminPassword = 'bhavesh@admin123';
-    }
+    // Clear any obsolete localStorage admin flags for security
+    localStorage.removeItem(LS + 'admin_logged_in');
   }
 
   // ── Admin Auth ────────────────────────────────────────────────
@@ -114,12 +113,12 @@ export class FurnitureService {
   }
 
   isAdminLoggedIn(): boolean {
-    return localStorage.getItem(LS + 'admin_logged_in') === 'true';
+    return sessionStorage.getItem(LS + 'admin_logged_in') === 'true' && !!this.adminPassword;
   }
 
   adminLogin(password: string): boolean {
     if (password === 'bhavesh@admin123') {
-      localStorage.setItem(LS + 'admin_logged_in', 'true');
+      sessionStorage.setItem(LS + 'admin_logged_in', 'true');
       this.setAdminPassword(password);
       return true;
     }
@@ -127,6 +126,7 @@ export class FurnitureService {
   }
 
   adminLogout(): void {
+    sessionStorage.removeItem(LS + 'admin_logged_in');
     localStorage.removeItem(LS + 'admin_logged_in');
     this.clearAdminPassword();
   }
@@ -158,8 +158,9 @@ export class FurnitureService {
   }
 
   deleteFurnitureItem(id: string): Observable<any> {
+    this.deleteLocalItem(id);
     return this.http.delete(`${API}/furniture/${id}`, { headers: this.adminHeaders }).pipe(
-      catchError(() => { this.deleteLocalItem(id); return of({ success: true }); })
+      catchError(() => of({ success: true }))
     );
   }
 
@@ -179,7 +180,11 @@ export class FurnitureService {
   }
 
   deleteWorkInfo(id: string): Observable<any> {
-    return this.http.delete(`${API}/workinfo/${id}`, { headers: this.adminHeaders });
+    const info = this.getLocalWorkInfo().filter(w => String(w._id || w.id) !== id);
+    localStorage.setItem(LS + 'workinfo', JSON.stringify(info));
+    return this.http.delete(`${API}/workinfo/${id}`, { headers: this.adminHeaders }).pipe(
+      catchError(() => of({ success: true }))
+    );
   }
 
   // ── Team Members ──────────────────────────────────────────────
@@ -202,8 +207,9 @@ export class FurnitureService {
   }
 
   deleteTeamMember(id: string): Observable<any> {
+    this.deleteLocalTeamMember(id);
     return this.http.delete(`${API}/team/${id}`, { headers: this.adminHeaders }).pipe(
-      catchError(() => { this.deleteLocalTeamMember(id); return of({ success: true }); })
+      catchError(() => of({ success: true }))
     );
   }
 
@@ -223,7 +229,11 @@ export class FurnitureService {
   }
 
   deleteVideo(id: string): Observable<any> {
-    return this.http.delete(`${API}/videos/${id}`, { headers: this.adminHeaders });
+    const vids = this.getLocalVideos().filter(v => String(v._id || v.id) !== id);
+    localStorage.setItem(LS + 'videos', JSON.stringify(vids));
+    return this.http.delete(`${API}/videos/${id}`, { headers: this.adminHeaders }).pipe(
+      catchError(() => of({ success: true }))
+    );
   }
 
   // ── Feedback ──────────────────────────────────────────────────
@@ -244,7 +254,11 @@ export class FurnitureService {
   }
 
   deleteFeedback(id: string): Observable<any> {
-    return this.http.delete(`${API}/feedback/${id}`, { headers: this.adminHeaders });
+    const fbs = this.getLocalFeedbacks().filter(f => String(f._id || f.id) !== id);
+    localStorage.setItem(LS + 'feedbacks', JSON.stringify(fbs));
+    return this.http.delete(`${API}/feedback/${id}`, { headers: this.adminHeaders }).pipe(
+      catchError(() => of({ success: true }))
+    );
   }
 
   getCategories(): string[] {

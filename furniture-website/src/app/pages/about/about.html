@@ -15,7 +15,7 @@
         <div class="story-text">
           <span class="section-tag">📖 Our Story</span>
           <h2>Who We Are</h2>
-          <p>Bhavesh Furniture was founded in 2010 by Bhavesh Patel in Ahmedabad, Gujarat with a simple vision — to provide every Indian family with beautiful, durable furniture at honest prices.</p>
+          <p>Rk Furniture was founded in 2010 in Ahmedabad, Gujarat with a simple vision — to provide every Indian family with beautiful, durable furniture at honest prices.</p>
           <p>Starting with a small workshop and a handful of skilled craftsmen, we have grown into one of the most trusted furniture brands in Gujarat, serving over 5000 happy customers across India.</p>
           <p>Our furniture is crafted using premium quality wood (Sheesham, Teak, and Pine), high-grade fabrics, and Italian hardware to ensure durability and elegance.</p>
           <div class="story-highlights">
@@ -93,7 +93,7 @@
         @for (member of team; track member._id || member.id || member.name) {
           <div class="team-card">
             @if (member.imageUrl) {
-              <img [src]="member.imageUrl" [alt]="member.name" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin: 0 auto 15px; border: 3px solid #b07d4b;" />
+              <img [src]="member.imageUrl" [alt]="member.name" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin: 0 auto 15px; border: 3px solid #06b6d4;" />
             } @else {
               <div class="team-avatar">{{ member.emoji || '👨‍💼' }}</div>
             }
@@ -109,7 +109,7 @@
         }
       </div>
       <div style="text-align: center; margin-top: 30px;">
-        <a routerLink="/team" class="btn-primary" style="display: inline-block; padding: 10px 24px; background: #b07d4b; color: #fff; border-radius: 25px; text-decoration: none; font-weight: 600;">View Dedicated Team Page →</a>
+        <a routerLink="/team" class="btn-primary" style="display: inline-block; padding: 10px 24px; background: linear-gradient(135deg, #06b6d4, #0891b2); color: #fff; border-radius: 25px; text-decoration: none; font-weight: 600;">View Dedicated Team Page →</a>
       </div>
     </div>
   </section>

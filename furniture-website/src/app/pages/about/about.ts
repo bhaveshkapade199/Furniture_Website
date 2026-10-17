@@ -14,7 +14,7 @@ export class About implements OnInit {
   team: TeamMember[] = [];
 
   timeline = [
-    { year: '2010', event: 'Founded Bhavesh Furniture in Ahmedabad with a small workshop' },
+    { year: '2010', event: 'Founded Rk Furniture in Ahmedabad with a small workshop' },
     { year: '2013', event: 'Expanded to serving 500+ happy customers across Gujarat' },
     { year: '2016', event: 'Launched custom furniture design service and interior consultation' },
     { year: '2019', event: 'Opened second showroom and started pan-India delivery' },
