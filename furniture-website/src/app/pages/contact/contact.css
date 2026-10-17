@@ -340,6 +340,9 @@
 }
 
 @media (max-width: 600px) {
+  .contact-page {
+    padding-top: 70px;
+  }
   .page-header {
     padding: 48px 18px 36px;
   }

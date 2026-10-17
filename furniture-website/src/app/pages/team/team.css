@@ -445,6 +445,9 @@
 }
 
 @media (max-width: 650px) {
+  .team-page {
+    padding-top: 70px;
+  }
   .team-hero {
     padding: 50px 18px 40px;
   }

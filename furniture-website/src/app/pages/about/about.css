@@ -368,6 +368,9 @@
 }
 
 @media (max-width: 600px) {
+  .about-page {
+    padding-top: 70px;
+  }
   .about-hero {
     padding: 48px 18px 36px;
   }

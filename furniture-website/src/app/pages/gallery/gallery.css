@@ -518,6 +518,9 @@
 }
 
 @media (max-width: 768px) {
+  .gallery-page {
+    padding-top: 70px;
+  }
   .page-header {
     padding: 45px 20px 35px;
   }
