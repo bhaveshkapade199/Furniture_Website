@@ -64,6 +64,7 @@
   overflow: hidden;
 }
 
+
 .logo-name {
   font-family: var(--font-serif);
   font-size: 21px;
@@ -71,11 +72,22 @@
   color: #0891b2;
   letter-spacing: -0.02em;
   line-height: 1.1;
-  background: linear-gradient(135deg, #0891b2 0%, #0e7490 60%, #06b6d4 100%);
+
+  background: linear-gradient(135deg,
+      #0891b2 0%,
+      #0e7490 60%,
+      #06b6d4 100%);
+
+  /* Standard property for compatibility */
+  background-clip: text;
+
+  /* WebKit browser compatibility */
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+
   white-space: nowrap;
 }
+
 
 .logo-tagline {
   font-size: 10px;
