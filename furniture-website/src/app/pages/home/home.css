@@ -96,7 +96,7 @@
 .hero-section-wrapper {
   position: relative;
   width: 100%;
-  padding-top: 76px;
+  padding-top: var(--nav-height, 80px);
   background-image: url('https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=2000&auto=format&fit=crop');
   background-position: center top;
   background-size: cover;
@@ -777,6 +777,10 @@
 /* ════════════════════════════════════════════════════════════════
    FLOATING 3D LUXURY BADGES (Around Showcase)
 ════════════════════════════════════════════════════════════════ */
+.hero-badges-wrap {
+  display: contents;
+}
+
 .hero-float-badge {
   position: absolute;
   z-index: 4;
@@ -2028,7 +2032,7 @@
 ════════════════════════════════════════════════════════════════ */
 @media (max-width: 1080px) {
   .hero-section-wrapper {
-    padding-top: 76px;
+    padding-top: var(--nav-height, 80px);
     background-position: center top;
   }
 
@@ -2059,61 +2063,91 @@
 
 @media (max-width: 768px) {
   .hero-section-wrapper {
-    padding-top: 70px;
+    padding-top: var(--nav-height, 76px);
     background-position: center top;
     background-size: cover;
   }
 
   .hero-bg-overlay {
     background: linear-gradient(180deg,
-        rgba(255, 255, 255, 0.88) 0%,
-        rgba(255, 255, 255, 0.76) 40%,
-        rgba(255, 255, 255, 0.88) 100%);
+        rgba(255, 255, 255, 0.92) 0%,
+        rgba(255, 255, 255, 0.82) 40%,
+        rgba(255, 255, 255, 0.94) 100%);
   }
 
   .hero {
-    padding: 20px 20px 48px;
-    gap: 28px;
+    padding: 20px 18px 44px;
+    gap: 26px;
     min-height: auto;
   }
 
-  .hero-visual {
-    max-width: 560px;
-    margin: 0 auto;
-    width: 100%;
+  .hero-content {
+    max-width: 100%;
   }
 
-  .hero-carousel-frame {
-    min-height: 320px;
-    aspect-ratio: 4 / 3;
+  .hero-badge {
+    margin-bottom: 16px;
   }
 
-  .hero-float-badge {
-    padding: 7px 12px;
-    border-radius: 14px;
+  .hero-eyebrow {
+    flex-wrap: wrap;
+    font-size: 0.85rem;
     gap: 8px;
+    margin-bottom: 8px;
   }
 
-  .float-title {
-    font-size: 11.5px;
-  }
-
-  .float-sub {
-    font-size: 9.5px;
+  .title-brand-container {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    margin: 4px 0 12px;
   }
 
   .title-brand {
-    font-size: 2.6rem;
+    font-size: clamp(2.1rem, 7vw, 2.7rem);
+    line-height: 1.12;
   }
 
   .title-serif {
-    font-size: 1.75rem;
+    font-size: clamp(1.4rem, 4.5vw, 1.8rem);
+    line-height: 1.25;
+    margin-top: 4px;
+  }
+
+  .hero-description {
+    font-size: 0.96rem;
+    line-height: 1.68;
+    margin-bottom: 22px;
+    max-width: 100%;
+  }
+
+  .hero-buttons {
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .btn-gold-glow,
+  .btn-outline-luxury {
+    width: 100%;
+    justify-content: center;
+    padding: 14px 20px;
+    font-size: 15px;
+  }
+
+  .visit-highlight-pill {
+    padding: 12px 14px;
+    gap: 12px;
+    margin-bottom: 20px;
+    max-width: 100%;
   }
 
   .hero-trust-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 8px;
-    margin-top: 18px;
+    margin-top: 14px;
+    padding-top: 16px;
+    max-width: 100%;
   }
 
   .trust-item {
@@ -2121,6 +2155,7 @@
     flex-direction: column;
     text-align: center;
     gap: 4px;
+    border-radius: 12px;
   }
 
   .trust-icon {
@@ -2136,6 +2171,165 @@
     font-size: 9.5px;
   }
 
+  /* ── Hero Visual & Badges (Eliminating Overlap on Mobile) ── */
+  .hero-visual {
+    max-width: 600px;
+    margin: 0 auto;
+    width: 100%;
+    perspective: none;
+  }
+
+  .hero-badges-wrap {
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 14px;
+    width: 100%;
+    position: relative;
+    z-index: 3;
+  }
+
+  .hero-float-badge {
+    position: static !important;
+    transform: none !important;
+    animation: none !important;
+    flex: 1 1 0;
+    min-width: 0;
+    margin: 0 !important;
+    padding: 9px 12px !important;
+    border-radius: 14px !important;
+    box-shadow: 0 4px 14px rgba(6, 182, 212, 0.12) !important;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .hero-float-badge:hover {
+    transform: none !important;
+  }
+
+  .float-badge-content {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .float-title {
+    font-size: 11px !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .float-sub {
+    font-size: 9px !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .hero-visual-chassis {
+    padding: 10px;
+    border-radius: 22px;
+    width: 100%;
+  }
+
+  .hero-carousel-frame {
+    aspect-ratio: 16 / 11;
+    min-height: 270px;
+    border-radius: 16px;
+    width: 100%;
+  }
+
+  /* Move carousel navigation dots to top-right inside glass capsule — NEVER overlaps caption text */
+  .hero-dots {
+    top: 12px;
+    right: 12px;
+    bottom: auto;
+    left: auto;
+    transform: none;
+    background: rgba(15, 23, 42, 0.55);
+    padding: 5px 9px;
+    border-radius: 20px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    gap: 6px;
+    z-index: 6;
+  }
+
+  .hero-dot {
+    width: 6px;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.5);
+  }
+
+  .hero-dot.active {
+    width: 18px;
+    border-radius: 4px;
+    background: #22d3ee;
+  }
+
+  .hero-arrow {
+    width: 34px;
+    height: 34px;
+    font-size: 18px;
+    opacity: 0.92;
+    z-index: 5;
+  }
+
+  .hero-arrow.prev {
+    left: 8px;
+  }
+
+  .hero-arrow.next {
+    right: 8px;
+  }
+
+  .hero-slide-caption {
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    gap: 6px;
+    z-index: 4;
+  }
+
+  .caption-top-chips {
+    gap: 6px;
+    margin-bottom: 2px;
+  }
+
+  .slide-tag {
+    font-size: 10px;
+    padding: 3px 8px;
+  }
+
+  .slide-mat-tag {
+    font-size: 9.5px;
+    padding: 3px 8px;
+  }
+
+  .slide-title-price {
+    padding: 8px 12px;
+    border-radius: 12px;
+    gap: 8px;
+  }
+
+  .slide-info-text h4 {
+    font-size: 13.5px;
+    line-height: 1.25;
+    margin: 0;
+  }
+
+  .slide-tagline {
+    display: none;
+  }
+
+  .slide-cost {
+    font-size: 14px;
+  }
+
+  /* ── Other Home Sections ── */
   .luxury-marquee-bar {
     margin-top: 0;
     padding: 10px 0;
@@ -2174,6 +2368,16 @@
     grid-template-columns: 1fr;
   }
 
+  .services-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .team-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
   .contact-box-luxury {
     padding: 24px 18px;
   }
@@ -2181,51 +2385,51 @@
 
 @media (max-width: 540px) {
   .hero-section-wrapper {
-    padding-top: 70px;
+    padding-top: calc(var(--nav-height, 72px) + 6px);
     background-position: center top;
     background-size: cover;
   }
 
   .hero {
-    padding: 16px 14px 38px;
+    padding: 16px 14px 36px;
     gap: 20px;
     min-height: auto;
   }
 
   .hero-badge {
-    font-size: 11.5px;
-    padding: 6px 14px;
-    margin-bottom: 14px;
+    font-size: 11px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
   }
 
   .hero-content h1 {
-    margin-bottom: 14px;
+    margin-bottom: 12px;
   }
 
   .title-brand {
-    font-size: clamp(1.95rem, 8vw, 2.35rem);
+    font-size: clamp(1.9rem, 7.5vw, 2.35rem);
   }
 
   .title-serif {
-    font-size: clamp(1.3rem, 4.8vw, 1.55rem);
+    font-size: clamp(1.25rem, 4.5vw, 1.55rem);
   }
 
   .hero-eyebrow {
-    font-size: 0.82rem;
-    letter-spacing: 0.12em;
-    margin-bottom: 6px;
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+    margin-bottom: 4px;
   }
 
   .hero-description {
-    font-size: 0.92rem;
+    font-size: 0.9rem;
     line-height: 1.6;
-    margin-bottom: 20px;
+    margin-bottom: 18px;
   }
 
   .hero-buttons {
     flex-direction: column;
     gap: 10px;
-    margin-bottom: 18px;
+    margin-bottom: 16px;
   }
 
   .btn-gold-glow,
@@ -2239,7 +2443,7 @@
   .visit-highlight-pill {
     padding: 10px 12px;
     gap: 10px;
-    margin-bottom: 18px;
+    margin-bottom: 16px;
   }
 
   .pill-icon {
@@ -2247,99 +2451,72 @@
   }
 
   .pill-text strong {
-    font-size: 12.5px;
+    font-size: 12px;
   }
 
   .pill-text span {
-    font-size: 11px;
+    font-size: 10.5px;
     line-height: 1.35;
   }
 
   .hero-trust-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 6px;
-    margin-top: 12px;
+    grid-template-columns: 1fr;
+    gap: 7px;
+    margin-top: 10px;
   }
 
   .trust-item {
-    padding: 7px 4px;
-    border-radius: 10px;
-    flex-direction: column;
-    text-align: center;
-    gap: 3px;
+    padding: 9px 12px;
+    border-radius: 12px;
+    flex-direction: row;
+    align-items: center;
+    text-align: left;
+    gap: 10px;
   }
 
   .trust-icon {
-    font-size: 16px;
+    font-size: 18px;
   }
 
   .trust-meta strong {
-    font-size: 10px;
+    font-size: 11.5px;
     line-height: 1.2;
   }
 
   .trust-meta span {
-    font-size: 8.5px;
+    font-size: 10px;
   }
 
   .hero-visual-chassis {
     padding: 8px;
-    border-radius: 20px;
+    border-radius: 18px;
   }
 
   .hero-carousel-frame {
     min-height: 240px;
     aspect-ratio: 16 / 11;
-    border-radius: 16px;
-  }
-
-  .hero-float-badge {
-    padding: 6px 10px;
-    border-radius: 12px;
-    gap: 6px;
-  }
-
-  .hero-float-badge.float-top-left {
-    top: -10px;
-    left: 6px;
-  }
-
-  .hero-float-badge.float-top-right {
-    top: -10px;
-    right: 6px;
-  }
-
-  .hero-float-badge.float-bottom-left,
-  .hero-float-badge.float-bottom-right {
-    display: none;
-  }
-
-  .float-title {
-    font-size: 10.5px;
-  }
-
-  .float-sub {
-    font-size: 8.5px;
+    border-radius: 14px;
   }
 
   .slide-title-price {
-    padding: 8px 12px;
-    border-radius: 12px;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
+    padding: 6px 10px;
+    border-radius: 10px;
   }
 
   .slide-info-text h4 {
-    font-size: 13px;
-  }
-
-  .slide-tagline {
-    display: none;
+    font-size: 12.5px;
   }
 
   .slide-cost {
     font-size: 13px;
+  }
+
+  .price-caption {
+    font-size: 9px;
+  }
+
+  .slide-mat-tag {
+    display: none;
   }
 
   .hero-arrow {
@@ -2357,11 +2534,11 @@
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
-    padding: 20px 12px;
+    padding: 16px 10px;
   }
 
-  .stat-number {
-    font-size: 1.85rem;
+  .stat-value {
+    font-size: 1.75rem;
   }
 
   .stat-label {
@@ -2370,20 +2547,15 @@
   }
 
   .hero-slide-caption {
-    bottom: 10px;
+    bottom: 8px;
     left: 8px;
     right: 8px;
-    gap: 6px;
+    gap: 5px;
   }
 
   .slide-tag {
-    font-size: 10.5px;
-    padding: 3px 8px;
-  }
-
-  .slide-mat-tag {
     font-size: 10px;
-    padding: 3px 8px;
+    padding: 3px 7px;
   }
 
   .categories-grid {
@@ -2392,14 +2564,14 @@
   }
 
   .cat-card {
-    padding: 16px 8px 12px;
+    padding: 14px 8px 12px;
     border-radius: 14px;
   }
 
   .cat-emoji-wrap {
-    width: 42px;
-    height: 42px;
-    margin-bottom: 8px;
+    width: 40px;
+    height: 40px;
+    margin-bottom: 6px;
   }
 
   .cat-emoji {
@@ -2407,7 +2579,7 @@
   }
 
   .cat-name {
-    font-size: 12.5px;
+    font-size: 12px;
   }
 
   .cta-action-row {
@@ -2423,33 +2595,42 @@
     flex: 0 0 280px;
     width: 280px;
   }
+
+  .furniture-cta-card {
+    padding: 28px 16px;
+    border-radius: 20px;
+    gap: 24px;
+  }
 }
 
 @media (max-width: 380px) {
-  .hero-float-badge.float-top-left {
-    display: none;
+  .hero-section-wrapper {
+    padding-top: calc(var(--nav-height, 68px) + 6px);
   }
 
-  .hero-float-badge.float-top-right {
-    top: -10px;
-    right: 50%;
-    transform: translateX(50%);
+  .hero-badges-wrap {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .hero-float-badge {
+    width: 100%;
   }
 
   .title-brand {
-    font-size: 1.8rem;
+    font-size: 1.75rem;
   }
 
   .title-serif {
-    font-size: 1.2rem;
+    font-size: 1.15rem;
   }
 
   .trust-meta strong {
-    font-size: 9px;
+    font-size: 10px;
   }
 
   .trust-meta span {
-    font-size: 7.5px;
+    font-size: 9px;
   }
 
   .stats-grid {

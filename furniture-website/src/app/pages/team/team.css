@@ -2,7 +2,7 @@
    LUXURY TEAM PAGE STYLES
 ════════════════════════════════════════════════════════════════ */
 .team-page {
-  padding-top: 76px;
+  padding-top: var(--nav-height, 80px);
   background-color: var(--bg-canvas);
 }
 
@@ -446,7 +446,7 @@
 
 @media (max-width: 650px) {
   .team-page {
-    padding-top: 70px;
+    padding-top: var(--nav-height, 72px);
   }
   .team-hero {
     padding: 50px 18px 40px;

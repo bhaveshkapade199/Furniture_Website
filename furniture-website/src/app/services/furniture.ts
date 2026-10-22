@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { Observable, BehaviorSubject, of } from 'rxjs';
+import { catchError, tap } from 'rxjs/operators';
 
 export interface FurnitureItem {
   id?: number;
@@ -66,13 +66,11 @@ export interface VideoItem {
 export interface CustomOrder {
   id?: number;
   _id?: string;
-  // Customer details
   name: string;
   email: string;
   phone: string;
   address?: string;
   city?: string;
-  // Furniture requirements
   furnitureType: string;
   woodType?: string;
   dimensions?: string;
@@ -82,7 +80,6 @@ export interface CustomOrder {
   urgency?: 'flexible' | 'within_month' | 'urgent';
   homeVisitNeeded?: boolean;
   referenceImageUrl?: string;
-  // Admin tracking
   status?: 'new' | 'contacted' | 'quoted' | 'in_progress' | 'completed' | 'cancelled';
   adminNotes?: string;
   quotedPrice?: string;
@@ -90,18 +87,181 @@ export interface CustomOrder {
   updatedAt?: Date;
 }
 
-const API = 'http://localhost:5000/api';
-
-// LocalStorage fallback keys
 const LS = 'bhavesh_furniture_';
+
+/**
+ * Dynamically resolves the API base URL whether running locally,
+ * accessed via LAN IP on phone, or deployed on a live server.
+ */
+export function resolveApiUrl(): string {
+  if (typeof window !== 'undefined') {
+    const custom = localStorage.getItem('rk_furniture_api_url');
+    if (custom) return custom.replace(/\/$/, '');
+
+    const { hostname, port, protocol } = window.location;
+
+    // Local Angular dev server on port 4200
+    if ((hostname === 'localhost' || hostname === '127.0.0.1') && port === '4200') {
+      return 'http://localhost:5000/api';
+    }
+
+    // Accessing dev server from mobile / LAN IP (e.g. 192.168.1.15:4200)
+    if (port === '4200') {
+      return `${protocol}//${hostname}:5000/api`;
+    }
+
+    // Live deployment (served from backend or reverse proxied domain)
+    return `${window.location.origin}/api`;
+  }
+  return 'http://localhost:5000/api';
+}
 
 @Injectable({ providedIn: 'root' })
 export class FurnitureService {
   private adminPassword = '';
+  private channel: BroadcastChannel | null = null;
+
+  // ── Reactive In-Memory State Stores (Instant UI Updating) ──────
+  private furnitureSubject = new BehaviorSubject<FurnitureItem[]>([]);
+  public furniture$ = this.furnitureSubject.asObservable();
+
+  private workInfoSubject = new BehaviorSubject<WorkInfo[]>([]);
+  public workInfo$ = this.workInfoSubject.asObservable();
+
+  private teamSubject = new BehaviorSubject<TeamMember[]>([]);
+  public team$ = this.teamSubject.asObservable();
+
+  private videosSubject = new BehaviorSubject<VideoItem[]>([]);
+  public videos$ = this.videosSubject.asObservable();
+
+  private customOrdersSubject = new BehaviorSubject<CustomOrder[]>([]);
+  public customOrders$ = this.customOrdersSubject.asObservable();
+
+  private feedbacksSubject = new BehaviorSubject<Feedback[]>([]);
+  public feedbacks$ = this.feedbacksSubject.asObservable();
 
   constructor(private http: HttpClient) {
-    // Clear any obsolete localStorage admin flags for security
     localStorage.removeItem(LS + 'admin_logged_in');
+
+    // 1. Immediately hydrate subjects from local cache so UI is instantaneous
+    this.furnitureSubject.next(this.getLocalItems());
+    this.workInfoSubject.next(this.getLocalWorkInfo());
+    this.teamSubject.next(this.getLocalTeamMembers());
+    this.videosSubject.next(this.getLocalVideos());
+    this.customOrdersSubject.next(this.getLocalCustomOrders());
+    this.feedbacksSubject.next(this.getLocalFeedbacks());
+
+    // 2. Setup real-time cross-tab synchronization channel
+    if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+      try {
+        this.channel = new BroadcastChannel('rk_furniture_channel');
+        this.channel.onmessage = (event) => {
+          if (event.data?.type === 'SYNC') {
+            this.fetchAllFromDatabase();
+          }
+        };
+      } catch (_) {}
+    }
+
+    // 3. Immediately fetch live data from MongoDB database
+    this.fetchAllFromDatabase();
+
+    // 4. Background sync on window focus and periodic auto-refresh (every 10s)
+    if (typeof window !== 'undefined') {
+      window.addEventListener('focus', () => this.fetchAllFromDatabase());
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) this.fetchAllFromDatabase();
+      });
+      setInterval(() => {
+        if (typeof document !== 'undefined' && !document.hidden) {
+          this.fetchAllFromDatabase();
+        }
+      }, 10000);
+    }
+  }
+
+  get apiUrl(): string {
+    return resolveApiUrl();
+  }
+
+  setCustomApiUrl(url: string) {
+    if (url) {
+      localStorage.setItem('rk_furniture_api_url', url);
+    } else {
+      localStorage.removeItem('rk_furniture_api_url');
+    }
+    this.fetchAllFromDatabase();
+  }
+
+  private notifySync() {
+    try {
+      this.channel?.postMessage({ type: 'SYNC', time: Date.now() });
+    } catch (_) {}
+  }
+
+  private isMatch(item: { _id?: string; id?: any }, id: string): boolean {
+    return String(item._id || item.id) === String(id);
+  }
+
+  // ── Database Fetching ─────────────────────────────────────────
+  public fetchAllFromDatabase(): void {
+    const api = this.apiUrl;
+
+    this.http.get<FurnitureItem[]>(`${api}/furniture`).pipe(
+      catchError(() => of(this.getLocalItems()))
+    ).subscribe(items => {
+      if (items && items.length) {
+        this.furnitureSubject.next(items);
+        localStorage.setItem(LS + 'items', JSON.stringify(items));
+      }
+    });
+
+    this.http.get<WorkInfo[]>(`${api}/workinfo`).pipe(
+      catchError(() => of(this.getLocalWorkInfo()))
+    ).subscribe(items => {
+      if (items && items.length) {
+        this.workInfoSubject.next(items);
+        localStorage.setItem(LS + 'workinfo', JSON.stringify(items));
+      }
+    });
+
+    this.http.get<TeamMember[]>(`${api}/team`).pipe(
+      catchError(() => of(this.getLocalTeamMembers()))
+    ).subscribe(items => {
+      if (items && items.length) {
+        this.teamSubject.next(items);
+        localStorage.setItem(LS + 'team', JSON.stringify(items));
+      }
+    });
+
+    this.http.get<VideoItem[]>(`${api}/videos`).pipe(
+      catchError(() => of(this.getLocalVideos()))
+    ).subscribe(items => {
+      if (items && items.length) {
+        this.videosSubject.next(items);
+        localStorage.setItem(LS + 'videos', JSON.stringify(items));
+      }
+    });
+
+    if (this.isAdminLoggedIn()) {
+      this.http.get<CustomOrder[]>(`${api}/custom-orders`, { headers: this.adminHeaders }).pipe(
+        catchError(() => of(this.getLocalCustomOrders()))
+      ).subscribe(orders => {
+        if (orders) {
+          this.customOrdersSubject.next(orders);
+          localStorage.setItem(LS + 'custom_orders', JSON.stringify(orders));
+        }
+      });
+
+      this.http.get<Feedback[]>(`${api}/feedback`, { headers: this.adminHeaders }).pipe(
+        catchError(() => of(this.getLocalFeedbacks()))
+      ).subscribe(fbs => {
+        if (fbs) {
+          this.feedbacksSubject.next(fbs);
+          localStorage.setItem(LS + 'feedbacks', JSON.stringify(fbs));
+        }
+      });
+    }
   }
 
   // ── Admin Auth ────────────────────────────────────────────────
@@ -120,6 +280,7 @@ export class FurnitureService {
     if (password === 'bhavesh@admin123') {
       sessionStorage.setItem(LS + 'admin_logged_in', 'true');
       this.setAdminPassword(password);
+      this.fetchAllFromDatabase();
       return true;
     }
     return false;
@@ -135,128 +296,437 @@ export class FurnitureService {
   uploadFile(file: File): Observable<{ url: string; filename: string }> {
     const formData = new FormData();
     formData.append('file', file);
-    return this.http.post<{ url: string; filename: string }>(`${API}/upload`, formData, {
+    return this.http.post<{ url: string; filename: string }>(`${this.apiUrl}/upload`, formData, {
       headers: this.adminHeaders
     });
   }
 
-  // ── Furniture Items ───────────────────────────────────────────
+  // ════════════════════════════════════════════════════════════════
+  // FURNITURE ITEMS (Optimistic + Live DB Save)
+  // ════════════════════════════════════════════════════════════════
   getFurnitureItems(): Observable<FurnitureItem[]> {
-    return this.http.get<FurnitureItem[]>(`${API}/furniture`).pipe(
-      catchError(() => of(this.getLocalItems()))
-    );
+    return this.furniture$;
   }
 
   addFurnitureItem(item: Partial<FurnitureItem>): Observable<FurnitureItem> {
-    return this.http.post<FurnitureItem>(`${API}/furniture`, item, { headers: this.adminHeaders }).pipe(
-      catchError(() => { this.addLocalItem(item); return of(item as FurnitureItem); })
+    const tempId = 'temp_' + Date.now();
+    const optimisticItem: FurnitureItem = {
+      _id: tempId,
+      name: item.name || '',
+      category: item.category || 'Sofa Set',
+      description: item.description || '',
+      imageUrl: item.imageUrl || '',
+      videoUrl: item.videoUrl || '',
+      price: item.price || '',
+      dateAdded: new Date()
+    };
+
+    // 1. Instant optimistic update across website & admin
+    const current = this.furnitureSubject.value;
+    const updated = [optimisticItem, ...current];
+    this.furnitureSubject.next(updated);
+    localStorage.setItem(LS + 'items', JSON.stringify(updated));
+    this.notifySync();
+
+    // 2. Persist to MongoDB database
+    return this.http.post<FurnitureItem>(`${this.apiUrl}/furniture`, item, { headers: this.adminHeaders }).pipe(
+      tap((saved) => {
+        if (saved && saved._id) {
+          const list = this.furnitureSubject.value.map(i => i._id === tempId ? saved : i);
+          this.furnitureSubject.next(list);
+          localStorage.setItem(LS + 'items', JSON.stringify(list));
+          this.notifySync();
+        }
+      }),
+      catchError(() => of(optimisticItem))
     );
   }
 
   updateFurnitureItem(id: string, item: Partial<FurnitureItem>): Observable<FurnitureItem> {
-    return this.http.put<FurnitureItem>(`${API}/furniture/${id}`, item, { headers: this.adminHeaders });
+    // 1. Instant optimistic update in memory & cache
+    const current = this.furnitureSubject.value;
+    const updated = current.map(i => this.isMatch(i, id) ? { ...i, ...item } : i);
+    this.furnitureSubject.next(updated);
+    localStorage.setItem(LS + 'items', JSON.stringify(updated));
+    this.notifySync();
+
+    // 2. Persist update to MongoDB database
+    return this.http.put<FurnitureItem>(`${this.apiUrl}/furniture/${id}`, item, { headers: this.adminHeaders }).pipe(
+      tap((saved) => {
+        if (saved && saved._id) {
+          const list = this.furnitureSubject.value.map(i => this.isMatch(i, id) ? { ...i, ...saved } : i);
+          this.furnitureSubject.next(list);
+          localStorage.setItem(LS + 'items', JSON.stringify(list));
+          this.notifySync();
+        }
+      }),
+      catchError(() => of(item as FurnitureItem))
+    );
   }
 
   deleteFurnitureItem(id: string): Observable<any> {
-    this.deleteLocalItem(id);
-    return this.http.delete(`${API}/furniture/${id}`, { headers: this.adminHeaders }).pipe(
+    // 1. Instant optimistic delete
+    const current = this.furnitureSubject.value;
+    const updated = current.filter(i => !this.isMatch(i, id));
+    this.furnitureSubject.next(updated);
+    localStorage.setItem(LS + 'items', JSON.stringify(updated));
+    this.notifySync();
+
+    // 2. Delete from MongoDB database
+    return this.http.delete(`${this.apiUrl}/furniture/${id}`, { headers: this.adminHeaders }).pipe(
       catchError(() => of({ success: true }))
     );
   }
 
-  // ── Work Info ─────────────────────────────────────────────────
+  // ════════════════════════════════════════════════════════════════
+  // WORK INFO (Optimistic + Live DB Save)
+  // ════════════════════════════════════════════════════════════════
   getWorkInfo(): Observable<WorkInfo[]> {
-    return this.http.get<WorkInfo[]>(`${API}/workinfo`).pipe(
-      catchError(() => of(this.getLocalWorkInfo()))
-    );
+    return this.workInfo$;
   }
 
   addWorkInfo(item: Partial<WorkInfo>): Observable<WorkInfo> {
-    return this.http.post<WorkInfo>(`${API}/workinfo`, item, { headers: this.adminHeaders });
+    const tempId = 'temp_' + Date.now();
+    const optimisticItem: WorkInfo = {
+      _id: tempId,
+      title: item.title || '',
+      description: item.description || '',
+      icon: item.icon || '🪑',
+      imageUrl: item.imageUrl || '',
+      videoUrl: item.videoUrl || '',
+      order: item.order ?? (this.workInfoSubject.value.length + 1)
+    };
+
+    const current = this.workInfoSubject.value;
+    const updated = [...current, optimisticItem];
+    this.workInfoSubject.next(updated);
+    localStorage.setItem(LS + 'workinfo', JSON.stringify(updated));
+    this.notifySync();
+
+    return this.http.post<WorkInfo>(`${this.apiUrl}/workinfo`, item, { headers: this.adminHeaders }).pipe(
+      tap((saved) => {
+        if (saved && saved._id) {
+          const list = this.workInfoSubject.value.map(i => i._id === tempId ? saved : i);
+          this.workInfoSubject.next(list);
+          localStorage.setItem(LS + 'workinfo', JSON.stringify(list));
+          this.notifySync();
+        }
+      }),
+      catchError(() => of(optimisticItem))
+    );
   }
 
   updateWorkInfo(id: string, item: Partial<WorkInfo>): Observable<WorkInfo> {
-    return this.http.put<WorkInfo>(`${API}/workinfo/${id}`, item, { headers: this.adminHeaders });
+    const current = this.workInfoSubject.value;
+    const updated = current.map(i => this.isMatch(i, id) ? { ...i, ...item } : i);
+    this.workInfoSubject.next(updated);
+    localStorage.setItem(LS + 'workinfo', JSON.stringify(updated));
+    this.notifySync();
+
+    return this.http.put<WorkInfo>(`${this.apiUrl}/workinfo/${id}`, item, { headers: this.adminHeaders }).pipe(
+      tap((saved) => {
+        if (saved && saved._id) {
+          const list = this.workInfoSubject.value.map(i => this.isMatch(i, id) ? { ...i, ...saved } : i);
+          this.workInfoSubject.next(list);
+          localStorage.setItem(LS + 'workinfo', JSON.stringify(list));
+          this.notifySync();
+        }
+      }),
+      catchError(() => of(item as WorkInfo))
+    );
   }
 
   deleteWorkInfo(id: string): Observable<any> {
-    const info = this.getLocalWorkInfo().filter(w => String(w._id || w.id) !== id);
-    localStorage.setItem(LS + 'workinfo', JSON.stringify(info));
-    return this.http.delete(`${API}/workinfo/${id}`, { headers: this.adminHeaders }).pipe(
+    const current = this.workInfoSubject.value;
+    const updated = current.filter(i => !this.isMatch(i, id));
+    this.workInfoSubject.next(updated);
+    localStorage.setItem(LS + 'workinfo', JSON.stringify(updated));
+    this.notifySync();
+
+    return this.http.delete(`${this.apiUrl}/workinfo/${id}`, { headers: this.adminHeaders }).pipe(
       catchError(() => of({ success: true }))
     );
   }
 
-  // ── Team Members ──────────────────────────────────────────────
+  // ════════════════════════════════════════════════════════════════
+  // TEAM MEMBERS (Optimistic + Live DB Save)
+  // ════════════════════════════════════════════════════════════════
   getTeamMembers(): Observable<TeamMember[]> {
-    return this.http.get<TeamMember[]>(`${API}/team`).pipe(
-      catchError(() => of(this.getLocalTeamMembers()))
-    );
+    return this.team$;
   }
 
   addTeamMember(member: Partial<TeamMember>): Observable<TeamMember> {
-    return this.http.post<TeamMember>(`${API}/team`, member, { headers: this.adminHeaders }).pipe(
-      catchError(() => { this.addLocalTeamMember(member); return of(member as TeamMember); })
+    const tempId = 'temp_' + Date.now();
+    const optimisticMember: TeamMember = {
+      _id: tempId,
+      name: member.name || '',
+      role: member.role || '',
+      experience: member.experience || '',
+      description: member.description || '',
+      specialty: member.specialty || '',
+      emoji: member.emoji || '👨‍💼',
+      imageUrl: member.imageUrl || '',
+      phone: member.phone || '',
+      order: member.order ?? (this.teamSubject.value.length + 1)
+    };
+
+    const current = this.teamSubject.value;
+    const updated = [...current, optimisticMember];
+    this.teamSubject.next(updated);
+    localStorage.setItem(LS + 'team', JSON.stringify(updated));
+    this.notifySync();
+
+    return this.http.post<TeamMember>(`${this.apiUrl}/team`, member, { headers: this.adminHeaders }).pipe(
+      tap((saved) => {
+        if (saved && saved._id) {
+          const list = this.teamSubject.value.map(m => m._id === tempId ? saved : m);
+          this.teamSubject.next(list);
+          localStorage.setItem(LS + 'team', JSON.stringify(list));
+          this.notifySync();
+        }
+      }),
+      catchError(() => of(optimisticMember))
     );
   }
 
   updateTeamMember(id: string, member: Partial<TeamMember>): Observable<TeamMember> {
-    return this.http.put<TeamMember>(`${API}/team/${id}`, member, { headers: this.adminHeaders }).pipe(
-      catchError(() => { this.updateLocalTeamMember(id, member); return of(member as TeamMember); })
+    const current = this.teamSubject.value;
+    const updated = current.map(m => this.isMatch(m, id) ? { ...m, ...member } : m);
+    this.teamSubject.next(updated);
+    localStorage.setItem(LS + 'team', JSON.stringify(updated));
+    this.notifySync();
+
+    return this.http.put<TeamMember>(`${this.apiUrl}/team/${id}`, member, { headers: this.adminHeaders }).pipe(
+      tap((saved) => {
+        if (saved && saved._id) {
+          const list = this.teamSubject.value.map(m => this.isMatch(m, id) ? { ...m, ...saved } : m);
+          this.teamSubject.next(list);
+          localStorage.setItem(LS + 'team', JSON.stringify(list));
+          this.notifySync();
+        }
+      }),
+      catchError(() => of(member as TeamMember))
     );
   }
 
   deleteTeamMember(id: string): Observable<any> {
-    this.deleteLocalTeamMember(id);
-    return this.http.delete(`${API}/team/${id}`, { headers: this.adminHeaders }).pipe(
+    const current = this.teamSubject.value;
+    const updated = current.filter(m => !this.isMatch(m, id));
+    this.teamSubject.next(updated);
+    localStorage.setItem(LS + 'team', JSON.stringify(updated));
+    this.notifySync();
+
+    return this.http.delete(`${this.apiUrl}/team/${id}`, { headers: this.adminHeaders }).pipe(
       catchError(() => of({ success: true }))
     );
   }
 
-  // ── Videos Showcase ───────────────────────────────────────────
+  // ════════════════════════════════════════════════════════════════
+  // VIDEOS SHOWCASE (Optimistic + Live DB Save)
+  // ════════════════════════════════════════════════════════════════
   getVideos(): Observable<VideoItem[]> {
-    return this.http.get<VideoItem[]>(`${API}/videos`).pipe(
-      catchError(() => of(this.getLocalVideos()))
-    );
+    return this.videos$;
   }
 
   addVideo(video: Partial<VideoItem>): Observable<VideoItem> {
-    return this.http.post<VideoItem>(`${API}/videos`, video, { headers: this.adminHeaders });
+    const tempId = 'temp_' + Date.now();
+    const optimisticVid: VideoItem = {
+      _id: tempId,
+      title: video.title || '',
+      description: video.description || '',
+      videoUrl: video.videoUrl || '',
+      thumbnailUrl: video.thumbnailUrl || '',
+      category: video.category || 'Workshop',
+      dateAdded: new Date()
+    };
+
+    const current = this.videosSubject.value;
+    const updated = [optimisticVid, ...current];
+    this.videosSubject.next(updated);
+    localStorage.setItem(LS + 'videos', JSON.stringify(updated));
+    this.notifySync();
+
+    return this.http.post<VideoItem>(`${this.apiUrl}/videos`, video, { headers: this.adminHeaders }).pipe(
+      tap((saved) => {
+        if (saved && saved._id) {
+          const list = this.videosSubject.value.map(v => v._id === tempId ? saved : v);
+          this.videosSubject.next(list);
+          localStorage.setItem(LS + 'videos', JSON.stringify(list));
+          this.notifySync();
+        }
+      }),
+      catchError(() => of(optimisticVid))
+    );
   }
 
   updateVideo(id: string, video: Partial<VideoItem>): Observable<VideoItem> {
-    return this.http.put<VideoItem>(`${API}/videos/${id}`, video, { headers: this.adminHeaders });
+    const current = this.videosSubject.value;
+    const updated = current.map(v => this.isMatch(v, id) ? { ...v, ...video } : v);
+    this.videosSubject.next(updated);
+    localStorage.setItem(LS + 'videos', JSON.stringify(updated));
+    this.notifySync();
+
+    return this.http.put<VideoItem>(`${this.apiUrl}/videos/${id}`, video, { headers: this.adminHeaders }).pipe(
+      tap((saved) => {
+        if (saved && saved._id) {
+          const list = this.videosSubject.value.map(v => this.isMatch(v, id) ? { ...v, ...saved } : v);
+          this.videosSubject.next(list);
+          localStorage.setItem(LS + 'videos', JSON.stringify(list));
+          this.notifySync();
+        }
+      }),
+      catchError(() => of(video as VideoItem))
+    );
   }
 
   deleteVideo(id: string): Observable<any> {
-    const vids = this.getLocalVideos().filter(v => String(v._id || v.id) !== id);
-    localStorage.setItem(LS + 'videos', JSON.stringify(vids));
-    return this.http.delete(`${API}/videos/${id}`, { headers: this.adminHeaders }).pipe(
+    const current = this.videosSubject.value;
+    const updated = current.filter(v => !this.isMatch(v, id));
+    this.videosSubject.next(updated);
+    localStorage.setItem(LS + 'videos', JSON.stringify(updated));
+    this.notifySync();
+
+    return this.http.delete(`${this.apiUrl}/videos/${id}`, { headers: this.adminHeaders }).pipe(
       catchError(() => of({ success: true }))
     );
   }
 
-  // ── Feedback ──────────────────────────────────────────────────
-  getFeedbacks(): Observable<Feedback[]> {
-    return this.http.get<Feedback[]>(`${API}/feedback`, { headers: this.adminHeaders }).pipe(
-      catchError(() => of(this.getLocalFeedbacks()))
+  // ════════════════════════════════════════════════════════════════
+  // CUSTOM ORDERS (Make Furniture)
+  // ════════════════════════════════════════════════════════════════
+  submitCustomOrder(order: Partial<CustomOrder>): Observable<CustomOrder> {
+    const tempId = 'temp_' + Date.now();
+    const optimisticOrder: CustomOrder = {
+      ...order,
+      _id: tempId,
+      status: 'new',
+      createdAt: new Date(),
+      furnitureType: order.furnitureType || 'Custom Furniture',
+      name: order.name || '',
+      email: order.email || '',
+      phone: order.phone || '',
+      description: order.description || ''
+    };
+
+    const current = this.customOrdersSubject.value;
+    const updated = [optimisticOrder, ...current];
+    this.customOrdersSubject.next(updated);
+    localStorage.setItem(LS + 'custom_orders', JSON.stringify(updated));
+    this.notifySync();
+
+    return this.http.post<CustomOrder>(`${this.apiUrl}/custom-orders`, order).pipe(
+      tap((saved) => {
+        if (saved && saved._id) {
+          const list = this.customOrdersSubject.value.map(o => o._id === tempId ? saved : o);
+          this.customOrdersSubject.next(list);
+          localStorage.setItem(LS + 'custom_orders', JSON.stringify(list));
+          this.notifySync();
+        }
+      }),
+      catchError(() => of(optimisticOrder))
     );
   }
 
+  getCustomOrders(status?: string): Observable<CustomOrder[]> {
+    if (status) {
+      return this.customOrders$.pipe(
+        tap(() => {}),
+        catchError(() => of([]))
+      );
+    }
+    return this.customOrders$;
+  }
+
+  updateCustomOrder(id: string, update: Partial<CustomOrder>): Observable<CustomOrder> {
+    const current = this.customOrdersSubject.value;
+    const updated = current.map(o => this.isMatch(o, id) ? { ...o, ...update, updatedAt: new Date() } : o);
+    this.customOrdersSubject.next(updated);
+    localStorage.setItem(LS + 'custom_orders', JSON.stringify(updated));
+    this.notifySync();
+
+    return this.http.patch<CustomOrder>(`${this.apiUrl}/custom-orders/${id}`, update, { headers: this.adminHeaders }).pipe(
+      tap((saved) => {
+        if (saved && saved._id) {
+          const list = this.customOrdersSubject.value.map(o => this.isMatch(o, id) ? { ...o, ...saved } : o);
+          this.customOrdersSubject.next(list);
+          localStorage.setItem(LS + 'custom_orders', JSON.stringify(list));
+          this.notifySync();
+        }
+      }),
+      catchError(() => of(update as CustomOrder))
+    );
+  }
+
+  deleteCustomOrder(id: string): Observable<any> {
+    const current = this.customOrdersSubject.value;
+    const updated = current.filter(o => !this.isMatch(o, id));
+    this.customOrdersSubject.next(updated);
+    localStorage.setItem(LS + 'custom_orders', JSON.stringify(updated));
+    this.notifySync();
+
+    return this.http.delete(`${this.apiUrl}/custom-orders/${id}`, { headers: this.adminHeaders }).pipe(
+      catchError(() => of({ success: true }))
+    );
+  }
+
+  // ════════════════════════════════════════════════════════════════
+  // FEEDBACK
+  // ════════════════════════════════════════════════════════════════
+  getFeedbacks(): Observable<Feedback[]> {
+    return this.feedbacks$;
+  }
+
   addFeedback(fb: Partial<Feedback>): Observable<Feedback> {
-    return this.http.post<Feedback>(`${API}/feedback`, fb).pipe(
-      catchError(() => { this.addLocalFeedback(fb); return of(fb as Feedback); })
+    const tempId = 'temp_' + Date.now();
+    const optimisticFb: Feedback = {
+      _id: tempId,
+      name: fb.name || '',
+      email: fb.email || '',
+      message: fb.message || '',
+      rating: fb.rating || 5,
+      status: 'new',
+      date: new Date()
+    };
+
+    const current = this.feedbacksSubject.value;
+    const updated = [optimisticFb, ...current];
+    this.feedbacksSubject.next(updated);
+    localStorage.setItem(LS + 'feedbacks', JSON.stringify(updated));
+    this.notifySync();
+
+    return this.http.post<Feedback>(`${this.apiUrl}/feedback`, fb).pipe(
+      tap((saved) => {
+        if (saved && saved._id) {
+          const list = this.feedbacksSubject.value.map(f => f._id === tempId ? saved : f);
+          this.feedbacksSubject.next(list);
+          localStorage.setItem(LS + 'feedbacks', JSON.stringify(list));
+          this.notifySync();
+        }
+      }),
+      catchError(() => of(optimisticFb))
     );
   }
 
   markFeedbackRead(id: string): Observable<any> {
-    return this.http.patch(`${API}/feedback/${id}/read`, {}, { headers: this.adminHeaders });
+    const current = this.feedbacksSubject.value;
+    const updated = current.map(f => this.isMatch(f, id) ? { ...f, status: 'read' as const } : f);
+    this.feedbacksSubject.next(updated);
+    localStorage.setItem(LS + 'feedbacks', JSON.stringify(updated));
+    this.notifySync();
+
+    return this.http.patch(`${this.apiUrl}/feedback/${id}/read`, {}, { headers: this.adminHeaders }).pipe(
+      catchError(() => of({ success: true }))
+    );
   }
 
   deleteFeedback(id: string): Observable<any> {
-    const fbs = this.getLocalFeedbacks().filter(f => String(f._id || f.id) !== id);
-    localStorage.setItem(LS + 'feedbacks', JSON.stringify(fbs));
-    return this.http.delete(`${API}/feedback/${id}`, { headers: this.adminHeaders }).pipe(
+    const current = this.feedbacksSubject.value;
+    const updated = current.filter(f => !this.isMatch(f, id));
+    this.feedbacksSubject.next(updated);
+    localStorage.setItem(LS + 'feedbacks', JSON.stringify(updated));
+    this.notifySync();
+
+    return this.http.delete(`${this.apiUrl}/feedback/${id}`, { headers: this.adminHeaders }).pipe(
       catchError(() => of({ success: true }))
     );
   }
@@ -265,10 +735,14 @@ export class FurnitureService {
     return ['Sofa Set', 'Bedroom', 'TV Unit', 'Kitchen', 'Temple / Mandir', 'Dining Room', 'Office'];
   }
 
-  // ── LocalStorage Fallbacks ────────────────────────────────────
+  // ════════════════════════════════════════════════════════════════
+  // INITIAL CACHE LOADERS
+  // ════════════════════════════════════════════════════════════════
   private getLocalItems(): FurnitureItem[] {
-    const d = localStorage.getItem(LS + 'items');
-    if (d) return JSON.parse(d);
+    try {
+      const d = localStorage.getItem(LS + 'items');
+      if (d) return JSON.parse(d);
+    } catch (_) {}
     const defaults: FurnitureItem[] = [
       { _id: '1', name: 'Royal Sofa Set 5-Seater', category: 'Sofa Set', description: 'Premium 5-seater sofa set with velvet finish.', imageUrl: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600', price: '₹45,000' },
       { _id: '2', name: 'L-Shape Corner Sofa', category: 'Sofa Set', description: 'Modern L-shaped sectional sofa.', imageUrl: 'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=600', price: '₹62,000' },
@@ -279,36 +753,24 @@ export class FurnitureService {
       { _id: '7', name: 'Modular Kitchen', category: 'Kitchen', description: 'Full modular kitchen with granite top.', imageUrl: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600', price: '₹1,20,000' },
       { _id: '8', name: 'Pooja Mandir', category: 'Temple / Mandir', description: 'Hand-carved wooden temple.', imageUrl: 'https://images.unsplash.com/photo-1609766418204-94aae0ecfdfc?w=600', price: '₹15,000' },
     ];
-    localStorage.setItem(LS + 'items', JSON.stringify(defaults));
+    try {
+      localStorage.setItem(LS + 'items', JSON.stringify(defaults));
+    } catch (_) {}
     return defaults;
   }
 
-  private addLocalItem(item: Partial<FurnitureItem>) {
-    const items = this.getLocalItems();
-    const newItem = { ...item, _id: Date.now().toString() } as FurnitureItem;
-    items.push(newItem);
-    localStorage.setItem(LS + 'items', JSON.stringify(items));
-  }
-
-  private deleteLocalItem(id: string) {
-    const items = this.getLocalItems().filter(i => i._id !== id);
-    localStorage.setItem(LS + 'items', JSON.stringify(items));
-  }
-
   private getLocalFeedbacks(): Feedback[] {
-    const d = localStorage.getItem(LS + 'feedbacks');
-    return d ? JSON.parse(d) : [];
-  }
-
-  private addLocalFeedback(fb: Partial<Feedback>) {
-    const items = this.getLocalFeedbacks();
-    items.push({ ...fb, _id: Date.now().toString(), status: 'new', date: new Date() } as Feedback);
-    localStorage.setItem(LS + 'feedbacks', JSON.stringify(items));
+    try {
+      const d = localStorage.getItem(LS + 'feedbacks');
+      return d ? JSON.parse(d) : [];
+    } catch (_) { return []; }
   }
 
   private getLocalWorkInfo(): WorkInfo[] {
-    const d = localStorage.getItem(LS + 'workinfo');
-    if (d) return JSON.parse(d);
+    try {
+      const d = localStorage.getItem(LS + 'workinfo');
+      if (d) return JSON.parse(d);
+    } catch (_) {}
     return [
       { _id: '1', title: 'Home Space Visit & Measurement', description: 'Our specialist visits your house, inspects the exact space, and provides a customized quotation for just ₹200 visit charge.', icon: '🏠', order: 1 },
       { _id: '2', title: 'Full Team On-Site Crafting', description: 'Once confirmed, our entire specialized artisan team visits your home with materials to build and complete furniture on-site.', icon: '👥', order: 2 },
@@ -320,8 +782,10 @@ export class FurnitureService {
   }
 
   private getLocalTeamMembers(): TeamMember[] {
-    const d = localStorage.getItem(LS + 'team');
-    if (d) return JSON.parse(d);
+    try {
+      const d = localStorage.getItem(LS + 'team');
+      if (d) return JSON.parse(d);
+    } catch (_) {}
     return [
       { _id: '1', name: 'Bhavesh Patel', role: 'Founder & Master Craftsman', experience: '15+ Years', specialty: 'All Custom Woods', emoji: '👨‍🔨', description: 'Visionary behind every piece of furniture we craft.', phone: '+91 9225576095', order: 1 },
       { _id: '2', name: 'Ramesh Kumar', role: 'Head of Design', experience: '12 Years', specialty: 'Sofa & Bedroom', emoji: '🎨', description: 'Expert in modern sofa sets and luxury bedroom furniture.', phone: '+91 92255 76095', order: 2 },
@@ -332,26 +796,11 @@ export class FurnitureService {
     ];
   }
 
-  private addLocalTeamMember(member: Partial<TeamMember>) {
-    const team = this.getLocalTeamMembers();
-    const newM = { ...member, _id: Date.now().toString() } as TeamMember;
-    team.push(newM);
-    localStorage.setItem(LS + 'team', JSON.stringify(team));
-  }
-
-  private updateLocalTeamMember(id: string, member: Partial<TeamMember>) {
-    const team = this.getLocalTeamMembers().map(m => String(m._id || m.id) === id ? { ...m, ...member } : m);
-    localStorage.setItem(LS + 'team', JSON.stringify(team));
-  }
-
-  private deleteLocalTeamMember(id: string) {
-    const team = this.getLocalTeamMembers().filter(m => String(m._id || m.id) !== id);
-    localStorage.setItem(LS + 'team', JSON.stringify(team));
-  }
-
   private getLocalVideos(): VideoItem[] {
-    const d = localStorage.getItem(LS + 'videos');
-    if (d) return JSON.parse(d);
+    try {
+      const d = localStorage.getItem(LS + 'videos');
+      if (d) return JSON.parse(d);
+    } catch (_) {}
     return [
       {
         _id: '1',
@@ -372,51 +821,10 @@ export class FurnitureService {
     ];
   }
 
-  // ── Custom Orders (Make Furniture Requests) ───────────────────
-  submitCustomOrder(order: Partial<CustomOrder>): Observable<CustomOrder> {
-    return this.http.post<CustomOrder>(`${API}/custom-orders`, order).pipe(
-      catchError(() => {
-        // Save locally as fallback
-        const orders = this.getLocalCustomOrders();
-        const newOrder = { ...order, _id: Date.now().toString(), status: 'new' as const, createdAt: new Date() } as CustomOrder;
-        orders.push(newOrder);
-        localStorage.setItem(LS + 'custom_orders', JSON.stringify(orders));
-        return of(newOrder);
-      })
-    );
-  }
-
-  getCustomOrders(status?: string): Observable<CustomOrder[]> {
-    const params = status ? `?status=${status}` : '';
-    return this.http.get<CustomOrder[]>(`${API}/custom-orders${params}`, { headers: this.adminHeaders }).pipe(
-      catchError(() => of(this.getLocalCustomOrders()))
-    );
-  }
-
-  updateCustomOrder(id: string, update: Partial<CustomOrder>): Observable<CustomOrder> {
-    return this.http.patch<CustomOrder>(`${API}/custom-orders/${id}`, update, { headers: this.adminHeaders }).pipe(
-      catchError(() => {
-        const orders = this.getLocalCustomOrders().map(o =>
-          String(o._id || o.id) === id ? { ...o, ...update, updatedAt: new Date() } : o
-        );
-        localStorage.setItem(LS + 'custom_orders', JSON.stringify(orders));
-        return of(update as CustomOrder);
-      })
-    );
-  }
-
-  deleteCustomOrder(id: string): Observable<any> {
-    return this.http.delete(`${API}/custom-orders/${id}`, { headers: this.adminHeaders }).pipe(
-      catchError(() => {
-        const orders = this.getLocalCustomOrders().filter(o => String(o._id || o.id) !== id);
-        localStorage.setItem(LS + 'custom_orders', JSON.stringify(orders));
-        return of({ success: true });
-      })
-    );
-  }
-
   private getLocalCustomOrders(): CustomOrder[] {
-    const d = localStorage.getItem(LS + 'custom_orders');
-    return d ? JSON.parse(d) : [];
+    try {
+      const d = localStorage.getItem(LS + 'custom_orders');
+      return d ? JSON.parse(d) : [];
+    } catch (_) { return []; }
   }
 }

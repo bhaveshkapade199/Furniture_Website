@@ -2,7 +2,7 @@
    LUXURY CUSTOM ORDER PAGE STYLES
 ════════════════════════════════════════════════════════════════ */
 .custom-order-page {
-  padding-top: 76px;
+  padding-top: var(--nav-height, 80px);
   min-height: 100vh;
   background-color: var(--bg-canvas);
 }
@@ -642,7 +642,7 @@
 
 @media (max-width: 600px) {
   .custom-order-page {
-    padding-top: 70px;
+    padding-top: var(--nav-height, 72px);
   }
   .page-header {
     padding: 40px 16px 30px;

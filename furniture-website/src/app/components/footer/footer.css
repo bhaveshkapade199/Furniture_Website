@@ -42,24 +42,25 @@
 }
 
 .footer-logo-img {
-  height: 48px;
-  width: auto;
-  max-width: 52px;
+  height: 58px;
+  width: 58px;
+  max-width: none;
   object-fit: contain;
   background: transparent;
   filter: drop-shadow(0 2px 8px rgba(6, 182, 212, 0.2));
+  flex-shrink: 0;
 }
 
 .brand-name {
   font-family: var(--font-serif);
-  font-size: 22px;
+  font-size: 23px;
   font-weight: 800;
   color: #0891b2;
   letter-spacing: -0.01em;
 }
 
 .brand-tagline {
-  font-size: 10px;
+  font-size: 10.5px;
   color: #06b6d4;
   letter-spacing: 2px;
   text-transform: uppercase;

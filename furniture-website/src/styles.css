@@ -84,6 +84,27 @@
   /* Fonts */
   --font-serif: 'Playfair Display', Georgia, serif;
   --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /* Navigation Dimensions */
+  --nav-height: 80px;
+}
+
+@media (max-width: 992px) {
+  :root {
+    --nav-height: 76px;
+  }
+}
+
+@media (max-width: 540px) {
+  :root {
+    --nav-height: 72px;
+  }
+}
+
+@media (max-width: 360px) {
+  :root {
+    --nav-height: 68px;
+  }
 }
 
 html {

@@ -2,7 +2,7 @@
    LUXURY GALLERY STYLES
 ════════════════════════════════════════════════════════════════ */
 .gallery-page {
-  padding-top: 76px;
+  padding-top: var(--nav-height, 80px);
   background-color: var(--bg-canvas);
   min-height: 100vh;
 }
@@ -519,7 +519,7 @@
 
 @media (max-width: 768px) {
   .gallery-page {
-    padding-top: 70px;
+    padding-top: var(--nav-height, 76px);
   }
   .page-header {
     padding: 45px 20px 35px;
@@ -528,7 +528,7 @@
     font-size: 2.2rem;
   }
   .filters-section {
-    top: 70px;
+    top: var(--nav-height, 76px);
     padding: 14px 0;
   }
   .filters-row {

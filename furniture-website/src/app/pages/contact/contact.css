@@ -2,7 +2,7 @@
    LUXURY CONTACT PAGE STYLES
 ════════════════════════════════════════════════════════════════ */
 .contact-page {
-  padding-top: 76px;
+  padding-top: var(--nav-height, 80px);
   background-color: var(--bg-canvas);
 }
 
@@ -341,7 +341,7 @@
 
 @media (max-width: 600px) {
   .contact-page {
-    padding-top: 70px;
+    padding-top: var(--nav-height, 72px);
   }
   .page-header {
     padding: 48px 18px 36px;

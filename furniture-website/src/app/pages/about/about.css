@@ -2,7 +2,7 @@
    LUXURY ABOUT PAGE STYLES
 ════════════════════════════════════════════════════════════════ */
 .about-page {
-  padding-top: 76px;
+  padding-top: var(--nav-height, 80px);
   background-color: var(--bg-canvas);
 }
 
@@ -369,7 +369,7 @@
 
 @media (max-width: 600px) {
   .about-page {
-    padding-top: 70px;
+    padding-top: var(--nav-height, 72px);
   }
   .about-hero {
     padding: 48px 18px 36px;

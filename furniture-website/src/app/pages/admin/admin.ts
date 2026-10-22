@@ -92,12 +92,12 @@ export class Admin implements OnInit, OnDestroy {
   }
 
   loadData() {
-    this.furnitureService.getFurnitureItems().subscribe(items => this.furnitureItems = items);
-    this.furnitureService.getVideos().subscribe(vids => this.videos = vids);
-    this.furnitureService.getWorkInfo().subscribe(info => this.workInfoItems = info);
-    this.furnitureService.getTeamMembers().subscribe(team => this.teamMembers = team);
-    this.furnitureService.getFeedbacks().subscribe(fbs => this.feedbacks = fbs);
-    this.furnitureService.getCustomOrders().subscribe(orders => this.customOrders = orders);
+    this.furnitureService.furniture$.subscribe(items => this.furnitureItems = items);
+    this.furnitureService.videos$.subscribe(vids => this.videos = vids);
+    this.furnitureService.workInfo$.subscribe(info => this.workInfoItems = info);
+    this.furnitureService.team$.subscribe(team => this.teamMembers = team);
+    this.furnitureService.feedbacks$.subscribe(fbs => this.feedbacks = fbs);
+    this.furnitureService.customOrders$.subscribe(orders => this.customOrders = orders);
   }
 
   // ---- Tabs ----
@@ -279,27 +279,19 @@ export class Admin implements OnInit, OnDestroy {
   saveItem() {
     if (!this.newItem.name || !this.newItem.imageUrl) return;
     const id = this.editingItem?._id || (this.editingItem?.id as any);
+    this.itemSaved = true;
     if (this.editingItem && id) {
-      this.furnitureService.updateFurnitureItem(String(id), this.newItem).subscribe(() => {
-        this.furnitureService.getFurnitureItems().subscribe(items => this.furnitureItems = items);
-        this.itemSaved = true;
-        setTimeout(() => this.cancelItemForm(), 1200);
-      });
+      this.furnitureService.updateFurnitureItem(String(id), this.newItem).subscribe();
     } else {
-      this.furnitureService.addFurnitureItem(this.newItem).subscribe(() => {
-        this.furnitureService.getFurnitureItems().subscribe(items => this.furnitureItems = items);
-        this.itemSaved = true;
-        setTimeout(() => this.cancelItemForm(), 1200);
-      });
+      this.furnitureService.addFurnitureItem(this.newItem).subscribe();
     }
+    setTimeout(() => this.cancelItemForm(), 400);
   }
 
   deleteItem(item: FurnitureItem) {
     const id = String(item._id || item.id);
     if (confirm(`Delete "${item.name}"?`)) {
-      this.furnitureService.deleteFurnitureItem(id).subscribe(() => {
-        this.furnitureService.getFurnitureItems().subscribe(items => this.furnitureItems = items);
-      });
+      this.furnitureService.deleteFurnitureItem(id).subscribe();
     }
   }
 
@@ -390,27 +382,19 @@ export class Admin implements OnInit, OnDestroy {
   saveVideo() {
     if (!this.newVideo.title || !this.newVideo.videoUrl) return;
     const id = this.editingVideo?._id || (this.editingVideo?.id as any);
+    this.videoSaved = true;
     if (this.editingVideo && id) {
-      this.furnitureService.updateVideo(String(id), this.newVideo).subscribe(() => {
-        this.furnitureService.getVideos().subscribe(vids => this.videos = vids);
-        this.videoSaved = true;
-        setTimeout(() => this.cancelVideoForm(), 1200);
-      });
+      this.furnitureService.updateVideo(String(id), this.newVideo).subscribe();
     } else {
-      this.furnitureService.addVideo(this.newVideo).subscribe(() => {
-        this.furnitureService.getVideos().subscribe(vids => this.videos = vids);
-        this.videoSaved = true;
-        setTimeout(() => this.cancelVideoForm(), 1200);
-      });
+      this.furnitureService.addVideo(this.newVideo).subscribe();
     }
+    setTimeout(() => this.cancelVideoForm(), 400);
   }
 
   deleteVideo(vid: VideoItem) {
     const id = String(vid._id || vid.id);
     if (confirm(`Delete video "${vid.title}"?`)) {
-      this.furnitureService.deleteVideo(id).subscribe(() => {
-        this.furnitureService.getVideos().subscribe(vids => this.videos = vids);
-      });
+      this.furnitureService.deleteVideo(id).subscribe();
     }
   }
 
@@ -466,27 +450,19 @@ export class Admin implements OnInit, OnDestroy {
   saveWork() {
     if (!this.newWork.title || !this.newWork.description) return;
     const id = this.editingWork?._id || (this.editingWork?.id as any);
+    this.workSaved = true;
     if (this.editingWork && id) {
-      this.furnitureService.updateWorkInfo(String(id), this.newWork).subscribe(() => {
-        this.furnitureService.getWorkInfo().subscribe(info => this.workInfoItems = info);
-        this.workSaved = true;
-        setTimeout(() => this.cancelWorkForm(), 1200);
-      });
+      this.furnitureService.updateWorkInfo(String(id), this.newWork).subscribe();
     } else {
-      this.furnitureService.addWorkInfo(this.newWork).subscribe(() => {
-        this.furnitureService.getWorkInfo().subscribe(info => this.workInfoItems = info);
-        this.workSaved = true;
-        setTimeout(() => this.cancelWorkForm(), 1200);
-      });
+      this.furnitureService.addWorkInfo(this.newWork).subscribe();
     }
+    setTimeout(() => this.cancelWorkForm(), 400);
   }
 
   deleteWork(item: WorkInfo) {
     const id = String(item._id || item.id);
     if (confirm(`Delete service "${item.title}"?`)) {
-      this.furnitureService.deleteWorkInfo(id).subscribe(() => {
-        this.furnitureService.getWorkInfo().subscribe(info => this.workInfoItems = info);
-      });
+      this.furnitureService.deleteWorkInfo(id).subscribe();
     }
   }
 
@@ -568,41 +544,26 @@ export class Admin implements OnInit, OnDestroy {
   saveTeam() {
     if (!this.newTeam.name || !this.newTeam.role) return;
     const id = this.editingTeam?._id || (this.editingTeam?.id as any);
+    this.teamSaved = true;
+    this.teamActionMsg = `✓ Team member "${this.newTeam.name}" saved successfully!`;
     if (this.editingTeam && id) {
-      this.furnitureService.updateTeamMember(String(id), this.newTeam).subscribe(() => {
-        this.furnitureService.getTeamMembers().subscribe(team => this.teamMembers = team);
-        this.teamSaved = true;
-        this.teamActionMsg = `✓ Team member "${this.newTeam.name}" updated successfully!`;
-        setTimeout(() => {
-          this.cancelTeamForm();
-          this.teamActionMsg = '';
-        }, 1500);
-      });
+      this.furnitureService.updateTeamMember(String(id), this.newTeam).subscribe();
     } else {
-      this.furnitureService.addTeamMember(this.newTeam).subscribe(() => {
-        this.furnitureService.getTeamMembers().subscribe(team => this.teamMembers = team);
-        this.teamSaved = true;
-        this.teamActionMsg = `✓ New team member "${this.newTeam.name}" added successfully!`;
-        setTimeout(() => {
-          this.cancelTeamForm();
-          this.teamActionMsg = '';
-        }, 1500);
-      });
+      this.furnitureService.addTeamMember(this.newTeam).subscribe();
     }
+    setTimeout(() => {
+      this.cancelTeamForm();
+      this.teamActionMsg = '';
+    }, 400);
   }
 
   deleteTeam(member: TeamMember) {
     const id = String(member._id || member.id);
     if (confirm(`Are you sure you want to remove team member "${member.name}"?`)) {
-      this.teamMembers = this.teamMembers.filter(m => String(m._id || m.id) !== id);
       this.furnitureService.deleteTeamMember(id).subscribe({
         next: () => {
           this.teamActionMsg = `✓ Team member "${member.name}" was removed successfully.`;
           setTimeout(() => this.teamActionMsg = '', 3000);
-          this.furnitureService.getTeamMembers().subscribe(team => this.teamMembers = team);
-        },
-        error: () => {
-          this.furnitureService.getTeamMembers().subscribe(team => this.teamMembers = team);
         }
       });
     }
