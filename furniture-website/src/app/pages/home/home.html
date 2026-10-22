@@ -8,32 +8,30 @@
     <div class="hero-content">
       <div class="hero-badge">
         <span class="badge-dot"></span>
-        <span>RK Furniture • Bespoke Studio Since 2010</span>
+        <span>{{ 'HERO_BADGE' | t }}</span>
       </div>
 
       <h1>
-        <span class="hero-eyebrow">Transform Your Space With</span>
+        <span class="hero-eyebrow">{{ 'HERO_EYEBROW' | t }}</span>
         <span class="title-brand-container">
-          <span class="title-brand">RK Furniture</span>
+          <span class="title-brand">{{ 'HERO_BRAND' | t }}</span>
           <span class="rk-brand-sparkle" aria-hidden="true">✦</span>
           <span class="brand-underline-glow"></span>
         </span>
-        <span class="title-serif">Into A Living Masterpiece</span>
+        <span class="title-serif">{{ 'HERO_SERIF' | t }}</span>
       </h1>
 
       <p class="hero-description">
-        We don't sell generic mass-produced furniture. At <strong>RK Furniture</strong>, our master craftsmen visit your
-        home, inspect your space, and construct <strong>100% custom-tailored furniture directly on-site</strong> with
-        Grade-A seasoned Teak and Sheesham wood.
+        {{ 'HERO_DESC' | t }}
       </p>
 
       <div class="hero-buttons">
         <a routerLink="/custom-order" class="btn-gold-glow">
-          <span class="btn-text">🪑 Make Your Furniture</span>
+          <span class="btn-text">{{ 'HERO_BTN_MAKE' | t }}</span>
           <span class="btn-arrow">→</span>
         </a>
         <a routerLink="/gallery" class="btn-outline-luxury">
-          <span>Explore Collection</span>
+          <span>{{ 'HERO_BTN_GALLERY' | t }}</span>
         </a>
       </div>
 
@@ -41,8 +39,8 @@
       <div class="visit-highlight-pill">
         <div class="pill-icon">🏠</div>
         <div class="pill-text">
-          <strong>Home Space Laser Inspection: Only ₹200</strong>
-          <span>Expert visits your home, measures the layout, & provides instant transparent quote</span>
+          <strong>{{ 'HERO_VISIT_TITLE' | t }}</strong>
+          <span>{{ 'HERO_VISIT_SUB' | t }}</span>
         </div>
       </div>
 
@@ -51,22 +49,22 @@
         <div class="trust-item">
           <span class="trust-icon">🪵</span>
           <div class="trust-meta">
-            <strong>Grade-A Solid Wood</strong>
-            <span>Teak & Sheesham</span>
+            <strong>{{ 'TRUST_WOOD' | t }}</strong>
+            <span>{{ 'TRUST_WOOD_SUB' | t }}</span>
           </div>
         </div>
         <div class="trust-item">
           <span class="trust-icon">👥</span>
           <div class="trust-meta">
-            <strong>On-Site Crafting</strong>
-            <span>Built at your house</span>
+            <strong>{{ 'TRUST_ONSITE' | t }}</strong>
+            <span>{{ 'TRUST_ONSITE_SUB' | t }}</span>
           </div>
         </div>
         <div class="trust-item">
           <span class="trust-icon">🛡️</span>
           <div class="trust-meta">
-            <strong>Termite Proof</strong>
-            <span>10-Year Warranty</span>
+            <strong>{{ 'TRUST_TERMITE' | t }}</strong>
+            <span>{{ 'TRUST_TERMITE_SUB' | t }}</span>
           </div>
         </div>
       </div>
@@ -86,8 +84,8 @@
             <span class="pulse-live-dot"></span>
           </div>
           <div class="float-badge-content">
-            <strong class="float-title">RK Live Atelier</strong>
-            <span class="float-sub">Handcrafted Direct On-Site</span>
+            <strong class="float-title">{{ 'HERO_FLOAT_ATELIER' | t }}</strong>
+            <span class="float-sub">{{ 'HERO_FLOAT_ATELIER_SUB' | t }}</span>
           </div>
         </div>
 
@@ -95,8 +93,8 @@
         <div class="hero-float-badge float-top-right">
           <div class="stars-gold">★★★★★</div>
           <div class="float-badge-content">
-            <strong class="float-title">4.9/5 Rating</strong>
-            <span class="float-sub">5,000+ Bespoke Homes</span>
+            <strong class="float-title">{{ 'HERO_FLOAT_RATING' | t }}</strong>
+            <span class="float-sub">{{ 'HERO_FLOAT_RATING_SUB' | t }}</span>
           </div>
         </div>
       </div>
@@ -113,16 +111,16 @@
               <div class="hero-slide-caption">
                 <div class="caption-top-chips">
                   <span class="slide-tag">{{ slide.tag }}</span>
-                  <span class="slide-mat-tag">✨ Seasoned Teak & Sheesham</span>
+                  <span class="slide-mat-tag">{{ 'HERO_SLIDE_MAT' | t }}</span>
                 </div>
                 <div class="slide-title-price">
                   <div class="slide-info-text">
                     <h4>{{ slide.title }}</h4>
-                    <span class="slide-tagline">100% Customized For Your Room Dimensions</span>
+                    <span class="slide-tagline">{{ 'HERO_SLIDE_CUSTOM' | t }}</span>
                   </div>
                   <div class="slide-price-box">
                     @if (slide.price) {
-                      <span class="price-caption">Starting at</span>
+                      <span class="price-caption">{{ 'HERO_SLIDE_FROM' | t }}</span>
                       <span class="slide-cost">{{ slide.price }}</span>
                     }
                   </div>
@@ -152,25 +150,25 @@
 <!-- Luxury Announcement Marquee Ribbon -->
 <div class="luxury-marquee-bar">
   <div class="marquee-track">
-    <span>✨ 100% Handcrafted Teak & Sheesham Wood</span>
+    <span>{{ 'MARQUEE_1' | t }}</span>
     <span class="marquee-sep">✦</span>
-    <span>🏠 ₹200 On-Site Space Laser Inspection</span>
+    <span>{{ 'MARQUEE_2' | t }}</span>
     <span class="marquee-sep">✦</span>
-    <span>👥 Full Master Team Crafts At Your Home</span>
+    <span>{{ 'MARQUEE_3' | t }}</span>
     <span class="marquee-sep">✦</span>
-    <span>👑 15+ Years Royal Woodworking Mastery</span>
+    <span>{{ 'MARQUEE_4' | t }}</span>
     <span class="marquee-sep">✦</span>
-    <span>⭐ 5,000+ Luxury Homes Completed in Gujarat</span>
+    <span>{{ 'MARQUEE_5' | t }}</span>
     <span class="marquee-sep">✦</span>
-    <span>✨ 100% Handcrafted Teak & Sheesham Wood</span>
+    <span>{{ 'MARQUEE_1' | t }}</span>
     <span class="marquee-sep">✦</span>
-    <span>🏠 ₹200 On-Site Space Laser Inspection</span>
+    <span>{{ 'MARQUEE_2' | t }}</span>
     <span class="marquee-sep">✦</span>
-    <span>👥 Full Master Team Crafts At Your Home</span>
+    <span>{{ 'MARQUEE_3' | t }}</span>
     <span class="marquee-sep">✦</span>
-    <span>👑 15+ Years Royal Woodworking Mastery</span>
+    <span>{{ 'MARQUEE_4' | t }}</span>
     <span class="marquee-sep">✦</span>
-    <span>⭐ 5,000+ Luxury Homes Completed in Gujarat</span>
+    <span>{{ 'MARQUEE_5' | t }}</span>
   </div>
 </div>
 
@@ -197,10 +195,9 @@
 <section class="section process-section">
   <div class="container">
     <div class="section-header">
-      <span class="section-tag">🛠️ How On-Site Crafting Works</span>
-      <h2>Our 3-Step Bespoke Experience</h2>
-      <p>Because every house layout is unique, we build directly at your home for a tailored, millimeter-perfect fit.
-      </p>
+      <span class="section-tag">{{ 'PROCESS_TAG' | t }}</span>
+      <h2>{{ 'PROCESS_TITLE' | t }}</h2>
+      <p>{{ 'PROCESS_SUB' | t }}</p>
     </div>
 
     <div class="process-steps-grid">
@@ -214,9 +211,8 @@
           <span class="icon-ring"></span>
         </div>
         <div class="price-chip">₹200 VISIT CHARGE</div>
-        <h3>Home Space Visit & Measurement</h3>
-        <p>Our master craftsman visits your house with laser measuring tools. We inspect the room space, understand your
-          lifestyle & preferred wood, and draft a transparent quotation.</p>
+        <h3>{{ 'STEP_1_TITLE' | t }}</h3>
+        <p>{{ 'STEP_1_DESC' | t }}</p>
         <div class="step-footer">
           <span>✓ Laser Dimension Accuracy</span>
         </div>
@@ -232,9 +228,8 @@
           <span class="icon-ring"></span>
         </div>
         <div class="price-chip gold">DESIGN APPROVAL</div>
-        <h3>Wood & Material Selection</h3>
-        <p>Choose from seasoned Teak, Sheesham, Italian upholstery fabrics, anti-scratch laminates, and German
-          soft-close hydraulic hardware that match your interior aesthetic.</p>
+        <h3>{{ 'STEP_2_TITLE' | t }}</h3>
+        <p>{{ 'STEP_2_DESC' | t }}</p>
         <div class="step-footer">
           <span>✓ 100% Customized Material</span>
         </div>
@@ -250,9 +245,8 @@
           <span class="icon-ring"></span>
         </div>
         <div class="price-chip green">ON-SITE BUILDING</div>
-        <h3>Full Team Crafts At Your Home</h3>
-        <p>Once finalized, our entire team of artisans arrives directly at your home with specialized tools to cut,
-          assemble, polish, and install your furniture for zero gaps and a lifetime fit.</p>
+        <h3>{{ 'STEP_3_TITLE' | t }}</h3>
+        <p>{{ 'STEP_3_DESC' | t }}</p>
         <div class="step-footer">
           <span>✓ Finished In Front Of You</span>
         </div>
@@ -262,11 +256,11 @@
     <!-- Process CTA bar -->
     <div class="process-cta-banner">
       <div class="pcb-left">
-        <strong>Ready for a flawless custom piece in your home?</strong>
-        <span>Schedule an on-site visit today for just ₹200.</span>
+        <strong>{{ 'PROCESS_CTA_TITLE' | t }}</strong>
+        <span>{{ 'PROCESS_CTA_SUB' | t }}</span>
       </div>
       <a routerLink="/custom-order" class="btn-gold-glow">
-        <span>Request Home Visit Now →</span>
+        <span>{{ 'PROCESS_CTA_BTN' | t }}</span>
       </a>
     </div>
   </div>
@@ -278,9 +272,9 @@
 <section class="section categories-section">
   <div class="container">
     <div class="section-header">
-      <span class="section-tag">🗂️ Curated Collections</span>
-      <h2>Furniture By Category</h2>
-      <p>Handcrafted designs for every sacred and functional room of your home</p>
+      <span class="section-tag">{{ 'CAT_TAG' | t }}</span>
+      <h2>{{ 'CAT_TITLE' | t }}</h2>
+      <p>{{ 'CAT_SUB' | t }}</p>
     </div>
 
     <div class="categories-grid">
@@ -290,7 +284,7 @@
         <div class="cat-emoji-wrap">
           <span class="cat-emoji">{{ cat.emoji }}</span>
         </div>
-        <div class="cat-name">{{ cat.name }}</div>
+        <div class="cat-name">{{ getCategoryName(cat.name) }}</div>
         <div class="cat-count-pill">{{ cat.count }}+ Designs</div>
         <span class="cat-arrow">Explore →</span>
       </a>
@@ -351,9 +345,9 @@
 <section class="section featured-section">
   <div class="container">
     <div class="section-header">
-      <span class="section-tag">✨ Signature Craft</span>
-      <h2>Featured Masterpieces</h2>
-      <p>Handpicked creations exemplifying our uncompromising quality & woodworking excellence</p>
+      <span class="section-tag">{{ 'PROD_TAG' | t }}</span>
+      <h2>{{ 'PROD_TITLE' | t }}</h2>
+      <p>{{ 'PROD_SUB' | t }}</p>
     </div>
 
     <div class="products-grid">
@@ -361,9 +355,9 @@
       <div class="product-card">
         <div class="product-img">
           <img [src]="item.imageUrl" [alt]="item.name" />
-          <span class="product-category">{{ item.category }}</span>
+          <span class="product-category">{{ getCategoryName(item.category) }}</span>
           <div class="product-hover-overlay">
-            <a routerLink="/custom-order" class="btn-order-hover">Craft Similar For My Room</a>
+            <a routerLink="/custom-order" class="btn-order-hover">{{ 'BTN_CRAFT_SIMILAR' | t }}</a>
           </div>
         </div>
         <div class="product-info">
@@ -371,7 +365,7 @@
           <p>{{ item.description }}</p>
           <div class="product-footer">
             <span class="price">{{ item.price || '' }}</span>
-            <a routerLink="/gallery" class="btn-view">Details →</a>
+            <a routerLink="/gallery" class="btn-view">{{ 'BTN_VIEW_DETAILS' | t }}</a>
           </div>
         </div>
       </div>
@@ -379,7 +373,7 @@
     </div>
 
     <div class="section-cta">
-      <a routerLink="/gallery" class="btn-gold-glow">Browse Full 200+ Gallery →</a>
+      <a routerLink="/gallery" class="btn-gold-glow">{{ 'BTN_VIEW_ALL' | t }}</a>
     </div>
   </div>
 </section>
@@ -415,9 +409,9 @@
 <section class="section home-videos-section">
   <div class="container">
     <div class="section-header">
-      <span class="section-tag">🎬 Live From The Workshop</span>
-      <h2>Master Woodworking In Motion</h2>
-      <p>Watch our artisans transform raw seasoned timber into heirloom furniture pieces</p>
+      <span class="section-tag">{{ 'VIDEOS_TAG' | t }}</span>
+      <h2>{{ 'VIDEOS_TITLE' | t }}</h2>
+      <p>{{ 'VIDEOS_SUB' | t }}</p>
     </div>
 
     <div class="home-videos-grid">
@@ -427,7 +421,7 @@
           <video [src]="vid.videoUrl" controls [poster]="vid.thumbnailUrl || ''"></video>
         </div>
         <div class="video-card-body">
-          <span class="video-category-tag">{{ vid.category }}</span>
+          <span class="video-category-tag">{{ getCategoryName(vid.category) }}</span>
           <h4>{{ vid.title }}</h4>
           <p>{{ vid.description }}</p>
         </div>
@@ -444,9 +438,9 @@
 <section class="section team-section">
   <div class="container">
     <div class="section-header">
-      <span class="section-tag">👥 Handcrafted By Masters</span>
-      <h2>Meet Our Master Craftsmen</h2>
-      <p>Decades of collective mastery bringing precision, heritage joinery, and perfection to your home</p>
+      <span class="section-tag">{{ 'TEAM_TAG' | t }}</span>
+      <h2>{{ 'TEAM_TITLE' | t }}</h2>
+      <p>{{ 'TEAM_SUB' | t }}</p>
     </div>
 
     <div class="team-grid">
@@ -472,7 +466,7 @@
     </div>
 
     <div class="team-cta-wrap">
-      <a routerLink="/team" class="btn-outline-luxury">Meet All Artisans & View Workshop →</a>
+      <a routerLink="/team" class="btn-outline-luxury">{{ 'TEAM_VIEW_ALL' | t }}</a>
     </div>
   </div>
 </section>
@@ -486,41 +480,36 @@
       <div class="cta-glow-bg"></div>
 
       <div class="cta-left">
-        <div class="cta-badge">👑 Bespoke Home Furniture Service</div>
-        <h2>Want Custom Furniture Made Specifically For Your Home?</h2>
-        <p>
-          Skip standard showroom sizes that don't fit your room. Tell us your vision, and our master craftsman will
-          visit your home for a comprehensive space inspection & tailored estimate (₹200 visit charge).
-        </p>
+        <div class="cta-badge">{{ 'HOME_CTA_BADGE' | t }}</div>
+        <h2>{{ 'HOME_CTA_TITLE' | t }}</h2>
+        <p>{{ 'HOME_CTA_DESC' | t }}</p>
 
         <ul class="cta-perks">
           <li>
             <span class="perk-check">✓</span>
-            <span><strong>₹200 Home Space Inspection:</strong> Accurate room laser measurements & layout planning</span>
+            <span>{{ 'HOME_CTA_FEAT_1' | t }}</span>
           </li>
           <li>
             <span class="perk-check">✓</span>
-            <span><strong>100% On-Site Handcrafting:</strong> Complete artisan team visits your home with
-              materials</span>
+            <span>{{ 'HOME_CTA_FEAT_2' | t }}</span>
           </li>
           <li>
             <span class="perk-check">✓</span>
-            <span><strong>Genuine Hardwood:</strong> Seasoned Sheesham, Teak, and Pine with heavy Italian
-              fittings</span>
+            <span>{{ 'HOME_CTA_FEAT_3' | t }}</span>
           </li>
           <li>
             <span class="perk-check">✓</span>
-            <span><strong>Direct Price Advantage:</strong> Transparent quote directly from the craftsmen</span>
+            <span>{{ 'HOME_CTA_FEAT_4' | t }}</span>
           </li>
         </ul>
 
         <div class="cta-action-row">
           <a routerLink="/custom-order" class="btn-gold-glow">
-            <span>Make Custom Furniture Online →</span>
+            <span>{{ 'HOME_CTA_BTN_ONLINE' | t }}</span>
           </a>
           <a href="https://wa.me/919876543210?text=Hello%20Rk%20Furniture%2C%20I%20want%20to%20book%20a%20home%20space%20visit%20inspection."
             target="_blank" class="btn-whatsapp-luxury">
-            <span>💬 WhatsApp RK Furniture Directly</span>
+            <span>{{ 'HOME_CTA_BTN_WA' | t }}</span>
           </a>
         </div>
       </div>
@@ -536,18 +525,18 @@
             <a href="tel:+919876543210" class="cb-item">
               <span class="cb-icon">📞</span>
               <div>
-                <small>Call Master Craftsman</small>
+                <small>{{ 'HOME_CTA_CARD_CALL' | t }}</small>
                 <strong>+91 92255 76095</strong>
               </div>
             </a>
             <a href="https://wa.me/919876543210" target="_blank" class="cb-item wa">
               <span class="cb-icon">💬</span>
               <div>
-                <small>Instant WhatsApp</small>
-                <strong>Book ₹200 Home Visit</strong>
+                <small>{{ 'HOME_CTA_CARD_SUB' | t }}</small>
+                <strong>{{ 'HOME_CTA_CARD_TITLE' | t }}</strong>
               </div>
             </a>
-            <a href="mailto:rkfurniture@gmail.com" class="cb-item">
+            <a href="mailto:bhaveshkapade5482@gmail.com" class="cb-item">
               <span class="cb-icon">✉️</span>
               <div>
                 <small>Email Inquiries</small>

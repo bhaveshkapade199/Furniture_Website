@@ -1,7 +1,9 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FurnitureService, FurnitureItem, Feedback, WorkInfo, TeamMember, VideoItem, CustomOrder } from '../../services/furniture';
+import { TranslationService } from '../../services/translation';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 type AdminTab = 'gallery' | 'videos' | 'workinfo' | 'team' | 'feedback' | 'orders';
 
@@ -12,6 +14,7 @@ type AdminTab = 'gallery' | 'videos' | 'workinfo' | 'team' | 'feedback' | 'order
   styleUrl: './admin.css'
 })
 export class Admin implements OnInit, OnDestroy {
+  langService = inject(TranslationService);
   isLoggedIn = false;
   password = '';
   loginError = '';

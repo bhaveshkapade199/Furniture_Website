@@ -1,28 +1,31 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FurnitureService, WorkInfo, TeamMember } from '../../services/furniture';
+import { TranslationService } from '../../services/translation';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-about',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, TranslatePipe],
   templateUrl: './about.html',
   styleUrl: './about.css'
 })
 export class About implements OnInit {
+  langService = inject(TranslationService);
+  private furnitureService = inject(FurnitureService);
+
   workInfo: WorkInfo[] = [];
   team: TeamMember[] = [];
 
   timeline = [
-    { year: '2010', event: 'Founded Rk Furniture in Ahmedabad with a small workshop' },
-    { year: '2013', event: 'Expanded to serving 500+ happy customers across Gujarat' },
-    { year: '2016', event: 'Launched custom furniture design service and interior consultation' },
-    { year: '2019', event: 'Opened second showroom and started pan-India delivery' },
-    { year: '2022', event: 'Introduced online gallery and custom on-site crafting services' },
-    { year: '2024', event: '5000+ satisfied clients across 50+ cities in India' }
+    { year: '2010', event: 'Founded RK Furniture with our first bespoke artisan workshop' },
+    { year: '2013', event: 'Expanded on-site crafting services across Gujarat and Maharashtra' },
+    { year: '2016', event: 'Introduced ₹200 laser measurement & 3D space planning' },
+    { year: '2019', event: 'Extended pure Sagwan (Teak) and Sheesham direct workshop crafting' },
+    { year: '2022', event: 'Launched online customized furniture tracking & instant quotes' },
+    { year: '2026', event: '5,000+ satisfied luxury homes completed with 10-year warranty' }
   ];
-
-  constructor(private furnitureService: FurnitureService) {}
 
   ngOnInit() {
     this.furnitureService.getWorkInfo().subscribe(info => {

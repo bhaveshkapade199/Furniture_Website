@@ -3,13 +3,13 @@
   <!-- ─── Page Header ─── -->
   <section class="page-header">
     <div class="header-content">
-      <div class="header-badge">🪑 Custom Furniture</div>
-      <h1>Make Your Dream Furniture</h1>
-      <p>Tell us exactly what you need — we'll craft it on-site at your home</p>
+      <div class="header-badge">🪑 {{ 'NAV_MAKE_FURNITURE' | t }}</div>
+      <h1>{{ 'CUSTOM_TITLE' | t }}</h1>
+      <p>{{ 'CUSTOM_SUB' | t }}</p>
       <div class="header-tags">
-        <span>✅ 100% Custom</span>
-        <span>🏠 On-Site Visit ₹200</span>
-        <span>⭐ 15+ Years Experience</span>
+        <span>✅ {{ 'HERO_SLIDE_CUSTOM' | t }}</span>
+        <span>🏠 {{ 'HERO_VISIT_TITLE' | t }}</span>
+        <span>⭐ {{ 'MARQUEE_4' | t }}</span>
       </div>
     </div>
   </section>
@@ -17,34 +17,34 @@
   <!-- ─── How It Works ─── -->
   <section class="how-section">
     <div class="container">
-      <h2 class="section-title">How It Works</h2>
+      <h2 class="section-title">{{ 'PROCESS_TITLE' | t }}</h2>
       <div class="steps-grid">
         <div class="step-card">
           <div class="step-num">1</div>
           <div class="step-icon">📝</div>
-          <h4>Fill This Form</h4>
-          <p>Share your furniture requirements, budget, and contact details below.</p>
+          <h4>{{ 'STEP_1_FORM' | t }}</h4>
+          <p>{{ 'CUSTOM_SUB' | t }}</p>
         </div>
         <div class="step-arrow">→</div>
         <div class="step-card">
           <div class="step-num">2</div>
           <div class="step-icon">📞</div>
-          <h4>We Call You Back</h4>
-          <p>Our team contacts you within 24 hours to understand your needs better.</p>
+          <h4>{{ 'STEP_2_FORM' | t }}</h4>
+          <p>{{ 'STEP_2_DESC' | t }}</p>
         </div>
         <div class="step-arrow">→</div>
         <div class="step-card">
           <div class="step-num">3</div>
           <div class="step-icon">🏠</div>
-          <h4>Home Visit (₹200)</h4>
-          <p>Our expert visits your home, measures the space, and provides a free detailed quote.</p>
+          <h4>{{ 'STEP_1_TITLE' | t }}</h4>
+          <p>{{ 'STEP_1_DESC' | t }}</p>
         </div>
         <div class="step-arrow">→</div>
         <div class="step-card">
           <div class="step-num">4</div>
           <div class="step-icon">🪑</div>
-          <h4>Furniture Crafted</h4>
-          <p>Our master craftsmen build your perfect furniture on-site at your home.</p>
+          <h4>{{ 'STEP_3_TITLE' | t }}</h4>
+          <p>{{ 'STEP_3_DESC' | t }}</p>
         </div>
       </div>
     </div>
@@ -59,8 +59,8 @@
           <!-- Form Card -->
           <div class="form-card">
             <div class="form-card-header">
-              <h2>🛠️ Your Furniture Request</h2>
-              <p>Fill in as much detail as possible. Our craftsmen will tailor everything to your needs.</p>
+              <h2>🛠️ {{ 'CUSTOM_TITLE' | t }}</h2>
+              <p>{{ 'CUSTOM_SUB' | t }}</p>
             </div>
 
             @if (errorMsg) {
@@ -70,34 +70,34 @@
             <!-- ── Section 1: Personal Details ── -->
             <div class="form-section-block">
               <div class="section-label">
-                <span class="section-dot">👤</span> Your Details
+                <span class="section-dot">👤</span> {{ 'STEP_4_FORM' | t }}
               </div>
               <div class="form-row">
                 <div class="form-group">
-                  <label>Full Name <span class="req">*</span></label>
+                  <label>{{ 'FORM_NAME' | t }} <span class="req">*</span></label>
                   <input type="text" [(ngModel)]="form.name" name="name"
                          placeholder="e.g. Rahul Sharma" />
                 </div>
                 <div class="form-group">
-                  <label>Phone / WhatsApp <span class="req">*</span></label>
+                  <label>{{ 'FORM_PHONE' | t }} <span class="req">*</span></label>
                   <input type="tel" [(ngModel)]="form.phone" name="phone"
                          placeholder="+91 92255 76095" />
                 </div>
               </div>
               <div class="form-row">
                 <div class="form-group">
-                  <label>Email Address <span class="req">*</span></label>
+                  <label>{{ 'FORM_EMAIL' | t }}</label>
                   <input type="email" [(ngModel)]="form.email" name="email"
                          placeholder="rahul@email.com" />
                 </div>
                 <div class="form-group">
-                  <label>City</label>
+                  <label>{{ 'FORM_CITY' | t }}</label>
                   <input type="text" [(ngModel)]="form.city" name="city"
-                         placeholder="e.g. Ahmedabad, Surat, Rajkot" />
+                         placeholder="e.g. Ahmedabad, Jalgaon, Surat" />
                 </div>
               </div>
               <div class="form-group full-width">
-                <label>Full Address (for Home Visit)</label>
+                <label>{{ 'VISIT_US' | t }} (Full Home Address for Space Inspection)</label>
                 <input type="text" [(ngModel)]="form.address" name="address"
                        placeholder="Flat/House No., Street, Area, City, Pincode" />
               </div>
@@ -106,22 +106,22 @@
             <!-- ── Section 2: Furniture Requirements ── -->
             <div class="form-section-block">
               <div class="section-label">
-                <span class="section-dot">🪑</span> Furniture Requirements
+                <span class="section-dot">🪑</span> {{ 'STEP_1_FORM' | t }} & {{ 'STEP_2_FORM' | t }}
               </div>
               <div class="form-row">
                 <div class="form-group">
-                  <label>Furniture Type <span class="req">*</span></label>
+                  <label>{{ 'SELECT_CATEGORY' | t }} <span class="req">*</span></label>
                   <select [(ngModel)]="form.furnitureType" name="furnitureType">
-                    <option value="">-- Select Furniture Type --</option>
+                    <option value="">-- {{ 'SELECT_CATEGORY' | t }} --</option>
                     @for (type of furnitureTypes; track type) {
-                      <option [value]="type">{{ type }}</option>
+                      <option [value]="type">{{ langService.translateCategory(type) }}</option>
                     }
                   </select>
                 </div>
                 <div class="form-group">
-                  <label>Preferred Wood Type</label>
+                  <label>{{ 'SELECT_WOOD' | t }}</label>
                   <select [(ngModel)]="form.woodType" name="woodType">
-                    <option value="">-- Select Wood (optional) --</option>
+                    <option value="">-- {{ 'SELECT_WOOD' | t }} --</option>
                     @for (wood of woodTypes; track wood) {
                       <option [value]="wood">{{ wood }}</option>
                     }
@@ -130,33 +130,32 @@
               </div>
               <div class="form-row">
                 <div class="form-group">
-                  <label>Room Dimensions / Size</label>
+                  <label>{{ 'ROOM_DIMENSIONS' | t }}</label>
                   <input type="text" [(ngModel)]="form.dimensions" name="dimensions"
                          placeholder="e.g. 12ft x 10ft room, or 6ft wide wall" />
                 </div>
                 <div class="form-group">
-                  <label>Color / Finish Preference</label>
+                  <label>Color / Finish / Polish Preference</label>
                   <input type="text" [(ngModel)]="form.colorFinish" name="colorFinish"
-                         placeholder="e.g. Walnut Polish, White Laminate, Natural Teak" />
+                         placeholder="e.g. Natural Teak, Walnut Polish, Deco Finish" />
                 </div>
               </div>
               <div class="form-group full-width">
-                <label>Describe Your Requirements in Detail <span class="req">*</span></label>
+                <label>{{ 'SPECIAL_REQUESTS' | t }} <span class="req">*</span></label>
                 <textarea rows="5" [(ngModel)]="form.description" name="description"
-                  placeholder="Example: I need a 5-seater L-shaped sofa for my 15x12 living room. I want it in grey fabric with wooden legs. Need storage under seating if possible. The wall color is white..."></textarea>
+                  placeholder="Describe dimensions, layout, hydraulic storage, fabric choices..."></textarea>
               </div>
               <div class="form-group full-width">
-                <label>Reference / Inspiration Image URL (optional)</label>
+                <label>Reference Image URL (optional)</label>
                 <input type="text" [(ngModel)]="form.referenceImageUrl" name="referenceImageUrl"
-                       placeholder="Paste a link to any image you like from Google, Pinterest, etc." />
-                <small>Share any image that inspires your design vision</small>
+                       placeholder="Paste image link from Pinterest, Instagram, or Google" />
               </div>
             </div>
 
-            <!-- ── Section 3: Budget & Urgency ── -->
+            <!-- ── Section 3: Budget & Home Visit ── -->
             <div class="form-section-block">
               <div class="section-label">
-                <span class="section-dot">💰</span> Budget & Timeline
+                <span class="section-dot">💰</span> Budget & Home Space Visit
               </div>
               <div class="form-row">
                 <div class="form-group">
@@ -183,13 +182,12 @@
                 <label class="toggle-label">
                   <input type="checkbox" [(ngModel)]="form.homeVisitNeeded" name="homeVisitNeeded" />
                   <span class="toggle-text">
-                    🏠 I want a <strong>Home Visit</strong> for accurate space measurement & free quotation
-                    <span class="visit-badge">₹200 visit charge</span>
+                    {{ 'HOME_VISIT_CHECKBOX' | t }}
                   </span>
                 </label>
                 @if (form.homeVisitNeeded) {
                   <div class="visit-info">
-                    ✅ A specialist will visit your home, measure the exact space, and provide a detailed quotation tailored to your room.
+                    ✅ {{ 'HOME_VISIT_NOTE' | t }}
                   </div>
                 }
               </div>
@@ -200,14 +198,14 @@
               <button class="submit-btn" (click)="submit()"
                       [disabled]="!isValid || submitting">
                 @if (submitting) {
-                  <span>⏳ Submitting your request...</span>
+                  <span>⏳ {{ 'LOADING' | t }}</span>
                 } @else {
-                  <span>🚀 Submit My Furniture Request</span>
+                  <span>{{ 'SUBMIT_CUSTOM_ORDER' | t }}</span>
                 }
               </button>
               <p class="submit-note">
-                ⚡ We respond within 24 hours · 📞 Or call us directly:
-                <a href="tel:+919876543210">+91 92255 76095</a>
+                ⚡ 24 Hours Response · 📞 Direct Master Craftsman:
+                <a href="tel:+919225576095">+91 92255 76095</a>
               </p>
             </div>
           </div>
@@ -215,41 +213,38 @@
           <!-- Info Sidebar -->
           <div class="sidebar">
             <div class="sidebar-card why-card">
-              <h3>💎 Why Choose Us?</h3>
+              <h3>💎 {{ 'TRUST_ONSITE' | t }}</h3>
               <ul class="why-list">
-                <li><span>🏠</span> On-site crafting at your home</li>
-                <li><span>📐</span> Perfect fit for your exact room</li>
-                <li><span>🌳</span> Premium termite-treated wood</li>
-                <li><span>🎨</span> 200+ custom design styles</li>
-                <li><span>✅</span> 100% quality guarantee</li>
-                <li><span>📋</span> Transparent honest pricing</li>
-                <li><span>⭐</span> 5000+ happy customers</li>
+                <li><span>🏠</span> {{ 'TRUST_ONSITE_SUB' | t }}</li>
+                <li><span>📐</span> {{ 'HERO_SLIDE_CUSTOM' | t }}</li>
+                <li><span>🌳</span> {{ 'TRUST_WOOD' | t }} ({{ 'TRUST_TERMITE' | t }})</li>
+                <li><span>🎨</span> 200+ Bespoke Designs</li>
+                <li><span>✅</span> {{ 'TRUST_TERMITE_SUB' | t }}</li>
+                <li><span>📋</span> {{ 'HERO_VISIT_TITLE' | t }}</li>
+                <li><span>⭐</span> {{ 'HERO_FLOAT_RATING_SUB' | t }}</li>
               </ul>
             </div>
 
             <div class="sidebar-card contact-card">
-              <h3>📞 Quick Contact</h3>
-              <a href="https://wa.me/919876543210?text=Hello%2C%20I%20want%20to%20make%20custom%20furniture"
+              <h3>📞 {{ 'GET_IN_TOUCH' | t }}</h3>
+              <a href="https://wa.me/919876543210?text=Hello%20Rk%20Furniture%2C%20I%20want%20to%20make%20custom%20furniture"
                  target="_blank" class="whatsapp-btn">
-                💬 WhatsApp Now
+                💬 WhatsApp
               </a>
-              <a href="tel:+919876543210" class="call-btn">
-                📞 Call +91 92255 76095
+              <a href="tel:+919225576095" class="call-btn">
+                📞 +91 92255 76095
               </a>
             </div>
 
             <div class="sidebar-card hours-card">
-              <h3>🕐 Business Hours</h3>
-              <div class="hours-list">
-                <div><span>Mon – Sat</span><span>10 AM – 8 PM</span></div>
-                <div><span>Sunday</span><span>11 AM – 6 PM</span></div>
-              </div>
+              <h3>🕐 {{ 'HOURS' | t }}</h3>
+              <p style="white-space: pre-line; font-size: 0.9rem; color: #475569;">{{ 'HOURS_TEXT' | t }}</p>
             </div>
 
             <div class="sidebar-card gallery-card">
-              <h3>🖼️ See Our Work</h3>
-              <p>Browse our gallery of 200+ completed projects</p>
-              <a routerLink="/gallery" class="gallery-link">View Gallery →</a>
+              <h3>🖼️ {{ 'NAV_GALLERY' | t }}</h3>
+              <p>{{ 'GALLERY_SUB' | t }}</p>
+              <a routerLink="/gallery" class="gallery-link">{{ 'BTN_VIEW_ALL' | t }}</a>
             </div>
           </div>
         </div>
@@ -259,21 +254,21 @@
         <div class="success-screen">
           <div class="success-card">
             <div class="success-anim">✅</div>
-            <h2>Request Submitted Successfully!</h2>
-            <p class="success-sub">Thank you <strong>{{ form.name }}</strong>! We've received your custom furniture request.</p>
+            <h2>{{ 'ORDER_SUCCESS_TITLE' | t }}</h2>
+            <p class="success-sub">{{ 'ORDER_SUCCESS_MSG' | t }}</p>
 
             <div class="success-details">
               <div class="success-detail">
                 <span class="detail-icon">🪑</span>
                 <div>
-                  <strong>Furniture Type</strong>
-                  <span>{{ form.furnitureType }}</span>
+                  <strong>{{ 'SELECT_CATEGORY' | t }}</strong>
+                  <span>{{ langService.translateCategory(form.furnitureType) }}</span>
                 </div>
               </div>
               <div class="success-detail">
                 <span class="detail-icon">📞</span>
                 <div>
-                  <strong>We'll Call</strong>
+                  <strong>{{ 'FORM_PHONE' | t }}</strong>
                   <span>{{ form.phone }}</span>
                 </div>
               </div>
@@ -288,18 +283,18 @@
                 <div class="success-detail">
                   <span class="detail-icon">🏠</span>
                   <div>
-                    <strong>Home Visit</strong>
-                    <span>Requested (₹200 charge)</span>
+                    <strong>{{ 'HERO_VISIT_TITLE' | t }}</strong>
+                    <span>{{ 'HERO_VISIT_SUB' | t }}</span>
                   </div>
                 </div>
               }
             </div>
 
             <div class="success-actions">
-              <a href="https://wa.me/919876543210?text=Hello%2C%20I%20just%20submitted%20a%20furniture%20request%20for%20{{ form.furnitureType }}"
+              <a href="https://wa.me/919876543210?text=Hello%20Rk%20Furniture%2C%20I%20just%20submitted%20a%20request%20for%20custom%20furniture"
                  target="_blank" class="whatsapp-btn">💬 Chat on WhatsApp</a>
-              <button class="new-btn" (click)="resetForm()">Submit Another Request</button>
-              <a routerLink="/" class="home-btn">Back to Home</a>
+              <button class="new-btn" (click)="resetForm()">{{ 'FORM_SEND_ANOTHER' | t }}</button>
+              <a routerLink="/" class="home-btn">{{ 'NAV_HOME' | t }}</a>
             </div>
           </div>
         </div>

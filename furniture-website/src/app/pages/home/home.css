@@ -243,7 +243,7 @@
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: rkTextShimmer 5s ease-in-out infinite;
+  /* animation: rkTextShimmer 5s ease-in-out infinite; */
   position: relative;
   z-index: 2;
   transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
@@ -2427,17 +2427,24 @@
   }
 
   .hero-buttons {
-    flex-direction: column;
-    gap: 10px;
-    margin-bottom: 16px;
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 10px !important;
+    margin-bottom: 16px !important;
+    visibility: visible !important;
   }
 
   .btn-gold-glow,
   .btn-outline-luxury {
-    width: 100%;
-    justify-content: center;
-    padding: 13px 18px;
-    font-size: 14px;
+    display: flex !important;
+    width: 100% !important;
+    justify-content: center !important;
+    align-items: center !important;
+    padding: 13px 18px !important;
+    font-size: 14px !important;
+    visibility: visible !important;
+    box-sizing: border-box !important;
   }
 
   .visit-highlight-pill {
@@ -2603,9 +2610,78 @@
   }
 }
 
+@media (max-width: 420px) {
+  .hero-section-wrapper {
+    padding-top: calc(var(--nav-height, 70px) + 6px);
+  }
+
+  .hero {
+    padding: 12px 10px 28px;
+    gap: 16px;
+  }
+
+  .title-brand {
+    font-size: clamp(1.75rem, 7vw, 2.1rem);
+  }
+
+  .title-serif {
+    font-size: clamp(1.15rem, 4.2vw, 1.35rem);
+  }
+
+  .hero-buttons {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 9px !important;
+    margin-bottom: 14px !important;
+    visibility: visible !important;
+  }
+
+  .btn-gold-glow,
+  .btn-outline-luxury {
+    display: flex !important;
+    width: 100% !important;
+    justify-content: center !important;
+    align-items: center !important;
+    padding: 12px 14px !important;
+    font-size: 13.5px !important;
+    visibility: visible !important;
+    box-sizing: border-box !important;
+  }
+
+  .hero-badges-wrap {
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+
+  .hero-float-badge {
+    width: 100%;
+  }
+
+  .visit-highlight-pill {
+    padding: 8px 10px;
+    gap: 8px;
+  }
+
+  .pill-text strong {
+    font-size: 11px;
+  }
+
+  .pill-text span {
+    font-size: 9.5px;
+  }
+
+  .hero-arrow {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 16px !important;
+  }
+}
+
 @media (max-width: 380px) {
   .hero-section-wrapper {
-    padding-top: calc(var(--nav-height, 68px) + 6px);
+    padding-top: calc(var(--nav-height, 66px) + 6px);
   }
 
   .hero-badges-wrap {
@@ -2618,11 +2694,11 @@
   }
 
   .title-brand {
-    font-size: 1.75rem;
+    font-size: 1.65rem;
   }
 
   .title-serif {
-    font-size: 1.15rem;
+    font-size: 1.1rem;
   }
 
   .trust-meta strong {

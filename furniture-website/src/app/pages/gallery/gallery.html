@@ -2,8 +2,8 @@
   <!-- Page Header -->
   <section class="page-header">
     <div class="header-content">
-      <h1>Furniture Gallery</h1>
-      <p>Browse our exclusive collection. Share links directly with clients!</p>
+      <h1>{{ 'GALLERY_TITLE' | t }}</h1>
+      <p>{{ 'GALLERY_SUB' | t }}</p>
     </div>
   </section>
 
@@ -15,7 +15,7 @@
           <span class="search-icon">🔍</span>
           <input
             type="text"
-            placeholder="Search furniture..."
+            [placeholder]="'SEARCH_PLACEHOLDER' | t"
             [(ngModel)]="searchText"
             (input)="applyFilters()"
           />
@@ -25,15 +25,15 @@
             <button
               [class.active]="selectedCategory === cat"
               (click)="filterByCategory(cat)"
-            >{{ cat }}</button>
+            >{{ getCatLabel(cat) }}</button>
           }
         </div>
       </div>
       <div class="results-count">
         @if (loading) {
-          Loading…
+          {{ 'LOADING' | t }}
         } @else {
-          Showing {{ filteredItems.length }} of {{ allItems.length }} items
+          {{ filteredItems.length }} / {{ allItems.length }}
         }
       </div>
     </div>
@@ -45,15 +45,15 @@
       @if (loading) {
         <div class="no-results">
           <span>⏳</span>
-          <h3>Loading furniture…</h3>
+          <h3>{{ 'LOADING' | t }}</h3>
         </div>
       }
 
       @if (!loading && filteredItems.length === 0) {
         <div class="no-results">
           <span>🔍</span>
-          <h3>No furniture found</h3>
-          <p>Try a different search or category</p>
+          <h3>{{ 'NO_ITEMS_FOUND' | t }}</h3>
+          <p>{{ 'NO_ITEMS_HINT' | t }}</p>
         </div>
       }
 
@@ -63,9 +63,9 @@
             <div class="card-img">
               <img [src]="item.imageUrl" [alt]="item.name" loading="lazy" />
               <div class="card-overlay">
-                <button class="overlay-btn" (click)="openItem(item)">👁️ View Details</button>
+                <button class="overlay-btn" (click)="openItem(item)">👁️ {{ 'BTN_VIEW_DETAILS' | t }}</button>
               </div>
-              <span class="card-category">{{ item.category }}</span>
+              <span class="card-category">{{ langService.translateCategory(item.category) }}</span>
               @if (item.videoUrl) {
                 <span class="video-badge" style="position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.75); color: #fff; font-size: 0.75rem; padding: 3px 8px; border-radius: 6px;">🎥 Video</span>
               }
@@ -81,16 +81,16 @@
                   <button
                     class="share-btn copy-btn"
                     (click)="copyLink(item, $event)"
-                    [title]="isCopied(item) ? 'Copied!' : 'Copy Link'"
+                    [title]="isCopied(item) ? ('SHARE_COPIED' | t) : ('SHARE_COPY' | t)"
                   >
-                    {{ isCopied(item) ? '✅ Copied!' : '🔗 Copy Link' }}
+                    {{ isCopied(item) ? ('SHARE_COPIED' | t) : ('SHARE_COPY' | t) }}
                   </button>
                   <button
                     class="share-btn wa-btn"
                     (click)="shareOnWhatsApp(item)"
-                    title="Share on WhatsApp"
+                    [title]="'SHARE_WA' | t"
                   >
-                    📱 Share
+                    {{ 'SHARE_WA' | t }}
                   </button>
                 </div>
               </div>
@@ -115,24 +115,27 @@
           <img [src]="selectedItem.imageUrl" [alt]="selectedItem.name" />
         </div>
         <div class="modal-info">
-          <span class="modal-category">{{ selectedItem.category }}</span>
+          <span class="modal-category">{{ langService.translateCategory(selectedItem.category) }}</span>
           <h2>{{ selectedItem.name }}</h2>
           @if (selectedItem.price) {
             <div class="modal-price">{{ selectedItem.price }}</div>
           }
           <p>{{ selectedItem.description }}</p>
           <div class="modal-share">
-            <h4>📤 Share with Client</h4>
+            <h4>📤 {{ 'SHARE_WA' | t }}</h4>
             <div class="share-link-box">
-              <input type="text" [value]="'http://localhost:4200/gallery?id=' + getItemId(selectedItem)" readonly />
+              <input type="text" [value]="getItemShareLink(selectedItem)" readonly />
               <button (click)="copyLink(selectedItem, $event)">
-                {{ isCopied(selectedItem) ? '✅' : '📋 Copy' }}
+                {{ isCopied(selectedItem) ? '✅' : '📋' }}
               </button>
             </div>
-            <div class="modal-actions">
+            <div class="modal-actions" style="margin-top: 14px; display: flex; flex-direction: column; gap: 8px;">
               <button class="wa-share-btn" (click)="shareOnWhatsApp(selectedItem)">
-                📱 Send on WhatsApp
+                📱 {{ 'SHARE_WA' | t }}
               </button>
+              <a routerLink="/custom-order" class="wa-share-btn" style="background: linear-gradient(135deg, #0891b2, #06b6d4); text-align: center; text-decoration: none;" (click)="closeItem()">
+                🪑 {{ 'MODAL_BOOK_VISIT' | t }}
+              </a>
             </div>
           </div>
         </div>

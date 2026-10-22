@@ -4,23 +4,23 @@
       <img src="/rk-logo.png" alt="RK Furniture Royal Logo" class="nav-logo-img" />
       <div class="logo-text">
         <span class="logo-name">RK Furniture</span>
-        <span class="logo-tagline">Royal Bespoke Studio • Est. 2010</span>
+        <span class="logo-tagline">{{ 'LOGO_TAGLINE' | t }}</span>
       </div>
     </a>
 
     <ul class="nav-links" [class.open]="menuOpen">
-      <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="closeMenu()">Home</a></li>
-      <li><a routerLink="/gallery" routerLinkActive="active" (click)="closeMenu()">Gallery</a></li>
-      <li><a routerLink="/team" routerLinkActive="active" (click)="closeMenu()">Our Team</a></li>
-      <li><a routerLink="/about" routerLinkActive="active" (click)="closeMenu()">About</a></li>
-      <li><a routerLink="/contact" routerLinkActive="active" (click)="closeMenu()">Contact</a></li>
+      <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="closeMenu()">{{ 'NAV_HOME' | t }}</a></li>
+      <li><a routerLink="/gallery" routerLinkActive="active" (click)="closeMenu()">{{ 'NAV_GALLERY' | t }}</a></li>
+      <li><a routerLink="/team" routerLinkActive="active" (click)="closeMenu()">{{ 'NAV_TEAM' | t }}</a></li>
+      <li><a routerLink="/about" routerLinkActive="active" (click)="closeMenu()">{{ 'NAV_ABOUT' | t }}</a></li>
+      <li><a routerLink="/contact" routerLinkActive="active" (click)="closeMenu()">{{ 'NAV_CONTACT' | t }}</a></li>
       <li>
         <a routerLink="/custom-order" routerLinkActive="active" class="custom-order-link" (click)="closeMenu()">
           <span class="cta-shimmer"></span>
-          <span class="cta-content">🪑 Make Custom Furniture</span>
+          <span class="cta-content">{{ 'NAV_MAKE_FURNITURE' | t }}</span>
         </a>
       </li>
-      <li><a routerLink="/admin" routerLinkActive="active" class="admin-link" (click)="closeMenu()">Admin</a></li>
+      <li><a routerLink="/admin" routerLinkActive="active" class="admin-link" (click)="closeMenu()">{{ 'NAV_ADMIN' | t }}</a></li>
     </ul>
 
     <button class="hamburger" (click)="toggleMenu()" [class.active]="menuOpen" aria-label="Toggle Navigation">

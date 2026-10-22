@@ -1,16 +1,21 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { FurnitureService } from '../../services/furniture';
+import { TranslationService } from '../../services/translation';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-custom-order',
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, TranslatePipe],
   templateUrl: './custom-order.html',
   styleUrl: './custom-order.css'
 })
 export class CustomOrder {
+  langService = inject(TranslationService);
+  private furnitureService = inject(FurnitureService);
+
   submitted = false;
   submitting = false;
   errorMsg = '';
@@ -22,8 +27,8 @@ export class CustomOrder {
   ];
 
   woodTypes = [
-    'Sheesham (Indian Rosewood)', 'Teak Wood', 'Pine Wood', 'Plywood + Laminate',
-    'MDF (Medium Density Fibre)', 'Acacia Wood', 'Mango Wood', 'Not Sure / Suggest Me'
+    'Teak Wood (Sagwan)', 'Sheesham (Indian Rosewood)', 'Marine Grade Plywood + Veneer',
+    'Pine Wood', 'MDF / Engineered Wood', 'Acacia Wood', 'Not Sure / Suggest Me'
   ];
 
   budgetRanges = [
@@ -48,10 +53,8 @@ export class CustomOrder {
     referenceImageUrl: ''
   };
 
-  constructor(private furnitureService: FurnitureService) {}
-
   get isValid(): boolean {
-    return !!(this.form.name && this.form.email && this.form.phone &&
+    return !!(this.form.name && this.form.phone &&
               this.form.furnitureType && this.form.description);
   }
 
@@ -59,7 +62,10 @@ export class CustomOrder {
     if (!this.isValid) return;
     this.submitting = true;
     this.errorMsg = '';
-    this.furnitureService.submitCustomOrder(this.form).subscribe({
+    this.furnitureService.submitCustomOrder({
+      ...this.form,
+      email: this.form.email || 'customer@furniture.in'
+    }).subscribe({
       next: () => {
         this.submitted = true;
         this.submitting = false;

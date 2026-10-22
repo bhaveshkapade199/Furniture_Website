@@ -1,0 +1,85 @@
+<div class="lang-fab-container" [class.open]="isOpen">
+  <!-- Expanded Popup Menu -->
+  @if (isOpen) {
+    <div class="lang-popup" (click)="$event.stopPropagation()">
+      <div class="lang-popup-header">
+        <span class="popup-globe">🌐</span>
+        <span class="popup-title">{{ 'CHOOSE_LANGUAGE' | t }}</span>
+        <button type="button" class="popup-close-btn" (click)="close()" aria-label="Close">✕</button>
+      </div>
+
+      <div class="lang-options-list">
+        <!-- English Option -->
+        <button
+          type="button"
+          class="lang-option-item"
+          [class.active]="currentLang === 'en'"
+          (click)="selectLang('en', $event)"
+        >
+          <div class="opt-left">
+            <span class="opt-code">EN</span>
+            <div class="opt-text">
+              <span class="opt-primary">English</span>
+              <span class="opt-secondary">International</span>
+            </div>
+          </div>
+          @if (currentLang === 'en') {
+            <span class="opt-check">✓</span>
+          }
+        </button>
+
+        <!-- Hindi Option -->
+        <button
+          type="button"
+          class="lang-option-item"
+          [class.active]="currentLang === 'hi'"
+          (click)="selectLang('hi', $event)"
+        >
+          <div class="opt-left">
+            <span class="opt-code hindi-code">हि</span>
+            <div class="opt-text">
+              <span class="opt-primary">हिन्दी</span>
+              <span class="opt-secondary">Hindi</span>
+            </div>
+          </div>
+          @if (currentLang === 'hi') {
+            <span class="opt-check">✓</span>
+          }
+        </button>
+
+        <!-- Marathi Option -->
+        <button
+          type="button"
+          class="lang-option-item"
+          [class.active]="currentLang === 'mr'"
+          (click)="selectLang('mr', $event)"
+        >
+          <div class="opt-left">
+            <span class="opt-code marathi-code">म</span>
+            <div class="opt-text">
+              <span class="opt-primary">मराठी</span>
+              <span class="opt-secondary">Marathi</span>
+            </div>
+          </div>
+          @if (currentLang === 'mr') {
+            <span class="opt-check">✓</span>
+          }
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Floating Action Button -->
+  <button
+    type="button"
+    class="lang-fab-btn"
+    (click)="toggleOpen($event)"
+    [attr.aria-expanded]="isOpen"
+    [title]="'CHOOSE_LANGUAGE' | t"
+  >
+    <div class="fab-pulse-aura"></div>
+    <span class="fab-icon">🌐</span>
+    <span class="fab-label">{{ currentLabel }}</span>
+    <span class="fab-chevron" [class.up]="isOpen">▾</span>
+  </button>
+</div>

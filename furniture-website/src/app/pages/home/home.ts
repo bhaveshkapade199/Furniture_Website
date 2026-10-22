@@ -2,6 +2,9 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FurnitureService, FurnitureItem, WorkInfo, TeamMember, VideoItem } from '../../services/furniture';
+import { TranslatePipe } from '../../pipes/translate.pipe';
+import { TranslationService } from '../../services/translation';
+
 
 export interface ShowcaseSlide {
   url: string;
@@ -19,7 +22,7 @@ export interface HeroSlide {
 
 @Component({
   selector: 'app-home',
-  imports: [RouterLink, CommonModule],
+  imports: [RouterLink, CommonModule, TranslatePipe],
   templateUrl: './home.html',
   styleUrl: './home.css'
 })
@@ -77,13 +80,13 @@ export class Home implements OnInit, OnDestroy {
   ];
 
   categories = [
-    { name: 'Sofa Set',        emoji: '🛋️', count: 20 },
-    { name: 'Bedroom',         emoji: '🛏️', count: 35 },
-    { name: 'TV Unit',         emoji: '📺',  count: 15 },
-    { name: 'Kitchen',         emoji: '🍳',  count: 18 },
-    { name: 'Temple / Mandir', emoji: '🛕',  count: 12 },
-    { name: 'Dining Room',     emoji: '🍽️', count: 10 },
-    { name: 'Office',          emoji: '🖥️', count: 14 }
+    { name: 'Sofa Set', emoji: '🛋️', count: 20 },
+    { name: 'Bedroom', emoji: '🛏️', count: 35 },
+    { name: 'TV Unit', emoji: '📺', count: 15 },
+    { name: 'Kitchen', emoji: '🍳', count: 18 },
+    { name: 'Temple / Mandir', emoji: '🛕', count: 12 },
+    { name: 'Dining Room', emoji: '🍽️', count: 10 },
+    { name: 'Office', emoji: '🖥️', count: 14 }
   ];
 
   // Auto-scrollable TV Units & Sofa Set Slides
@@ -104,7 +107,14 @@ export class Home implements OnInit, OnDestroy {
     return [...this.showcaseSlides, ...this.showcaseSlides];
   }
 
-  constructor(private furnitureService: FurnitureService) {}
+  constructor(
+    private furnitureService: FurnitureService,
+    public langService: TranslationService
+  ) { }
+
+  getCategoryName(name: string | undefined): string {
+    return this.langService.translateCategory(name || '');
+  }
 
   ngOnInit() {
     this.startHeroAutoplay();

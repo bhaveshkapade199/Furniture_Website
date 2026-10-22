@@ -7,69 +7,79 @@
           <img src="/rk-logo.png" alt="RK Furniture" class="footer-logo-img" />
           <div>
             <div class="brand-name">RK Furniture</div>
-            <div class="brand-tagline">Royal Bespoke Studio • Est. 2010</div>
+            <div class="brand-tagline">{{ 'LOGO_TAGLINE' | t }}</div>
           </div>
         </div>
-        <p>Crafting beautiful, durable furniture for your home and office since 2010. Your dream space is our passion.</p>
+        <p>{{ 'FOOTER_ABOUT' | t }}</p>
         <div class="social-links">
           <a href="https://wa.me/919876543210" target="_blank" class="social-btn whatsapp">📱 WhatsApp</a>
-          <a href="mailto:rkfurniture&#64;gmail.com" class="social-btn email">✉️ Email</a>
+          <a href="mailto:bhaveshkapade5482@gmail.com" class="social-btn email">✉️ Email</a>
+        </div>
+
+        <!-- Footer Language Selector -->
+        <div class="footer-lang-wrap">
+          <span class="footer-lang-title">🌐 {{ 'CHOOSE_LANGUAGE' | t }}:</span>
+          <div class="footer-lang-chips">
+            <button type="button" [class.active]="langService.currentLang() === 'en'" (click)="setLang('en')">English</button>
+            <button type="button" [class.active]="langService.currentLang() === 'hi'" (click)="setLang('hi')">हिन्दी</button>
+            <button type="button" [class.active]="langService.currentLang() === 'mr'" (click)="setLang('mr')">मराठी</button>
+          </div>
         </div>
       </div>
 
       <!-- Quick Links -->
       <div class="footer-col">
-        <h4>Quick Links</h4>
+        <h4>{{ 'FOOTER_QUICK_LINKS' | t }}</h4>
         <ul>
-          <li><a routerLink="/">Home</a></li>
-          <li><a routerLink="/gallery">Gallery</a></li>
-          <li><a routerLink="/custom-order" style="color: #0891b2; font-weight: 700;">🪑 Make Custom Furniture</a></li>
-          <li><a routerLink="/team">Our Team</a></li>
-          <li><a routerLink="/about">About Us</a></li>
-          <li><a routerLink="/contact">Contact</a></li>
-          <li><a routerLink="/admin">Admin Portal</a></li>
+          <li><a routerLink="/">{{ 'NAV_HOME' | t }}</a></li>
+          <li><a routerLink="/gallery">{{ 'NAV_GALLERY' | t }}</a></li>
+          <li><a routerLink="/custom-order" style="color: #0891b2; font-weight: 700;">{{ 'NAV_MAKE_FURNITURE' | t }}</a></li>
+          <li><a routerLink="/team">{{ 'NAV_TEAM' | t }}</a></li>
+          <li><a routerLink="/about">{{ 'NAV_ABOUT' | t }}</a></li>
+          <li><a routerLink="/contact">{{ 'NAV_CONTACT' | t }}</a></li>
+          <li><a routerLink="/admin">{{ 'NAV_ADMIN' | t }}</a></li>
         </ul>
       </div>
 
       <!-- Categories -->
       <div class="footer-col">
-        <h4>Categories</h4>
+        <h4>{{ 'FOOTER_CATEGORIES' | t }}</h4>
         <ul>
-          <li><a routerLink="/gallery">Living Room</a></li>
-          <li><a routerLink="/gallery">Bedroom</a></li>
-          <li><a routerLink="/gallery">Dining Room</a></li>
-          <li><a routerLink="/gallery">Office</a></li>
-          <li><a routerLink="/gallery">Kids Room</a></li>
+          <li><a routerLink="/gallery">{{ 'CAT_SOFA' | t }}</a></li>
+          <li><a routerLink="/gallery">{{ 'CAT_BED' | t }}</a></li>
+          <li><a routerLink="/gallery">{{ 'CAT_DINING' | t }}</a></li>
+          <li><a routerLink="/gallery">{{ 'CAT_WARDROBE' | t }}</a></li>
+          <li><a routerLink="/gallery">{{ 'CAT_MANDIR' | t }}</a></li>
         </ul>
       </div>
 
       <!-- Contact Info -->
       <div class="footer-col">
-        <h4>Contact Us</h4>
+        <h4>{{ 'FOOTER_CONTACT' | t }}</h4>
         <div class="contact-info">
           <div class="contact-item">
             <span>📍</span>
-            <span>Jalgaon, Maharashtra</span>
+            <span>Jalgaon, Maharashtra & Ahmedabad, Gujarat</span>
           </div>
           <div class="contact-item">
             <span>📞</span>
-            <a href="tel:+919876543210">+91 9225576095, +91 7821856342</a>
+            <a href="tel:+919225576095">+91 9225576095, +91 7821856342</a>
           </div>
           <div class="contact-item">
             <span>✉️</span>
-            <a href="mailto:rkfurniture&#64;gmail.com">bhaveshkapade5482@gmail.com</a>
+            <a href="mailto:bhaveshkapade5482@gmail.com">bhaveshkapade5482@gmail.com</a>
           </div>
           <div class="contact-item">
             <span>🕐</span>
-            <span>Mon-Sat: 10 AM - 8 PM</span>
+            <span>{{ 'HOURS_TEXT' | t }}</span>
           </div>
         </div>
       </div>
     </div>
 
     <div class="footer-bottom">
-      <p>&copy; {{ currentYear }} RK Furniture. All rights reserved.</p>
-      <p>Made with ❤️ in India</p>
+      <p>&copy; {{ currentYear }} {{ 'FOOTER_RIGHTS' | t }}</p>
+      <p>{{ 'FOOTER_MADE_WITH' | t }}</p>
     </div>
   </div>
 </footer>

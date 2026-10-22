@@ -1,16 +1,22 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { FurnitureService, FurnitureItem } from '../../services/furniture';
+import { TranslationService } from '../../services/translation';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-gallery',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslatePipe],
   templateUrl: './gallery.html',
   styleUrl: './gallery.css'
 })
 export class Gallery implements OnInit {
+  langService = inject(TranslationService);
+  private furnitureService = inject(FurnitureService);
+  private route = inject(ActivatedRoute);
+
   allItems: FurnitureItem[] = [];
   filteredItems: FurnitureItem[] = [];
   categories: string[] = [];
@@ -19,11 +25,6 @@ export class Gallery implements OnInit {
   selectedItem: FurnitureItem | null = null;
   copiedId: string | null = null;
   loading = true;
-
-  constructor(
-    private furnitureService: FurnitureService,
-    private route: ActivatedRoute
-  ) {}
 
   ngOnInit() {
     this.furnitureService.getFurnitureItems().subscribe(items => {
@@ -42,6 +43,11 @@ export class Gallery implements OnInit {
   filterByCategory(cat: string) {
     this.selectedCategory = cat;
     this.applyFilters();
+  }
+
+  getCatLabel(cat: string): string {
+    if (cat === 'All') return this.langService.t('ALL_CATEGORIES');
+    return this.langService.translateCategory(cat);
   }
 
   applyFilters() {
@@ -67,21 +73,27 @@ export class Gallery implements OnInit {
     return (item._id || item.id || '') as string;
   }
 
+  getItemShareLink(item: FurnitureItem): string {
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    return `${origin}/gallery?id=${this.getItemId(item)}`;
+  }
+
   copyLink(item: FurnitureItem, event: Event) {
     event.stopPropagation();
     const id = this.getItemId(item);
-    const link = window.location.origin + '/gallery?id=' + id;
-    navigator.clipboard.writeText(link).then(() => {
-      this.copiedId = id;
-      setTimeout(() => this.copiedId = null, 2000);
-    });
+    const link = this.getItemShareLink(item);
+    if (navigator && navigator.clipboard) {
+      navigator.clipboard.writeText(link).then(() => {
+        this.copiedId = id;
+        setTimeout(() => this.copiedId = null, 2000);
+      });
+    }
   }
 
   shareOnWhatsApp(item: FurnitureItem) {
-    const id = this.getItemId(item);
-    const link = window.location.origin + '/gallery?id=' + id;
+    const link = this.getItemShareLink(item);
     const priceText = item.price ? ` - ${item.price}` : '';
-    const msg = `Check out this ${item.name}${priceText}\n${link}`;
+    const msg = `Check out ${item.name}${priceText} on RK Furniture:\n${link}`;
     window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
   }
 

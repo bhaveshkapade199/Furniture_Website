@@ -2,9 +2,9 @@
   <!-- Hero Section -->
   <section class="team-hero">
     <div class="hero-inner">
-      <span class="badge">👥 The Artisans & Leaders</span>
-      <h1>Meet Our Master Craftsmen & Team</h1>
-      <p>Decades of collective experience in fine woodworking, luxury upholstery, modular design, and client satisfaction.</p>
+      <span class="badge">{{ 'TEAM_PAGE_BADGE' | t }}</span>
+      <h1>{{ 'TEAM_PAGE_TITLE' | t }}</h1>
+      <p>{{ 'TEAM_PAGE_SUB' | t }}</p>
     </div>
   </section>
 
@@ -12,15 +12,15 @@
   <section class="section team-grid-section">
     <div class="container">
       <div class="section-header">
-        <span class="section-tag">✨ Dedicated Experts</span>
-        <h2>Our Craftsmanship Specialists</h2>
-        <p>Every piece of furniture from Rk Furniture is touched by the hands of these skilled professionals.</p>
+        <span class="section-tag">{{ 'TEAM_GRID_TAG' | t }}</span>
+        <h2>{{ 'TEAM_GRID_TITLE' | t }}</h2>
+        <p>{{ 'TEAM_GRID_SUB' | t }}</p>
       </div>
 
       @if (loading) {
         <div class="loading-state">
           <span>⏳</span>
-          <p>Loading our team members...</p>
+          <p>{{ 'LOADING' | t }}</p>
         </div>
       }
 
@@ -34,7 +34,7 @@
                 <div class="member-emoji-avatar">{{ member.emoji || '👨‍💼' }}</div>
               }
               @if (member.experience) {
-                <span class="exp-badge">⭐ {{ member.experience }}</span>
+                <span class="exp-badge">⭐ {{ member.experience }} {{ 'TEAM_EXP' | t }}</span>
               }
             </div>
 
@@ -68,9 +68,9 @@
     <section class="section team-videos-section">
       <div class="container">
         <div class="section-header">
-          <span class="section-tag">🎬 In The Workshop</span>
-          <h2>Watch Our Team at Work</h2>
-          <p>Step inside our Ahmedabad workshop and witness the artistry, precision, and passion in every cut and polish.</p>
+          <span class="section-tag">{{ 'VIDEOS_TAG' | t }}</span>
+          <h2>{{ 'VIDEOS_TITLE' | t }}</h2>
+          <p>{{ 'VIDEOS_SUB' | t }}</p>
         </div>
 
         <div class="videos-grid">
@@ -81,7 +81,7 @@
               </div>
               <div class="video-info">
                 @if (vid.category) {
-                  <span class="vid-category">{{ vid.category }}</span>
+                  <span class="vid-category">{{ langService.translateCategory(vid.category) }}</span>
                 }
                 <h4>{{ vid.title }}</h4>
                 <p>{{ vid.description }}</p>
@@ -99,23 +99,23 @@
       <div class="values-grid">
         <div class="value-card">
           <span class="value-icon">🪵</span>
-          <h3>Grade-A Hardwoods</h3>
-          <p>Hand-selected Seasoned Sheesham, Teak, and Pine with complete anti-termite treatment.</p>
+          <h3>{{ 'TRUST_WOOD' | t }}</h3>
+          <p>{{ 'TRUST_WOOD_SUB' | t }} - {{ 'TRUST_TERMITE' | t }} ({{ 'TRUST_TERMITE_SUB' | t }})</p>
         </div>
         <div class="value-card">
           <span class="value-icon">🧵</span>
-          <h3>Luxury Upholstery</h3>
-          <p>High GSM velvet, leatherette, and breathable linen stitched to perfection with heavy-duty thread.</p>
+          <h3>{{ 'CAT_SOFA' | t }}</h3>
+          <p>{{ 'CAT_SOFA_SUB' | t }}</p>
         </div>
         <div class="value-card">
           <span class="value-icon">📐</span>
-          <h3>Custom Measurements</h3>
-          <p>Every home is unique. Our team takes precision laser measurements to build made-to-fit pieces.</p>
+          <h3>{{ 'STEP_1_TITLE' | t }}</h3>
+          <p>{{ 'STEP_1_DESC' | t }}</p>
         </div>
         <div class="value-card">
           <span class="value-icon">🤝</span>
-          <h3>Direct Master Access</h3>
-          <p>Direct communication with Bhavesh Patel and our design heads throughout your order lifecycle.</p>
+          <h3>{{ 'STEP_3_TITLE' | t }}</h3>
+          <p>{{ 'STEP_3_DESC' | t }}</p>
         </div>
       </div>
     </div>
@@ -125,11 +125,11 @@
   <section class="team-cta">
     <div class="container">
       <div class="cta-box">
-        <h2>Want our team to craft custom furniture for your home?</h2>
-        <p>Book a home space inspection & quotation visit (₹200 visit charge). Our master craftsman visits your house, and our complete artisan team builds your furniture on-site!</p>
+        <h2>{{ 'HOME_CTA_TITLE' | t }}</h2>
+        <p>{{ 'HOME_CTA_DESC' | t }}</p>
         <div class="cta-actions">
-          <a routerLink="/contact" class="btn-primary">Book ₹200 Home Visit</a>
-          <a href="https://wa.me/919876543210?text=Hello%20Team%2C%20I%20want%20to%20book%20a%20home%20visit%20inspection%20for%20custom%20furniture" target="_blank" class="btn-secondary">💬 Chat on WhatsApp</a>
+          <a routerLink="/custom-order" class="btn-primary">{{ 'PROCESS_CTA_BTN' | t }}</a>
+          <a href="https://wa.me/919876543210?text=Hello%20Team%2C%20I%20want%20to%20book%20a%20home%20visit%20inspection%20for%20custom%20furniture" target="_blank" class="btn-secondary">💬 WhatsApp</a>
         </div>
       </div>
     </div>

@@ -101,9 +101,15 @@
   }
 }
 
+@media (max-width: 420px) {
+  :root {
+    --nav-height: 70px;
+  }
+}
+
 @media (max-width: 360px) {
   :root {
-    --nav-height: 68px;
+    --nav-height: 66px;
   }
 }
 
