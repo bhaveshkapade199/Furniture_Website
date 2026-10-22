@@ -271,13 +271,13 @@ export class FurnitureService {
     if (d) return JSON.parse(d);
     const defaults: FurnitureItem[] = [
       { _id: '1', name: 'Royal Sofa Set 5-Seater', category: 'Sofa Set', description: 'Premium 5-seater sofa set with velvet finish.', imageUrl: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600', price: '₹45,000' },
-      { _id: '2', name: 'L-Shape Corner Sofa',     category: 'Sofa Set', description: 'Modern L-shaped sectional sofa.', imageUrl: 'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=600', price: '₹62,000' },
-      { _id: '3', name: '3-Seater Recliner Sofa',  category: 'Sofa Set', description: 'Luxury 3-seater recliner with cup holders.', imageUrl: 'https://images.unsplash.com/photo-1540574163026-643ea20ade25?w=600', price: '₹55,000' },
-      { _id: '4', name: 'Fabric Sofa Set',          category: 'Sofa Set', description: 'Elegant 6-seater fabric sofa.', imageUrl: 'https://images.unsplash.com/photo-1484101403633-562f891dc89a?w=600', price: '₹38,000' },
-      { _id: '5', name: 'King Size Bed',            category: 'Bedroom',  description: 'King-size bed with hydraulic storage.', imageUrl: 'https://images.unsplash.com/photo-1505693314120-0d443867891c?w=600', price: '₹38,000' },
-      { _id: '6', name: 'Modern TV Unit',           category: 'TV Unit',  description: 'Sleek wall-mounted TV unit.', imageUrl: 'https://images.unsplash.com/photo-1593359677879-a4bb92f4e62a?w=600', price: '₹18,500' },
-      { _id: '7', name: 'Modular Kitchen',          category: 'Kitchen',  description: 'Full modular kitchen with granite top.', imageUrl: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600', price: '₹1,20,000' },
-      { _id: '8', name: 'Pooja Mandir',             category: 'Temple / Mandir', description: 'Hand-carved wooden temple.', imageUrl: 'https://images.unsplash.com/photo-1609766418204-94aae0ecfdfc?w=600', price: '₹15,000' },
+      { _id: '2', name: 'L-Shape Corner Sofa', category: 'Sofa Set', description: 'Modern L-shaped sectional sofa.', imageUrl: 'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=600', price: '₹62,000' },
+      { _id: '3', name: '3-Seater Recliner Sofa', category: 'Sofa Set', description: 'Luxury 3-seater recliner with cup holders.', imageUrl: 'https://images.unsplash.com/photo-1540574163026-643ea20ade25?w=600', price: '₹55,000' },
+      { _id: '4', name: 'Fabric Sofa Set', category: 'Sofa Set', description: 'Elegant 6-seater fabric sofa.', imageUrl: 'https://images.unsplash.com/photo-1484101403633-562f891dc89a?w=600', price: '₹38,000' },
+      { _id: '5', name: 'King Size Bed', category: 'Bedroom', description: 'King-size bed with hydraulic storage.', imageUrl: 'https://images.unsplash.com/photo-1505693314120-0d443867891c?w=600', price: '₹38,000' },
+      { _id: '6', name: 'Modern TV Unit', category: 'TV Unit', description: 'Sleek wall-mounted TV unit.', imageUrl: 'https://images.unsplash.com/photo-1593359677879-a4bb92f4e62a?w=600', price: '₹18,500' },
+      { _id: '7', name: 'Modular Kitchen', category: 'Kitchen', description: 'Full modular kitchen with granite top.', imageUrl: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600', price: '₹1,20,000' },
+      { _id: '8', name: 'Pooja Mandir', category: 'Temple / Mandir', description: 'Hand-carved wooden temple.', imageUrl: 'https://images.unsplash.com/photo-1609766418204-94aae0ecfdfc?w=600', price: '₹15,000' },
     ];
     localStorage.setItem(LS + 'items', JSON.stringify(defaults));
     return defaults;
@@ -323,12 +323,12 @@ export class FurnitureService {
     const d = localStorage.getItem(LS + 'team');
     if (d) return JSON.parse(d);
     return [
-      { _id: '1', name: 'Bhavesh Patel',  role: 'Founder & Master Craftsman',   experience: '15+ Years', specialty: 'All Custom Woods', emoji: '👨‍🔨', description: 'Visionary behind every piece of furniture we craft.', phone: '+91 98765 43210', order: 1 },
-      { _id: '2', name: 'Ramesh Kumar',   role: 'Head of Design',                experience: '12 Years',  specialty: 'Sofa & Bedroom',   emoji: '🎨', description: 'Expert in modern sofa sets and luxury bedroom furniture.', phone: '+91 98765 43211', order: 2 },
-      { _id: '3', name: 'Sunita Devi',    role: 'Kitchen & Interior Specialist', experience: '10 Years',  specialty: 'Modular Kitchens', emoji: '🍳', description: 'Specializes in ergonomic modular kitchens and TV units.', phone: '+91 98765 43212', order: 3 },
-      { _id: '4', name: 'Kiran Shah',     role: 'Temple & Decor Artisan',        experience: '8 Years',   specialty: 'Hand Carving',     emoji: '🛕', description: 'Master carver of wooden temples and artistic pooja units.', phone: '+91 98765 43213', order: 4 },
-      { _id: '5', name: 'Mahesh Parmar',  role: 'Sales & Client Relations',      experience: '6 Years',   specialty: 'Custom Orders',    emoji: '🤝', description: 'Your personal advisor for custom orders and quotes.', phone: '+91 98765 43214', order: 5 },
-      { _id: '6', name: 'Deepa Joshi',    role: 'Quality Control Manager',       experience: '9 Years',   specialty: 'Quality Assurance',emoji: '✅', description: 'Ensures every product meets our highest standards.', phone: '+91 98765 43215', order: 6 }
+      { _id: '1', name: 'Bhavesh Patel', role: 'Founder & Master Craftsman', experience: '15+ Years', specialty: 'All Custom Woods', emoji: '👨‍🔨', description: 'Visionary behind every piece of furniture we craft.', phone: '+91 9225576095', order: 1 },
+      { _id: '2', name: 'Ramesh Kumar', role: 'Head of Design', experience: '12 Years', specialty: 'Sofa & Bedroom', emoji: '🎨', description: 'Expert in modern sofa sets and luxury bedroom furniture.', phone: '+91 92255 76095', order: 2 },
+      { _id: '3', name: 'Sunita Devi', role: 'Kitchen & Interior Specialist', experience: '10 Years', specialty: 'Modular Kitchens', emoji: '🍳', description: 'Specializes in ergonomic modular kitchens and TV units.', phone: '+91 92255 76095', order: 3 },
+      { _id: '4', name: 'Kiran Shah', role: 'Temple & Decor Artisan', experience: '8 Years', specialty: 'Hand Carving', emoji: '🛕', description: 'Master carver of wooden temples and artistic pooja units.', phone: '+91 92255 76095', order: 4 },
+      { _id: '5', name: 'Mahesh Parmar', role: 'Sales & Client Relations', experience: '6 Years', specialty: 'Custom Orders', emoji: '🤝', description: 'Your personal advisor for custom orders and quotes.', phone: '+91 92255 76095', order: 5 },
+      { _id: '6', name: 'Deepa Joshi', role: 'Quality Control Manager', experience: '9 Years', specialty: 'Quality Assurance', emoji: '✅', description: 'Ensures every product meets our highest standards.', phone: '+91 92255 76095', order: 6 }
     ];
   }
 

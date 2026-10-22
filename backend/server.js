@@ -85,7 +85,7 @@ async function seedDefaults() {
   if (tmCount === 0) {
     console.log('🌱  Seeding default team members…');
     await TeamMember.insertMany([
-      { name: 'Bhavesh Patel',  role: 'Founder & Master Craftsman',   experience: '15+ Years', specialty: 'All Custom Woods', emoji: '👨‍🔨', description: 'Visionary behind every piece of furniture we craft. 15+ years of master woodworking experience.', phone: '+91 98765 43210', order: 1 },
+      { name: 'Bhavesh Patel',  role: 'Founder & Master Craftsman',   experience: '15+ Years', specialty: 'All Custom Woods', emoji: '👨‍🔨', description: 'Visionary behind every piece of furniture we craft. 15+ years of master woodworking experience.', phone: '+91 92255 76095', order: 1 },
       { name: 'Ramesh Kumar',   role: 'Head of Design',                experience: '12 Years',  specialty: 'Sofa & Bedroom',   emoji: '🎨', description: 'Expert in modern sofa sets, luxury recliners, and contemporary bedroom furniture.', phone: '+91 98765 43211', order: 2 },
       { name: 'Sunita Devi',    role: 'Kitchen & Interior Specialist', experience: '10 Years',  specialty: 'Modular Kitchens', emoji: '🍳', description: 'Specializes in ergonomic modular kitchens, storage solutions, and TV entertainment units.', phone: '+91 98765 43212', order: 3 },
       { name: 'Kiran Shah',     role: 'Temple & Decor Artisan',        experience: '8 Years',   specialty: 'Hand Carving',     emoji: '🛕', description: 'Master carver of sacred wooden temples, mandirs, and intricate artistic wood carvings.', phone: '+91 98765 43213', order: 4 },

@@ -509,7 +509,7 @@ export class Admin implements OnInit, OnDestroy {
       specialty: 'Custom Woodwork',
       emoji: '👨‍💼',
       imageUrl: '',
-      phone: '+91 98765 43210',
+      phone: '+91 92255 76095',
       order: 1
     };
   }
