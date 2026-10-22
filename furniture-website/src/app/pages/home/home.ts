@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { FurnitureService, FurnitureItem, WorkInfo, TeamMember, VideoItem } from '../../services/furniture';
+import { FurnitureService, FurnitureItem, WorkInfo, TeamMember, VideoItem, SiteStat } from '../../services/furniture';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { TranslationService } from '../../services/translation';
 
@@ -72,7 +72,7 @@ export class Home implements OnInit, OnDestroy {
   private heroTimer: any = null;
   isHeroPaused = false;
 
-  stats = [
+  stats: SiteStat[] = [
     { value: '15+', label: 'Years Experience' },
     { value: '5000+', label: 'Happy Clients' },
     { value: '200+', label: 'Furniture Designs' },
@@ -163,6 +163,12 @@ export class Home implements OnInit, OnDestroy {
 
     this.furnitureService.getVideos().subscribe(vids => {
       this.videos = vids.slice(0, 2);
+    });
+
+    this.furnitureService.getStats().subscribe(stats => {
+      if (stats && stats.length > 0) {
+        this.stats = stats;
+      }
     });
   }
 

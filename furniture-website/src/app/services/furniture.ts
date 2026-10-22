@@ -87,6 +87,14 @@ export interface CustomOrder {
   updatedAt?: Date;
 }
 
+export interface SiteStat {
+  id?: number;
+  _id?: string;
+  value: string;
+  label: string;
+  order?: number;
+}
+
 const LS = 'bhavesh_furniture_';
 
 /**
@@ -140,6 +148,9 @@ export class FurnitureService {
   private feedbacksSubject = new BehaviorSubject<Feedback[]>([]);
   public feedbacks$ = this.feedbacksSubject.asObservable();
 
+  private statsSubject = new BehaviorSubject<SiteStat[]>([]);
+  public stats$ = this.statsSubject.asObservable();
+
   constructor(private http: HttpClient) {
     localStorage.removeItem(LS + 'admin_logged_in');
 
@@ -150,6 +161,7 @@ export class FurnitureService {
     this.videosSubject.next(this.getLocalVideos());
     this.customOrdersSubject.next(this.getLocalCustomOrders());
     this.feedbacksSubject.next(this.getLocalFeedbacks());
+    this.statsSubject.next(this.getLocalStats());
 
     // 2. Setup real-time cross-tab synchronization channel
     if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
@@ -240,6 +252,15 @@ export class FurnitureService {
       if (items && items.length) {
         this.videosSubject.next(items);
         localStorage.setItem(LS + 'videos', JSON.stringify(items));
+      }
+    });
+
+    this.http.get<SiteStat[]>(`${api}/stats`).pipe(
+      catchError(() => of(this.getLocalStats()))
+    ).subscribe(stats => {
+      if (stats && stats.length) {
+        this.statsSubject.next(stats);
+        localStorage.setItem(LS + 'site_stats', JSON.stringify(stats));
       }
     });
 
@@ -731,6 +752,90 @@ export class FurnitureService {
     );
   }
 
+  // ════════════════════════════════════════════════════════════════
+  // SITE STATS (Instant UI Sync + Live DB Save)
+  // ════════════════════════════════════════════════════════════════
+  getStats(): Observable<SiteStat[]> {
+    return this.stats$;
+  }
+
+  addStat(stat: Partial<SiteStat>): Observable<SiteStat> {
+    const tempId = 'temp_' + Date.now();
+    const optimisticStat: SiteStat = {
+      _id: tempId,
+      value: stat.value || '',
+      label: stat.label || '',
+      order: stat.order !== undefined ? stat.order : this.statsSubject.value.length + 1
+    };
+
+    const current = this.statsSubject.value;
+    const updated = [...current, optimisticStat];
+    this.statsSubject.next(updated);
+    localStorage.setItem(LS + 'site_stats', JSON.stringify(updated));
+    this.notifySync();
+
+    return this.http.post<SiteStat>(`${this.apiUrl}/stats`, stat, { headers: this.adminHeaders }).pipe(
+      tap((saved) => {
+        if (saved && saved._id) {
+          const list = this.statsSubject.value.map(s => s._id === tempId ? saved : s);
+          this.statsSubject.next(list);
+          localStorage.setItem(LS + 'site_stats', JSON.stringify(list));
+          this.notifySync();
+        }
+      }),
+      catchError(() => of(optimisticStat))
+    );
+  }
+
+  updateStat(id: string, stat: Partial<SiteStat>): Observable<SiteStat> {
+    const current = this.statsSubject.value;
+    const updated = current.map(s => this.isMatch(s, id) ? { ...s, ...stat } : s);
+    this.statsSubject.next(updated);
+    localStorage.setItem(LS + 'site_stats', JSON.stringify(updated));
+    this.notifySync();
+
+    return this.http.put<SiteStat>(`${this.apiUrl}/stats/${id}`, stat, { headers: this.adminHeaders }).pipe(
+      tap((saved) => {
+        if (saved && saved._id) {
+          const list = this.statsSubject.value.map(s => this.isMatch(s, id) ? { ...s, ...saved } : s);
+          this.statsSubject.next(list);
+          localStorage.setItem(LS + 'site_stats', JSON.stringify(list));
+          this.notifySync();
+        }
+      }),
+      catchError(() => of(stat as SiteStat))
+    );
+  }
+
+  saveAllStats(stats: SiteStat[]): Observable<SiteStat[]> {
+    this.statsSubject.next([...stats]);
+    localStorage.setItem(LS + 'site_stats', JSON.stringify(stats));
+    this.notifySync();
+
+    return this.http.put<SiteStat[]>(`${this.apiUrl}/stats`, stats, { headers: this.adminHeaders }).pipe(
+      tap((savedList) => {
+        if (savedList && Array.isArray(savedList)) {
+          this.statsSubject.next(savedList);
+          localStorage.setItem(LS + 'site_stats', JSON.stringify(savedList));
+          this.notifySync();
+        }
+      }),
+      catchError(() => of(stats))
+    );
+  }
+
+  deleteStat(id: string): Observable<any> {
+    const current = this.statsSubject.value;
+    const updated = current.filter(s => !this.isMatch(s, id));
+    this.statsSubject.next(updated);
+    localStorage.setItem(LS + 'site_stats', JSON.stringify(updated));
+    this.notifySync();
+
+    return this.http.delete(`${this.apiUrl}/stats/${id}`, { headers: this.adminHeaders }).pipe(
+      catchError(() => of({ success: true }))
+    );
+  }
+
   getCategories(): string[] {
     return ['Sofa Set', 'Bedroom', 'TV Unit', 'Kitchen', 'Temple / Mandir', 'Dining Room', 'Office'];
   }
@@ -826,5 +931,18 @@ export class FurnitureService {
       const d = localStorage.getItem(LS + 'custom_orders');
       return d ? JSON.parse(d) : [];
     } catch (_) { return []; }
+  }
+
+  private getLocalStats(): SiteStat[] {
+    try {
+      const d = localStorage.getItem(LS + 'site_stats');
+      if (d) return JSON.parse(d);
+    } catch (_) {}
+    return [
+      { _id: '1', value: '15+', label: 'Years Experience', order: 1 },
+      { _id: '2', value: '5000+', label: 'Happy Clients', order: 2 },
+      { _id: '3', value: '200+', label: 'Furniture Designs', order: 3 },
+      { _id: '4', value: '50+', label: 'Cities Delivered', order: 4 }
+    ];
   }
 }

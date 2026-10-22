@@ -172,26 +172,21 @@
   </div>
 </div>
 
-<!-- ════════════════════════════════════════════════════════════════
-     STATS RIBBON
-════════════════════════════════════════════════════════════════ -->
 <section class="stats-section">
   <div class="container">
     <div class="stats-grid">
-      @for (stat of stats; track stat.label) {
+      @for (stat of stats; track (stat._id || stat.label)) {
       <div class="stat-card">
         <div class="stat-glow"></div>
         <div class="stat-value">{{ stat.value }}</div>
-        <div class="stat-label">{{ stat.label }}</div>
+        <div class="stat-label">{{ stat.label | t }}</div>
       </div>
       }
     </div>
   </div>
 </section>
 
-<!-- ════════════════════════════════════════════════════════════════
-     3-STEP BESPOKE CRAFTING PROCESS
-════════════════════════════════════════════════════════════════ -->
+
 <section class="section process-section">
   <div class="container">
     <div class="section-header">
@@ -266,9 +261,7 @@
   </div>
 </section>
 
-<!-- ════════════════════════════════════════════════════════════════
-     CATEGORIES SHOWCASE
-════════════════════════════════════════════════════════════════ -->
+
 <section class="section categories-section">
   <div class="container">
     <div class="section-header">
@@ -293,9 +286,7 @@
   </div>
 </section>
 
-<!-- ════════════════════════════════════════════════════════════════
-     AUTO-SCROLLING LIVE SHOWCASE (SOFAS & TV ENTERTAINMENT)
-════════════════════════════════════════════════════════════════ -->
+
 <section class="section showcase-scroll-section">
   <div class="container">
     <div class="section-header">
@@ -378,9 +369,7 @@
   </div>
 </section>
 
-<!-- ════════════════════════════════════════════════════════════════
-     WHY CHOOSE BHAVESH FURNITURE
-════════════════════════════════════════════════════════════════ -->
+
 <section class="section why-section">
   <div class="container">
     <div class="section-header">
@@ -402,9 +391,7 @@
   </div>
 </section>
 
-<!-- ════════════════════════════════════════════════════════════════
-     WORKSHOP VIDEOS SECTION
-════════════════════════════════════════════════════════════════ -->
+
 @if (videos.length > 0) {
 <section class="section home-videos-section">
   <div class="container">
@@ -432,9 +419,7 @@
 </section>
 }
 
-<!-- ════════════════════════════════════════════════════════════════
-     MASTER TEAM SECTION
-════════════════════════════════════════════════════════════════ -->
+
 <section class="section team-section">
   <div class="container">
     <div class="section-header">
@@ -471,9 +456,7 @@
   </div>
 </section>
 
-<!-- ════════════════════════════════════════════════════════════════
-     ROYAL BESPOKE CONSULTATION CTA
-════════════════════════════════════════════════════════════════ -->
+
 <section class="furniture-cta-section">
   <div class="container">
     <div class="furniture-cta-card">

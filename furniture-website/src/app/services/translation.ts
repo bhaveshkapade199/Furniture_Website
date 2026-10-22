@@ -61,6 +61,12 @@ export class TranslationService {
       'HERO_SLIDE_CUSTOM': '100% Customized For Your Room Dimensions',
       'HERO_SLIDE_FROM': 'Starting at',
 
+      // ── Stats ──
+      'Years Experience': 'Years Experience',
+      'Happy Clients': 'Happy Clients',
+      'Furniture Designs': 'Furniture Designs',
+      'Cities Delivered': 'Cities Delivered',
+
       // ── Marquee Ribbon ──
       'MARQUEE_1': '✨ 100% Handcrafted Teak & Sheesham Wood',
       'MARQUEE_2': '🏠 ₹200 On-Site Space Laser Inspection',
@@ -272,6 +278,12 @@ export class TranslationService {
       'HERO_SLIDE_CUSTOM': '100% आपके कमरे की नाप अनुसार',
       'HERO_SLIDE_FROM': 'शुरुआती कीमत',
 
+      // ── Stats ──
+      'Years Experience': 'वर्षों का अनुभव',
+      'Happy Clients': 'संतुष्ट ग्राहक',
+      'Furniture Designs': 'फर्नीचर डिज़ाइन',
+      'Cities Delivered': 'शहरों में डिलीवरी',
+
       // ── Marquee Ribbon ──
       'MARQUEE_1': '✨ 100% हस्तनिर्मित शुद्ध सागवान व शीशम लकड़ी',
       'MARQUEE_2': '🏠 मात्र ₹200 में घर पर लेजर नाप व कोटेशन',
@@ -482,6 +494,12 @@ export class TranslationService {
       'HERO_SLIDE_MAT': '✨ अस्सल सागवान व शिसम लाकूड',
       'HERO_SLIDE_CUSTOM': '१००% आपल्या खोलीच्या अचूक मापांनुसार',
       'HERO_SLIDE_FROM': 'सुरुवातीची किंमत',
+
+      // ── Stats ──
+      'Years Experience': 'वर्षांचा अनुभव',
+      'Happy Clients': 'समाधानी ग्राहक',
+      'Furniture Designs': 'फर्निचर डिझाईन्स',
+      'Cities Delivered': 'शहरांमध्ये वितरण',
 
       // ── Marquee Ribbon ──
       'MARQUEE_1': '✨ १००% हस्तकलेने बनवलेले शुद्ध सागवान व शिसम फर्निचर',

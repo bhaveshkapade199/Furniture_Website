@@ -64,6 +64,10 @@
             <strong>{{ feedbacks.length }}</strong>
             <span>Feedback</span>
           </div>
+          <div class="a-stat">
+            <strong>{{ siteStats.length }}</strong>
+            <span>Stats</span>
+          </div>
         </div>
 
         <button class="logout-btn" (click)="logout()">🚪 Logout</button>
@@ -95,6 +99,9 @@
         @if (newOrdersCount > 0) {
           <span class="badge">{{ newOrdersCount }}</span>
         }
+      </button>
+      <button [class.active]="activeTab === 'stats'" (click)="setTab('stats')">
+        📊 Home Stats ({{ siteStats.length }})
       </button>
     </nav>
 
@@ -812,6 +819,121 @@
                   <button class="action-btn edit" (click)="viewOrder(order)">👁️ View & Manage</button>
                   <button class="action-btn delete" (click)="deleteOrder(order)">🗑️</button>
                 </div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- ================================================================ -->
+      <!-- TAB 7: HOME STATS MANAGEMENT                                    -->
+      <!-- ================================================================ -->
+      @if (activeTab === 'stats') {
+        <div class="tab-header">
+          <div>
+            <h2>Home Stats Management</h2>
+            <p>Customize the key statistics shown on the home screen hero banner (e.g., Years Experience, Happy Clients). Changes update instantly on the website and persist in MongoDB.</p>
+          </div>
+          <div class="stats-header-actions">
+            @if (!showAddStatForm) {
+              <button class="add-btn" (click)="startAddStat()">➕ Add New Stat</button>
+            }
+            <button class="action-btn-primary save-all-stats-btn" (click)="saveAllStats()" title="Save all changed stats to MongoDB">
+              💾 Save All Stats
+            </button>
+          </div>
+        </div>
+
+        @if (statsSaveMsg) {
+          <div class="success-banner">
+            {{ statsSaveMsg }}
+          </div>
+        }
+
+        <!-- Add Stat Form -->
+        @if (showAddStatForm) {
+          <div class="admin-form-card">
+            <h3>Add New Home Stat</h3>
+            <form (ngSubmit)="submitNewStat()">
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Display Value <span class="req">*</span> (e.g. 15+, 5000+, 99%)</label>
+                  <input
+                    type="text"
+                    [(ngModel)]="newStat.value"
+                    name="newStatValue"
+                    placeholder="e.g. 15+"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label>Stat Label / Title <span class="req">*</span> (e.g. Years Experience)</label>
+                  <input
+                    type="text"
+                    [(ngModel)]="newStat.label"
+                    name="newStatLabel"
+                    placeholder="e.g. Years Experience"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label>Display Order</label>
+                  <input
+                    type="number"
+                    [(ngModel)]="newStat.order"
+                    name="newStatOrder"
+                    placeholder="1, 2, 3..."
+                  />
+                </div>
+              </div>
+              <div class="form-actions">
+                <button type="submit" class="submit-btn" [disabled]="!newStat.value || !newStat.label">
+                  Publish Stat
+                </button>
+                <button type="button" class="cancel-btn" (click)="cancelStatForm()">Cancel</button>
+              </div>
+            </form>
+          </div>
+        }
+
+        <!-- Live Stats Grid Editor -->
+        <div class="stats-editor-grid">
+          @for (stat of siteStats; track (stat._id || stat.label); let i = $index) {
+            <div class="stat-editor-card">
+              <div class="stat-card-badge">#{{ i + 1 }}</div>
+              
+              <div class="stat-card-preview">
+                <div class="preview-glow"></div>
+                <div class="preview-val">{{ stat.value || '0' }}</div>
+                <div class="preview-lbl">{{ stat.label || 'Stat Label' }}</div>
+              </div>
+
+              <div class="stat-edit-fields">
+                <div class="form-group">
+                  <label>Display Value</label>
+                  <input
+                    type="text"
+                    [(ngModel)]="stat.value"
+                    placeholder="e.g. 15+"
+                  />
+                </div>
+                <div class="form-group">
+                  <label>Stat Label / Name</label>
+                  <input
+                    type="text"
+                    [(ngModel)]="stat.label"
+                    placeholder="e.g. Years Experience"
+                  />
+                </div>
+              </div>
+
+              <div class="stat-card-actions">
+                <button class="action-btn edit" (click)="saveSingleStat(stat)" title="Save changes for this stat">
+                  💾 Update
+                </button>
+                <button class="action-btn delete" (click)="deleteSiteStat(stat)" title="Delete this stat">
+                  🗑️
+                </button>
               </div>
             </div>
           }

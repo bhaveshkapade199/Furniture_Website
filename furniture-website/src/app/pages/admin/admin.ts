@@ -1,11 +1,11 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { FurnitureService, FurnitureItem, Feedback, WorkInfo, TeamMember, VideoItem, CustomOrder } from '../../services/furniture';
+import { FurnitureService, FurnitureItem, Feedback, WorkInfo, TeamMember, VideoItem, CustomOrder, SiteStat } from '../../services/furniture';
 import { TranslationService } from '../../services/translation';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 
-type AdminTab = 'gallery' | 'videos' | 'workinfo' | 'team' | 'feedback' | 'orders';
+type AdminTab = 'gallery' | 'videos' | 'workinfo' | 'team' | 'feedback' | 'orders' | 'stats';
 
 @Component({
   selector: 'app-admin',
@@ -63,6 +63,13 @@ export class Admin implements OnInit, OnDestroy {
   orderStatusFilter = '';
   orderActionMsg = '';
 
+  // Home Stats
+  siteStats: SiteStat[] = [];
+  showAddStatForm = false;
+  editingStat: SiteStat | null = null;
+  newStat: Partial<SiteStat> = { value: '', label: '', order: 0 };
+  statsSaveMsg = '';
+
   constructor(private furnitureService: FurnitureService) {}
 
   ngOnInit() {
@@ -101,6 +108,7 @@ export class Admin implements OnInit, OnDestroy {
     this.furnitureService.team$.subscribe(team => this.teamMembers = team);
     this.furnitureService.feedbacks$.subscribe(fbs => this.feedbacks = fbs);
     this.furnitureService.customOrders$.subscribe(orders => this.customOrders = orders);
+    this.furnitureService.stats$.subscribe(stats => this.siteStats = stats);
   }
 
   // ---- Tabs ----
@@ -110,6 +118,7 @@ export class Admin implements OnInit, OnDestroy {
     this.cancelVideoForm();
     this.cancelWorkForm();
     this.cancelTeamForm();
+    this.cancelStatForm();
     this.selectedOrder = null;
     if (tab === 'orders') {
       this.loadOrders();
@@ -602,5 +611,56 @@ export class Admin implements OnInit, OnDestroy {
 
   get newFeedbackCount(): number {
     return this.feedbacks.filter(f => f.status === 'new').length;
+  }
+
+  // ════════════════════════════════════════════════════════════════
+  // 7. SITE STATS MANAGEMENT
+  // ════════════════════════════════════════════════════════════════
+  saveSingleStat(stat: SiteStat) {
+    const id = String(stat._id || stat.id);
+    this.furnitureService.updateStat(id, { value: stat.value, label: stat.label, order: stat.order })
+      .subscribe(() => {
+        this.statsSaveMsg = `✓ Stat "${stat.label}" updated successfully!`;
+        setTimeout(() => this.statsSaveMsg = '', 3000);
+      });
+  }
+
+  saveAllStats() {
+    this.furnitureService.saveAllStats(this.siteStats)
+      .subscribe(() => {
+        this.statsSaveMsg = '✓ All Home Stats saved successfully to database!';
+        setTimeout(() => this.statsSaveMsg = '', 3500);
+      });
+  }
+
+  startAddStat() {
+    this.newStat = { value: '', label: '', order: this.siteStats.length + 1 };
+    this.showAddStatForm = true;
+    this.editingStat = null;
+  }
+
+  cancelStatForm() {
+    this.showAddStatForm = false;
+    this.editingStat = null;
+    this.newStat = { value: '', label: '', order: 0 };
+  }
+
+  submitNewStat() {
+    if (!this.newStat.value || !this.newStat.label) return;
+    this.furnitureService.addStat(this.newStat).subscribe(() => {
+      this.statsSaveMsg = '✓ New Stat created & published!';
+      this.cancelStatForm();
+      setTimeout(() => this.statsSaveMsg = '', 3000);
+    });
+  }
+
+  deleteSiteStat(stat: SiteStat) {
+    if (confirm(`Are you sure you want to delete "${stat.label}" (${stat.value})?`)) {
+      const id = String(stat._id || stat.id);
+      this.furnitureService.deleteStat(id).subscribe(() => {
+        this.statsSaveMsg = '✓ Stat removed successfully.';
+        setTimeout(() => this.statsSaveMsg = '', 3000);
+      });
+    }
   }
 }
