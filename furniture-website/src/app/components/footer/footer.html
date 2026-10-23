@@ -17,14 +17,14 @@
         </div>
 
         <!-- Footer Language Selector -->
-        <div class="footer-lang-wrap">
+        <!-- <div class="footer-lang-wrap">
           <span class="footer-lang-title">🌐 {{ 'CHOOSE_LANGUAGE' | t }}:</span>
           <div class="footer-lang-chips">
             <button type="button" [class.active]="langService.currentLang() === 'en'" (click)="setLang('en')">English</button>
             <button type="button" [class.active]="langService.currentLang() === 'hi'" (click)="setLang('hi')">हिन्दी</button>
             <button type="button" [class.active]="langService.currentLang() === 'mr'" (click)="setLang('mr')">मराठी</button>
           </div>
-        </div>
+        </div> -->
       </div>
 
       <!-- Quick Links -->
@@ -33,7 +33,8 @@
         <ul>
           <li><a routerLink="/">{{ 'NAV_HOME' | t }}</a></li>
           <li><a routerLink="/gallery">{{ 'NAV_GALLERY' | t }}</a></li>
-          <li><a routerLink="/custom-order" style="color: #0891b2; font-weight: 700;">{{ 'NAV_MAKE_FURNITURE' | t }}</a></li>
+          <li><a routerLink="/custom-order" style="color: #0891b2; font-weight: 700;">{{ 'NAV_MAKE_FURNITURE' | t }}</a>
+          </li>
           <li><a routerLink="/team">{{ 'NAV_TEAM' | t }}</a></li>
           <li><a routerLink="/about">{{ 'NAV_ABOUT' | t }}</a></li>
           <li><a routerLink="/contact">{{ 'NAV_CONTACT' | t }}</a></li>
