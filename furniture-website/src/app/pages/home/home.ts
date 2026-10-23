@@ -27,9 +27,6 @@ export interface HeroSlide {
 
 @Component({
   selector: 'app-home',
-openSlideLightbox(_t215: ShowcaseSlide) {
-throw new Error('Method not implemented.');
-}
   imports: [RouterLink, CommonModule, TranslatePipe],
   templateUrl: './home.html',
   styleUrl: './home.css'
