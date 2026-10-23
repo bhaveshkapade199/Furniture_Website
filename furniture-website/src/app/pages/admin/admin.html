@@ -116,14 +116,27 @@
         <div class="backend-offline-banner">
           <div class="bob-icon">⚠️</div>
           <div class="bob-content">
-            <h4>Backend Server on Port 5000 is NOT Running!</h4>
-            <p>
-              Your browser cannot connect to <code>{{ apiUrl }}</code>. Changes cannot be saved or deleted until the backend is online.
-              <br/>
-              👉 <strong>To fix locally:</strong> Double-click <code>start-all.bat</code> in <code>d:\furniture_web</code> (or run <code>cd backend && npm start</code> in terminal).
-              <br/>
-              👉 <strong>If website is live on Vercel/Netlify:</strong> Click <button type="button" class="bob-link-btn" (click)="changeApiUrl()">⚙️ Change API URL</button> to link your live cloud backend.
-            </p>
+            @if (isLiveVercel) {
+              <h4>Live Vercel Site Needs Cloud Backend & Database</h4>
+              <p>
+                You are currently opening your live Vercel website (<code>{{ apiUrl }}</code>).
+                Vercel only hosts the frontend files. Your Node.js backend and MongoDB database are running locally on your laptop!
+                <br/><br/>
+                👉 <strong>To manage furniture on your computer right now:</strong>
+                <a href="http://localhost:4200/admin" class="bob-link-btn" style="text-decoration: none;">Open Localhost Admin (http://localhost:4200/admin)</a>
+                <br/><br/>
+                👉 <strong>To connect this live Vercel site to a cloud backend:</strong>
+                <button type="button" class="bob-link-btn" (click)="changeApiUrl()">⚙️ Connect Cloud API URL</button>
+              </p>
+            } @else {
+              <h4>Backend Server on Port 5000 is NOT Running!</h4>
+              <p>
+                Your browser cannot connect to <code>{{ apiUrl }}</code>.
+                <br/>
+                👉 <strong>To fix locally:</strong> Double-click <code>start-all.bat</code> in <code>d:\furniture_web</code> (or run <code>cd backend && npm start</code> in terminal).
+                <button type="button" class="bob-link-btn" (click)="resetToLocalhost()" style="margin-left: 8px;">🔄 Reset to localhost:5000</button>
+              </p>
+            }
           </div>
         </div>
       }

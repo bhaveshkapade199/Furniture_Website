@@ -99,6 +99,17 @@ export class Admin implements OnInit, OnDestroy {
     return `⚠️ Failed: ${err?.error?.error || err?.message || 'Server connection error'}`;
   }
 
+  get isLiveVercel(): boolean {
+    if (typeof window !== 'undefined') {
+      return window.location.hostname.includes('vercel.app') || (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1');
+    }
+    return false;
+  }
+
+  resetToLocalhost() {
+    this.furnitureService.setCustomApiUrl('');
+  }
+
   changeApiUrl() {
     const current = localStorage.getItem('rk_furniture_api_url') || this.apiUrl;
     const nextUrl = prompt('Configure Backend API URL (for local dev or live cloud backend):\n\nLeave empty to reset to default.', current);
