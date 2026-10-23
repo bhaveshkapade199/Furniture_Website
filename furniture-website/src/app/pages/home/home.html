@@ -292,20 +292,51 @@
     <div class="section-header">
       <span class="section-tag">🛋️ & 📺 Handcrafted Living Room Designs</span>
       <h2>Trending Sofas & TV Units</h2>
-      <p>Continuous auto-scrolling gallery of our bestselling on-site designs. Hover or tap to pause!</p>
+      <p>Continuous auto-scrolling gallery of our bestselling on-site designs. Every uploaded detail photo and angle is displayed below! Hover or tap to pause.</p>
+
+      <!-- Category Filter Tabs for Auto-Slider -->
+      <div class="showcase-filter-tabs">
+        <button 
+          class="showcase-tab-btn" 
+          [class.active]="activeShowcaseFilter === 'all'" 
+          (click)="setShowcaseFilter('all')">
+          🌟 All Showcase ({{ showcaseSlides.length }})
+        </button>
+        <button 
+          class="showcase-tab-btn tv-tab" 
+          [class.active]="activeShowcaseFilter === 'TV Unit'" 
+          (click)="setShowcaseFilter('TV Unit')">
+          📺 TV Units & All Detail Photos
+        </button>
+        <button 
+          class="showcase-tab-btn sofa-tab" 
+          [class.active]="activeShowcaseFilter === 'Sofa Set'" 
+          (click)="setShowcaseFilter('Sofa Set')">
+          🛋️ Sofa Sets & Angles
+        </button>
+      </div>
     </div>
   </div>
 
   <div class="auto-scroll-wrapper" (mouseenter)="isPaused = true" (mouseleave)="isPaused = false">
     <div class="auto-scroll-track" [class.paused]="isPaused">
       @for (slide of autoScrollSlides; track $index) {
-      <div class="showcase-slide">
+      <div class="showcase-slide" (click)="openSlideLightbox(slide)" title="Click to view all photos of this furniture">
         <div class="slide-img-wrap">
           <img [src]="slide.url" [alt]="slide.name" loading="lazy" />
           <div class="slide-gradient-shade"></div>
+          
           <span class="slide-badge" [class.tv-badge]="slide.category === 'TV Unit'">
-            {{ slide.category === 'TV Unit' ? '📺 TV Unit' : '🛋️ Sofa Set' }}
+            {{ slide.photoLabel || (slide.category === 'TV Unit' ? '📺 TV Unit' : '🛋️ Sofa Set') }}
           </span>
+
+          @if (slide.isDetail) {
+            <span class="slide-detail-badge">🔍 Detail Shot</span>
+          }
+
+          @if (slide.totalPhotos && slide.totalPhotos > 1) {
+            <span class="slide-photos-count">📸 {{ slide.totalPhotos }} Photos</span>
+          }
         </div>
         <div class="showcase-slide-info">
           <div class="slide-title-wrap">
@@ -315,8 +346,10 @@
             }
           </div>
           <div class="slide-actions">
-            <a routerLink="/gallery" [queryParams]="{cat: slide.category}" class="slide-link">View Collection →</a>
-            <a routerLink="/custom-order" class="slide-custom-btn">Make This</a>
+            <button type="button" class="slide-view-btn" (click)="$event.stopPropagation(); openSlideLightbox(slide)">
+              🔍 View All Photos
+            </button>
+            <a routerLink="/custom-order" class="slide-custom-btn" (click)="$event.stopPropagation()">Make This</a>
           </div>
         </div>
       </div>
@@ -326,7 +359,7 @@
 
   <div class="scroll-hint">
     <span class="hint-pulse"></span>
-    <span>Auto-scrolling showcase • Hover cursor over any item to inspect details</span>
+    <span>Auto-scrolling showcase • Hover cursor to pause • Click any card to inspect all related detail photos</span>
   </div>
 </section>
 
@@ -537,3 +570,60 @@
     </div>
   </div>
 </section>
+
+<!-- Home Multi-Photo Detail Lightbox Modal -->
+@if (selectedHomeItem) {
+  <div class="home-modal-overlay" (click)="closeHomeLightbox()">
+    <div class="home-modal-box" (click)="$event.stopPropagation()">
+      <button class="home-modal-close" (click)="closeHomeLightbox()">✕</button>
+      <div class="home-modal-content">
+        <div class="home-modal-img">
+          @if (selectedHomeItem.videoUrl) {
+            <video [src]="selectedHomeItem.videoUrl" controls [poster]="activeHomeModalImage || selectedHomeItem.imageUrl" style="width: 100%; border-radius: 12px; margin-bottom: 10px;"></video>
+          }
+          <div class="home-modal-active-img-wrap">
+            <img [src]="activeHomeModalImage || selectedHomeItem.imageUrl" [alt]="selectedHomeItem.name" class="home-modal-large-img" />
+          </div>
+
+          <!-- Thumbnails Strip for Related / Additional Photos -->
+          @if (getAllHomeItemImages(selectedHomeItem).length > 1) {
+            <div class="home-modal-gallery-strip">
+              <div class="strip-header">
+                <span>📸 All {{ getAllHomeItemImages(selectedHomeItem).length }} Photos of this {{ getCategoryName(selectedHomeItem.category) }}</span>
+              </div>
+              <div class="strip-row">
+                @for (photo of getAllHomeItemImages(selectedHomeItem); track photo; let i = $index) {
+                  <button 
+                    type="button" 
+                    class="strip-thumb-btn"
+                    [class.active]="(activeHomeModalImage || selectedHomeItem.imageUrl) === photo"
+                    (click)="setHomeModalImage(photo)">
+                    <img [src]="photo" [alt]="selectedHomeItem.name + ' - Photo ' + (i + 1)" />
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="home-modal-details">
+          <span class="home-modal-badge">{{ getCategoryName(selectedHomeItem.category) }}</span>
+          <h2>{{ selectedHomeItem.name }}</h2>
+          <p>{{ selectedHomeItem.description }}</p>
+          @if (selectedHomeItem.price) {
+            <div class="home-modal-price">{{ selectedHomeItem.price }}</div>
+          }
+
+          <div class="home-modal-actions">
+            <a routerLink="/custom-order" class="home-modal-btn make-btn" (click)="closeHomeLightbox()">
+              🛠️ Customize & Order This
+            </a>
+            <a routerLink="/gallery" [queryParams]="{cat: selectedHomeItem.category}" class="home-modal-btn gallery-btn" (click)="closeHomeLightbox()">
+              🖼️ Browse All {{ getCategoryName(selectedHomeItem.category) }}
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+}

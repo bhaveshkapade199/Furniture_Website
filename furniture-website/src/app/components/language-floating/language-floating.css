@@ -4,8 +4,8 @@
 
 .lang-fab-container {
   position: fixed;
-  bottom: 50px;
-  left: 14px;
+  bottom: 28px;
+  left: 24px;
   z-index: 9995;
   font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
 }

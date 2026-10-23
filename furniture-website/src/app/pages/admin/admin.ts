@@ -27,6 +27,7 @@ export class Admin implements OnInit, OnDestroy {
   showAddItemForm = false;
   editingItem: FurnitureItem | null = null;
   newItem = this.blankItem();
+  newAdditionalImageUrl = '';
   categories: string[] = [];
   itemSaved = false;
   previewImage = '';
@@ -79,6 +80,30 @@ export class Admin implements OnInit, OnDestroy {
       this.loadData();
     } else {
       this.isLoggedIn = false;
+    }
+    this.furnitureService.checkBackendHealth();
+  }
+
+  get apiUrl(): string {
+    return this.furnitureService.apiUrl;
+  }
+
+  get isBackendOnline$() {
+    return this.furnitureService.backendOnline$;
+  }
+
+  formatApiError(err: any): string {
+    if (err?.status === 0) {
+      return '⚠️ Backend server is NOT running on port 5000!\n\nTo fix:\n1. Open terminal in the "backend" directory\n2. Run: npm start\n(Or double-click "start-all.bat" in the furniture_web folder to start both frontend & backend)';
+    }
+    return `⚠️ Failed: ${err?.error?.error || err?.message || 'Server connection error'}`;
+  }
+
+  changeApiUrl() {
+    const current = localStorage.getItem('rk_furniture_api_url') || this.apiUrl;
+    const nextUrl = prompt('Configure Backend API URL (for local dev or live cloud backend):\n\nLeave empty to reset to default.', current);
+    if (nextUrl !== null) {
+      this.furnitureService.setCustomApiUrl(nextUrl.trim());
     }
   }
 
@@ -196,15 +221,23 @@ export class Admin implements OnInit, OnDestroy {
 
   // ════════════════════════════════════════════════════════════════
   // 1. GALLERY & PHOTOS
-  // ════════════════════════════════════════════════════════════════
-  blankItem() {
-    return { name: '', category: 'Sofa Set', description: '', imageUrl: '', videoUrl: '', price: '' };
+  blankItem(): FurnitureItem {
+    return {
+      name: '',
+      category: 'Sofa Set',
+      description: '',
+      imageUrl: '',
+      additionalImages: [],
+      videoUrl: '',
+      price: ''
+    };
   }
 
   openAddItemForm() {
     this.showAddItemForm = true;
     this.editingItem = null;
     this.newItem = this.blankItem();
+    this.newAdditionalImageUrl = '';
     this.previewImage = '';
     this.previewVideo = '';
     this.itemSaved = false;
@@ -217,13 +250,25 @@ export class Admin implements OnInit, OnDestroy {
       category: item.category,
       description: item.description || '',
       imageUrl: item.imageUrl,
+      additionalImages: item.additionalImages ? [...item.additionalImages] : [],
       videoUrl: item.videoUrl || '',
       price: item.price || ''
     };
+    this.newAdditionalImageUrl = '';
     this.previewImage = item.imageUrl;
     this.previewVideo = item.videoUrl || '';
     this.showAddItemForm = true;
     this.itemSaved = false;
+  }
+
+  openAddPhotosFor(item: FurnitureItem) {
+    this.editItem(item);
+    setTimeout(() => {
+      const el = document.querySelector('.additional-photos-group');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 150);
   }
 
   onImageUrlChange() { this.previewImage = this.newItem.imageUrl; }
@@ -290,6 +335,81 @@ export class Admin implements OnInit, OnDestroy {
     });
   }
 
+  onAdditionalPhotosFiles(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+    const files = Array.from(input.files);
+    this.isUploading = true;
+    this.uploadMsg = `Uploading ${files.length} related photo(s)...`;
+
+    if (!this.newItem.additionalImages) {
+      this.newItem.additionalImages = [];
+    }
+
+    let completed = 0;
+    for (const file of files) {
+      this.furnitureService.uploadFile(file).subscribe({
+        next: (res) => {
+          this.newItem.additionalImages!.push(res.url);
+          completed++;
+          if (completed === files.length) {
+            this.isUploading = false;
+            this.uploadMsg = `All ${files.length} related photo(s) uploaded!`;
+            setTimeout(() => this.uploadMsg = '', 2500);
+          }
+        },
+        error: () => {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const result = e.target?.result as string;
+            if (result) {
+              this.newItem.additionalImages!.push(result);
+            }
+            completed++;
+            if (completed === files.length) {
+              this.isUploading = false;
+              this.uploadMsg = 'Photos attached!';
+              setTimeout(() => this.uploadMsg = '', 2500);
+            }
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+    }
+    input.value = '';
+  }
+
+  addAdditionalImageUrl() {
+    const url = (this.newAdditionalImageUrl || '').trim();
+    if (!url) return;
+    if (!this.newItem.additionalImages) {
+      this.newItem.additionalImages = [];
+    }
+    this.newItem.additionalImages.push(url);
+    this.newAdditionalImageUrl = '';
+  }
+
+  removeAdditionalImage(index: number) {
+    if (this.newItem.additionalImages) {
+      this.newItem.additionalImages.splice(index, 1);
+    }
+  }
+
+  makePhotoPrimary(index: number) {
+    if (!this.newItem.additionalImages || !this.newItem.additionalImages[index]) return;
+    const selected = this.newItem.additionalImages[index];
+    const oldPrimary = this.newItem.imageUrl;
+
+    this.newItem.imageUrl = selected;
+    this.previewImage = selected;
+
+    if (oldPrimary) {
+      this.newItem.additionalImages[index] = oldPrimary;
+    } else {
+      this.newItem.additionalImages.splice(index, 1);
+    }
+  }
+
   saveItem() {
     if (!this.newItem.name || !this.newItem.imageUrl) return;
     const id = this.editingItem?._id || (this.editingItem?.id as any);
@@ -306,7 +426,7 @@ export class Admin implements OnInit, OnDestroy {
     const id = String(item._id || item.id);
     if (confirm(`Delete "${item.name}"?`)) {
       this.furnitureService.deleteFurnitureItem(id, item.name).subscribe({
-        error: (err) => alert(`Failed to delete: ${err?.error?.error || err.message || 'Unknown error'}`)
+        error: (err) => alert(this.formatApiError(err))
       });
     }
   }
@@ -315,6 +435,7 @@ export class Admin implements OnInit, OnDestroy {
     this.showAddItemForm = false;
     this.editingItem = null;
     this.newItem = this.blankItem();
+    this.newAdditionalImageUrl = '';
     this.previewImage = '';
     this.previewVideo = '';
     this.itemSaved = false;
@@ -411,7 +532,7 @@ export class Admin implements OnInit, OnDestroy {
     const id = String(vid._id || vid.id);
     if (confirm(`Delete video "${vid.title}"?`)) {
       this.furnitureService.deleteVideo(id, vid.title).subscribe({
-        error: (err) => alert(`Failed to delete: ${err?.error?.error || err.message || 'Unknown error'}`)
+        error: (err) => alert(this.formatApiError(err))
       });
     }
   }
@@ -481,7 +602,7 @@ export class Admin implements OnInit, OnDestroy {
     const id = String(item._id || item.id);
     if (confirm(`Delete service "${item.title}"?`)) {
       this.furnitureService.deleteWorkInfo(id, item.title).subscribe({
-        error: (err) => alert(`Failed to delete: ${err?.error?.error || err.message || 'Unknown error'}`)
+        error: (err) => alert(this.formatApiError(err))
       });
     }
   }
@@ -586,7 +707,7 @@ export class Admin implements OnInit, OnDestroy {
           setTimeout(() => this.teamActionMsg = '', 3000);
         },
         error: (err) => {
-          alert(`Failed to delete team member from database: ${err?.error?.error || err.message || 'Unknown error'}`);
+          alert(this.formatApiError(err));
         }
       });
     }

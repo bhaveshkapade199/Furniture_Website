@@ -59,14 +59,33 @@ export class Gallery implements OnInit {
     });
   }
 
+  activeModalImage: string = '';
+
   openItem(item: FurnitureItem) {
     this.selectedItem = item;
+    this.activeModalImage = item.imageUrl;
     document.body.style.overflow = 'hidden';
   }
 
   closeItem() {
     this.selectedItem = null;
+    this.activeModalImage = '';
     document.body.style.overflow = '';
+  }
+
+  setActiveModalImage(img: string) {
+    this.activeModalImage = img;
+  }
+
+  getAllItemImages(item: FurnitureItem): string[] {
+    const list: string[] = [];
+    if (item.imageUrl) list.push(item.imageUrl);
+    if (item.additionalImages && Array.isArray(item.additionalImages)) {
+      for (const img of item.additionalImages) {
+        if (img && !list.includes(img)) list.push(img);
+      }
+    }
+    return list;
   }
 
   getItemId(item: FurnitureItem): string {

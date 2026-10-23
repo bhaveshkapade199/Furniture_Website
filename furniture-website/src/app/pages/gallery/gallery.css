@@ -390,20 +390,102 @@
   width: 100%;
   height: 100%;
   min-height: 440px;
-  background: #f1f5f9;
+  background: #0f172a;
   display: flex;
   flex-direction: column;
 }
 
-.modal-img img {
+.card-more-photos {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(8px);
+  color: #38bdf8;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+  z-index: 2;
+  letter-spacing: 0.2px;
+}
+
+.modal-active-img-wrap {
+  width: 100%;
+  flex: 1;
+  min-height: 320px;
+  background: #0f172a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 24px 0 0 0;
+}
+
+.modal-large-img {
   width: 100%;
   height: 100%;
-  flex: 1 1 auto;
-  min-height: 100%;
+  max-height: 480px;
   object-fit: cover;
-  object-position: center;
   display: block;
-  border-radius: 24px 0 0 24px;
+  transition: opacity 0.25s ease;
+}
+
+.modal-gallery-strip {
+  background: #0f172a;
+  padding: 12px 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0 0 0 24px;
+}
+
+.strip-header {
+  font-size: 12px;
+  color: #94a3b8;
+  font-weight: 700;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.strip-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: thin;
+}
+
+.strip-thumb-btn {
+  flex: 0 0 58px;
+  height: 58px;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  padding: 0;
+  overflow: hidden;
+  cursor: pointer;
+  background: #1e293b;
+  transition: all 0.2s ease;
+}
+
+.strip-thumb-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.strip-thumb-btn:hover {
+  transform: translateY(-2px);
+  border-color: #38bdf8;
+}
+
+.strip-thumb-btn.active {
+  border-color: #06b6d4;
+  box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.6);
+  transform: scale(1.04);
 }
 
 .modal-info {

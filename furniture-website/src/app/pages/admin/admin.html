@@ -42,9 +42,12 @@
           </div>
         </div>
 
-        <div class="live-sync-badge" title="Changes made here are instantly updated on the live website and saved to the database">
-          <span class="live-pulse"></span>
-          <span>⚡ Live Database Sync Active</span>
+        <div [class]="(isBackendOnline$ | async) ? 'live-sync-badge online' : 'live-sync-badge offline'"
+             (click)="changeApiUrl()"
+             [title]="(isBackendOnline$ | async) ? 'Connected to ' + apiUrl + ' (Click to change)' : 'Backend server offline! Click to configure API URL'">
+          <span [class]="(isBackendOnline$ | async) ? 'live-pulse' : 'offline-pulse'"></span>
+          <span>{{ (isBackendOnline$ | async) ? '⚡ Connected: ' + apiUrl : '⚠️ Backend Offline: ' + apiUrl }}</span>
+          <span class="edit-api-hint">⚙️</span>
         </div>
 
         <div class="admin-stats">
@@ -108,6 +111,23 @@
     <!-- Main Content -->
     <div class="admin-content">
 
+      <!-- Backend Offline Warning Banner -->
+      @if (!(isBackendOnline$ | async)) {
+        <div class="backend-offline-banner">
+          <div class="bob-icon">⚠️</div>
+          <div class="bob-content">
+            <h4>Backend Server on Port 5000 is NOT Running!</h4>
+            <p>
+              Your browser cannot connect to <code>{{ apiUrl }}</code>. Changes cannot be saved or deleted until the backend is online.
+              <br/>
+              👉 <strong>To fix locally:</strong> Double-click <code>start-all.bat</code> in <code>d:\furniture_web</code> (or run <code>cd backend && npm start</code> in terminal).
+              <br/>
+              👉 <strong>If website is live on Vercel/Netlify:</strong> Click <button type="button" class="bob-link-btn" (click)="changeApiUrl()">⚙️ Change API URL</button> to link your live cloud backend.
+            </p>
+          </div>
+        </div>
+      }
+
       <!-- Upload Status Banner -->
       @if (uploadMsg) {
         <div class="upload-alert">
@@ -165,16 +185,78 @@
                   </div>
                 </div>
 
-                <!-- Photo Upload Section -->
-                <div class="form-group">
-                  <label>📸 Upload Photo from Computer</label>
+                <!-- Primary Cover Photo -->
+                <div class="form-group primary-photo-group">
+                  <label>📸 Primary Cover Photo * (Main Thumbnail)</label>
                   <input type="file" accept="image/*" (change)="onItemPhotoFile($event)" />
-                  <small>Upload direct JPG, PNG, or WEBP photo. File will be saved to MongoDB backend server.</small>
+                  <input type="text" [(ngModel)]="newItem.imageUrl" (input)="onImageUrlChange()" placeholder="Or enter main photo URL (https://...)" style="margin-top: 6px;" />
+                  <small>Main photo displayed on catalog cards and search results.</small>
                 </div>
 
-                <div class="form-group">
-                  <label>Or Enter Photo URL</label>
-                  <input type="text" [(ngModel)]="newItem.imageUrl" (input)="onImageUrlChange()" placeholder="https://..." />
+                <!-- Related & Additional Photos (e.g. TV Unit details) -->
+                <div class="form-group additional-photos-group">
+                  <div class="ap-header">
+                    <div class="ap-title-wrap">
+                      <span class="ap-badge">🖼️ Multi-Photo Gallery</span>
+                      <label class="ap-title">Add More Photos (TV Unit / Sofa Angles & Details)</label>
+                    </div>
+                    <span class="ap-counter">{{ newItem.additionalImages?.length || 0 }} extra photos attached</span>
+                  </div>
+
+                  <!-- Live Info Note -->
+                  <div class="ap-slider-info-banner">
+                    <span class="banner-icon">⚡</span>
+                    <div>
+                      <strong>Automatically Displays on Home Screen Slider:</strong>
+                      <span> Every photo you add here will appear on the continuous auto-scrolling gallery on the Home Screen! Customers can see front, side, and detail views.</span>
+                    </div>
+                  </div>
+
+                  <!-- Large Dropzone Button -->
+                  <label class="ap-big-dropzone">
+                    <input type="file" multiple accept="image/*" (change)="onAdditionalPhotosFiles($event)" />
+                    <span class="ap-drop-icon">📷 ➕</span>
+                    <span class="ap-drop-title">Click to Choose More Photos</span>
+                    <span class="ap-drop-sub">Select 1 or multiple photos from your device (e.g. inside cabinets, side view, LED glow)</span>
+                  </label>
+
+                  <div class="ap-url-adder" style="margin-top: 10px;">
+                    <input type="text" [(ngModel)]="newAdditionalImageUrl" placeholder="Or paste image URL (https://...)" (keyup.enter)="addAdditionalImageUrl()" />
+                    <button type="button" class="ap-add-btn" (click)="addAdditionalImageUrl()" [disabled]="!newAdditionalImageUrl">
+                      + Add URL
+                    </button>
+                  </div>
+
+                  @if (newItem.additionalImages && newItem.additionalImages.length > 0) {
+                    <div class="ap-preview-header">
+                      <span>📸 Attached Detail Photos ({{ newItem.additionalImages.length }} extra + 1 cover):</span>
+                      <label class="ap-mini-add-btn">
+                        <input type="file" multiple accept="image/*" (change)="onAdditionalPhotosFiles($event)" />
+                        ➕ Add Another Photo
+                      </label>
+                    </div>
+
+                    <div class="ap-preview-grid">
+                      @for (photo of newItem.additionalImages; track photo; let i = $index) {
+                        <div class="ap-thumb-box">
+                          <img [src]="photo" [alt]="'Photo ' + (i + 1)" />
+                          <div class="ap-thumb-overlay">
+                            <button type="button" class="ap-primary-btn" (click)="makePhotoPrimary(i)" title="Make this the Primary Cover Photo">
+                              ⭐ Cover
+                            </button>
+                            <button type="button" class="ap-del-btn" (click)="removeAdditionalImage(i)" title="Delete this photo">
+                              ✕
+                            </button>
+                          </div>
+                          <span class="ap-thumb-badge">Angle #{{ i + 1 }}</span>
+                        </div>
+                      }
+                    </div>
+                  } @else {
+                    <div class="ap-empty-note">
+                      <span>💡</span> Example for <strong>{{ newItem.category || 'TV Unit' }}</strong>: Add photos of shelves, cable management, back LED light, and open drawers!
+                    </div>
+                  }
                 </div>
 
                 <!-- Video Upload Section -->
@@ -230,12 +312,18 @@
                 @if (item.videoUrl) {
                   <span class="item-has-vid">🎥 Video</span>
                 }
+                @if (item.additionalImages && item.additionalImages.length > 0) {
+                  <span class="item-has-photos">📸 +{{ item.additionalImages.length }} photos</span>
+                }
               </div>
               <div class="item-body">
                 <h4>{{ item.name }}</h4>
                 <p>{{ item.description }}</p>
                 <div class="item-price">{{ item.price || '' }}</div>
                 <div class="item-actions">
+                  <button class="action-btn add-photos-btn" (click)="openAddPhotosFor(item)" title="Add extra angle/detail photos">
+                    🖼️ + Add Photos
+                  </button>
                   <button class="action-btn edit" (click)="editItem(item)">✏️ Edit</button>
                   <button class="action-btn copy" (click)="copyShareLink(item)">🔗 Share Link</button>
                   <button class="action-btn delete" (click)="deleteItem(item)">🗑️ Delete</button>

@@ -10,6 +10,7 @@ export interface FurnitureItem {
   category: string;
   description: string;
   imageUrl: string;
+  additionalImages?: string[];
   videoUrl?: string;
   price?: string;
   shareableLink?: string;
@@ -152,6 +153,9 @@ export class FurnitureService {
   private statsSubject = new BehaviorSubject<SiteStat[]>([]);
   public stats$ = this.statsSubject.asObservable();
 
+  private backendOnlineSubject = new BehaviorSubject<boolean>(false);
+  public backendOnline$ = this.backendOnlineSubject.asObservable();
+
   constructor(private http: HttpClient) {
     // 0. Restore admin password from sessionStorage if user previously authenticated
     if (typeof window !== 'undefined') {
@@ -160,6 +164,9 @@ export class FurnitureService {
         this.adminPassword = savedPwd;
       }
     }
+
+    // Health check to test if backend on port 5000 is running
+    this.checkBackendHealth();
 
     // 1. Immediately hydrate subjects from local cache so initial UI render has no delay
     this.furnitureSubject.next(this.getLocalItems());
@@ -221,8 +228,22 @@ export class FurnitureService {
     } else {
       localStorage.removeItem('rk_furniture_api_url');
     }
+    this.checkBackendHealth();
     this.setupLiveSync();
     this.fetchAllFromDatabase();
+  }
+
+  public checkBackendHealth(): void {
+    this.http.get<{ status: string }>(`${this.apiUrl}/health`).subscribe({
+      next: (res) => {
+        if (res && res.status === 'ok') {
+          this.backendOnlineSubject.next(true);
+        }
+      },
+      error: () => {
+        this.backendOnlineSubject.next(false);
+      }
+    });
   }
 
   private notifySync() {
@@ -471,6 +492,7 @@ export class FurnitureService {
       category: item.category || 'Sofa Set',
       description: item.description || '',
       imageUrl: item.imageUrl || '',
+      additionalImages: item.additionalImages ? [...item.additionalImages] : [],
       videoUrl: item.videoUrl || '',
       price: item.price || '',
       dateAdded: new Date()

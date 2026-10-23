@@ -69,6 +69,9 @@
               @if (item.videoUrl) {
                 <span class="video-badge" style="position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.75); color: #fff; font-size: 0.75rem; padding: 3px 8px; border-radius: 6px;">🎥 Video</span>
               }
+              @if (item.additionalImages && item.additionalImages.length > 0) {
+                <span class="card-more-photos">📸 +{{ item.additionalImages.length }} photos</span>
+              }
             </div>
             <div class="card-body">
               <h3>{{ item.name }}</h3>
@@ -110,9 +113,31 @@
       <div class="modal-content">
         <div class="modal-img">
           @if (selectedItem.videoUrl) {
-            <video [src]="selectedItem.videoUrl" controls [poster]="selectedItem.imageUrl" style="width: 100%; border-radius: 12px; margin-bottom: 10px;"></video>
+            <video [src]="selectedItem.videoUrl" controls [poster]="activeModalImage || selectedItem.imageUrl" style="width: 100%; border-radius: 12px; margin-bottom: 10px;"></video>
           }
-          <img [src]="selectedItem.imageUrl" [alt]="selectedItem.name" />
+          <div class="modal-active-img-wrap">
+            <img [src]="activeModalImage || selectedItem.imageUrl" [alt]="selectedItem.name" class="modal-large-img" />
+          </div>
+
+          <!-- Thumbnails Strip for Related / Additional Photos -->
+          @if (getAllItemImages(selectedItem).length > 1) {
+            <div class="modal-gallery-strip">
+              <div class="strip-header">
+                <span>📸 {{ getAllItemImages(selectedItem).length }} Photos of this {{ langService.translateCategory(selectedItem.category) }}</span>
+              </div>
+              <div class="strip-row">
+                @for (photo of getAllItemImages(selectedItem); track photo; let i = $index) {
+                  <button 
+                    type="button" 
+                    class="strip-thumb-btn"
+                    [class.active]="(activeModalImage || selectedItem.imageUrl) === photo"
+                    (click)="setActiveModalImage(photo)">
+                    <img [src]="photo" [alt]="selectedItem.name + ' - Photo ' + (i + 1)" />
+                  </button>
+                }
+              </div>
+            </div>
+          }
         </div>
         <div class="modal-info">
           <span class="modal-category">{{ langService.translateCategory(selectedItem.category) }}</span>
