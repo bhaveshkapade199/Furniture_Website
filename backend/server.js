@@ -1,14 +1,15 @@
-require('dotenv').config();
+const path     = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 const express  = require('express');
 const mongoose = require('mongoose');
 const cors     = require('cors');
-const path     = require('path');
 const fs       = require('fs');
 const multer   = require('multer');
-const { Furniture, Feedback, WorkInfo, TeamMember, Video, CustomOrder } = require('./models');
+const { Furniture, Feedback, WorkInfo, TeamMember, Video, CustomOrder, Stat } = require('./models');
 
 const app  = express();
 const PORT = process.env.PORT || 5000;
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'bhavesh@admin123';
 
 // ─── Ensure uploads folder exists ─────────────────────────────
 const uploadDir = path.join(__dirname, 'uploads');
@@ -37,11 +38,68 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use('/uploads', express.static(uploadDir));
 
-// ─── MongoDB ──────────────────────────────────────────────────
-mongoose.connect(process.env.MONGODB_URI)
+// ─── Real-Time Server-Sent Events (SSE) Engine ────────────────
+const sseClients = new Set();
+
+function broadcastChange(collection, action = 'update', meta = {}) {
+  const payload = JSON.stringify({
+    type: 'CHANGE',
+    collection,
+    action,
+    meta,
+    timestamp: Date.now()
+  });
+
+  const deadClients = [];
+  for (const client of sseClients) {
+    try {
+      client.write(`data: ${payload}\n\n`);
+    } catch (_) {
+      deadClients.push(client);
+    }
+  }
+  for (const dead of deadClients) {
+    sseClients.delete(dead);
+  }
+}
+
+// SSE Live Sync Endpoint for immediate frontend updates
+app.get('/api/live-sync', (req, res) => {
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache, no-transform');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.flushHeaders();
+
+  // Send initial connected payload
+  res.write(`data: ${JSON.stringify({ type: 'CONNECTED', message: 'Live database sync connected', timestamp: Date.now() })}\n\n`);
+
+  sseClients.add(res);
+
+  // Keep-alive heartbeat every 15s to prevent timeouts
+  const heartbeat = setInterval(() => {
+    try {
+      res.write(`: heartbeat ${Date.now()}\n\n`);
+    } catch (_) {
+      clearInterval(heartbeat);
+      sseClients.delete(res);
+    }
+  }, 15000);
+
+  req.on('close', () => {
+    clearInterval(heartbeat);
+    sseClients.delete(res);
+  });
+});
+
+// ─── MongoDB Connection & Seed ────────────────────────────────
+const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/bhavesh_furniture';
+mongoose.connect(mongoUri)
   .then(async () => {
-    console.log('✅  MongoDB connected →', process.env.MONGODB_URI);
+    console.log('✅  MongoDB connected →', mongoUri);
     await seedDefaults();
+    // Start background watcher after initial connect and seed
+    startMongoDirectWatcher();
   })
   .catch(err => console.error('❌  MongoDB error:', err.message));
 
@@ -114,50 +172,149 @@ async function seedDefaults() {
       }
     ]);
   }
+
+  const statCount = await Stat.countDocuments();
+  if (statCount === 0) {
+    console.log('🌱  Seeding default stats…');
+    await Stat.insertMany([
+      { value: '15+', label: 'Years Experience', order: 1 },
+      { value: '5000+', label: 'Happy Clients', order: 2 },
+      { value: '200+', label: 'Furniture Designs', order: 3 },
+      { value: '50+', label: 'Cities Delivered', order: 4 }
+    ]);
+  }
   console.log('✅  Seed complete.');
 }
 
-// ─── Helper: Admin auth ───────────────────────────────────────
+// ─── Direct MongoDB Change Detector (Compass, Mongo Shell, etc.) ─
+const MONITORED_MODELS = {
+  furniture: Furniture,
+  workinfo: WorkInfo,
+  team: TeamMember,
+  videos: Video,
+  'custom-orders': CustomOrder,
+  feedback: Feedback,
+  stats: Stat
+};
+
+const collectionFingerprints = {};
+
+async function pollDirectMongoChanges() {
+  for (const [name, Model] of Object.entries(MONITORED_MODELS)) {
+    try {
+      const docs = await Model.find({}, { _id: 1, __v: 1, updatedAt: 1, name: 1, title: 1, order: 1 }).lean();
+      const currentFingerprint = JSON.stringify(docs);
+
+      if (collectionFingerprints[name] !== undefined && collectionFingerprints[name] !== currentFingerprint) {
+        console.log(`⚡ Direct MongoDB change detected in [${name}] collection! Broadcasting live update…`);
+        broadcastChange(name, 'direct_db_change', { count: docs.length });
+      }
+      collectionFingerprints[name] = currentFingerprint;
+    } catch (_) {}
+  }
+}
+
+function startMongoDirectWatcher() {
+  // Initialize fingerprints
+  pollDirectMongoChanges().then(() => {
+    // Poll every 1000ms for live external database updates
+    setInterval(pollDirectMongoChanges, 1000);
+  });
+}
+
+// ─── Helper: Admin Auth ───────────────────────────────────────
 function adminAuth(req, res, next) {
   const pwd = req.headers['x-admin-password'] ||
               (req.headers['authorization'] && req.headers['authorization'].replace(/^Bearer\s+/i, '')) ||
               req.query.adminPassword;
-  if (pwd !== process.env.ADMIN_PASSWORD) return res.status(401).json({ error: 'Unauthorized' });
+  if (!pwd || pwd !== ADMIN_PASSWORD) {
+    console.warn(`🔒 Unauthorized admin request to ${req.method} ${req.url}`);
+    return res.status(401).json({ error: 'Unauthorized: Invalid admin credentials' });
+  }
   next();
 }
 
-// ─── Helper: Safe MongoDB Operations ──────────────────────────
-async function safeDelete(Model, id) {
-  try {
-    if (mongoose.Types.ObjectId.isValid(id)) {
-      const res = await Model.findByIdAndDelete(id);
-      if (res) return res;
-    }
-  } catch (_) {}
+// ─── Helper: Robust MongoDB Operations ────────────────────────
+async function safeDelete(Model, id, extraFilter = null) {
+  let deleted = null;
+
+  // 1. Match by standard 24-char ObjectId
+  if (id && mongoose.Types.ObjectId.isValid(id)) {
+    try {
+      deleted = await Model.findByIdAndDelete(id);
+      if (deleted) return deleted;
+    } catch (_) {}
+  }
+
+  // 2. Match by custom string _id
+  if (id) {
+    try {
+      deleted = await Model.findOneAndDelete({ _id: id });
+      if (deleted) return deleted;
+    } catch (_) {}
+  }
+
+  // 3. Match by numeric order or custom numeric id
   const num = Number(id);
   if (!isNaN(num)) {
     try {
-      const res = await Model.findOneAndDelete({ order: num });
-      if (res) return res;
+      deleted = await Model.findOneAndDelete({ $or: [{ order: num }, { id: num }] });
+      if (deleted) return deleted;
     } catch (_) {}
   }
+
+  // 4. Fallback: match by extra filter (e.g. name or title)
+  if (extraFilter && Object.keys(extraFilter).length > 0) {
+    try {
+      deleted = await Model.findOneAndDelete(extraFilter);
+      if (deleted) return deleted;
+    } catch (_) {}
+  }
+
   return null;
 }
 
-async function safeUpdate(Model, id, update, options = { new: true }) {
-  try {
-    if (mongoose.Types.ObjectId.isValid(id)) {
-      const res = await Model.findByIdAndUpdate(id, update, options);
-      if (res) return res;
-    }
-  } catch (_) {}
+async function safeUpdate(Model, id, update, extraFilter = null, options = { new: true, returnDocument: 'after' }) {
+  const cleanUpdate = { ...update };
+  delete cleanUpdate._id;
+  delete cleanUpdate.__v;
+  delete cleanUpdate.id;
+
+  let updated = null;
+
+  // 1. Match by standard 24-char ObjectId
+  if (id && mongoose.Types.ObjectId.isValid(id)) {
+    try {
+      updated = await Model.findByIdAndUpdate(id, cleanUpdate, options);
+      if (updated) return updated;
+    } catch (_) {}
+  }
+
+  // 2. Match by custom string _id
+  if (id) {
+    try {
+      updated = await Model.findOneAndUpdate({ _id: id }, cleanUpdate, options);
+      if (updated) return updated;
+    } catch (_) {}
+  }
+
+  // 3. Match by numeric order or custom numeric id
   const num = Number(id);
   if (!isNaN(num)) {
     try {
-      const res = await Model.findOneAndUpdate({ order: num }, update, options);
-      if (res) return res;
+      updated = await Model.findOneAndUpdate({ $or: [{ order: num }, { id: num }] }, cleanUpdate, options);
+      if (updated) return updated;
     } catch (_) {}
   }
+
+  // 4. Fallback: match by extra filter
+  if (extraFilter && Object.keys(extraFilter).length > 0) {
+    try {
+      updated = await Model.findOneAndUpdate(extraFilter, cleanUpdate, options);
+      if (updated) return updated;
+    } catch (_) {}
+  }
+
   return null;
 }
 
@@ -212,24 +369,45 @@ app.get('/api/furniture/:id', async (req, res) => {
 
 app.post('/api/furniture', adminAuth, async (req, res) => {
   try {
-    const item = await Furniture.create(req.body);
-    item.shareableLink = `http://localhost:4200/gallery?id=${item._id}`;
+    const itemData = { ...req.body };
+    delete itemData._id;
+    delete itemData.id;
+    const item = await Furniture.create(itemData);
+    const origin = req.get('origin') || req.get('referer') || '';
+    const cleanOrigin = origin.replace(/\/$/, '');
+    item.shareableLink = cleanOrigin ? `${cleanOrigin}/gallery?id=${item._id}` : `/gallery?id=${item._id}`;
     await item.save();
+
+    console.log(`🛋️  Furniture created: "${item.name}" [${item._id}]`);
+    broadcastChange('furniture', 'create', item);
     res.status(201).json(item);
   } catch (e) { res.status(400).json({ error: e.message }); }
 });
 
 app.put('/api/furniture/:id', adminAuth, async (req, res) => {
   try {
-    const item = await safeUpdate(Furniture, req.params.id, req.body);
+    const origin = req.get('origin') || req.get('referer') || '';
+    const cleanOrigin = origin.replace(/\/$/, '');
+    const update = { ...req.body };
+    if (!update.shareableLink && cleanOrigin) {
+      update.shareableLink = `${cleanOrigin}/gallery?id=${req.params.id}`;
+    }
+    const name = req.query.name || req.body?.name;
+    const item = await safeUpdate(Furniture, req.params.id, update, name ? { name } : null);
+
+    console.log(`🛋️  Furniture updated: "${item ? item.name : req.params.id}"`);
+    broadcastChange('furniture', 'update', item || { _id: req.params.id });
     res.json(item || { success: true });
   } catch (e) { res.status(400).json({ error: e.message }); }
 });
 
 app.delete('/api/furniture/:id', adminAuth, async (req, res) => {
   try {
-    await safeDelete(Furniture, req.params.id);
-    res.json({ success: true });
+    const name = req.query.name;
+    const deleted = await safeDelete(Furniture, req.params.id, name ? { name } : null);
+    console.log(`🗑️  Furniture deleted from MongoDB: ${req.params.id}`, deleted ? deleted.name : '(deleted)');
+    broadcastChange('furniture', 'delete', { id: req.params.id, item: deleted });
+    res.json({ success: true, deleted: !!deleted, item: deleted });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -246,21 +424,29 @@ app.get('/api/workinfo', async (req, res) => {
 app.post('/api/workinfo', adminAuth, async (req, res) => {
   try {
     const item = await WorkInfo.create(req.body);
+    console.log(`🔧  WorkInfo created: "${item.title}" [${item._id}]`);
+    broadcastChange('workinfo', 'create', item);
     res.status(201).json(item);
   } catch (e) { res.status(400).json({ error: e.message }); }
 });
 
 app.put('/api/workinfo/:id', adminAuth, async (req, res) => {
   try {
-    const item = await safeUpdate(WorkInfo, req.params.id, req.body);
+    const title = req.query.title || req.body?.title;
+    const item = await safeUpdate(WorkInfo, req.params.id, req.body, title ? { title } : null);
+    console.log(`🔧  WorkInfo updated: "${item ? item.title : req.params.id}"`);
+    broadcastChange('workinfo', 'update', item || { _id: req.params.id });
     res.json(item || { success: true });
   } catch (e) { res.status(400).json({ error: e.message }); }
 });
 
 app.delete('/api/workinfo/:id', adminAuth, async (req, res) => {
   try {
-    await safeDelete(WorkInfo, req.params.id);
-    res.json({ success: true });
+    const title = req.query.title;
+    const deleted = await safeDelete(WorkInfo, req.params.id, title ? { title } : null);
+    console.log(`🗑️  WorkInfo deleted from MongoDB: ${req.params.id}`, deleted ? deleted.title : '(deleted)');
+    broadcastChange('workinfo', 'delete', { id: req.params.id, item: deleted });
+    res.json({ success: true, deleted: !!deleted, item: deleted });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -277,22 +463,33 @@ app.get('/api/team', async (req, res) => {
 app.post('/api/team', adminAuth, async (req, res) => {
   try {
     const item = await TeamMember.create(req.body);
+    console.log(`👥  TeamMember created in MongoDB: "${item.name}" [${item._id}]`);
+    broadcastChange('team', 'create', item);
     res.status(201).json(item);
   } catch (e) { res.status(400).json({ error: e.message }); }
 });
 
 app.put('/api/team/:id', adminAuth, async (req, res) => {
   try {
-    const item = await safeUpdate(TeamMember, req.params.id, req.body);
+    const name = req.query.name || req.body?.name;
+    const item = await safeUpdate(TeamMember, req.params.id, req.body, name ? { name } : null);
+    console.log(`👥  TeamMember updated in MongoDB: "${item ? item.name : req.params.id}"`);
+    broadcastChange('team', 'update', item || { _id: req.params.id });
     res.json(item || { success: true });
   } catch (e) { res.status(400).json({ error: e.message }); }
 });
 
 app.delete('/api/team/:id', adminAuth, async (req, res) => {
   try {
-    await safeDelete(TeamMember, req.params.id);
-    res.json({ success: true });
-  } catch (e) { res.status(500).json({ error: e.message }); }
+    const name = req.query.name;
+    const deleted = await safeDelete(TeamMember, req.params.id, name ? { name } : null);
+    console.log(`🗑️  TeamMember deleted from MongoDB: ID=${req.params.id}`, deleted ? `Name="${deleted.name}"` : '(deleted by fallback)');
+    broadcastChange('team', 'delete', { id: req.params.id, item: deleted });
+    res.json({ success: true, deleted: !!deleted, item: deleted });
+  } catch (e) {
+    console.error('Error deleting team member:', e);
+    res.status(500).json({ error: e.message });
+  }
 });
 
 // ════════════════════════════════════════════════════════════════
@@ -308,21 +505,29 @@ app.get('/api/videos', async (req, res) => {
 app.post('/api/videos', adminAuth, async (req, res) => {
   try {
     const item = await Video.create(req.body);
+    console.log(`🎬  Video created: "${item.title}" [${item._id}]`);
+    broadcastChange('videos', 'create', item);
     res.status(201).json(item);
   } catch (e) { res.status(400).json({ error: e.message }); }
 });
 
 app.put('/api/videos/:id', adminAuth, async (req, res) => {
   try {
-    const item = await safeUpdate(Video, req.params.id, req.body);
+    const title = req.query.title || req.body?.title;
+    const item = await safeUpdate(Video, req.params.id, req.body, title ? { title } : null);
+    console.log(`🎬  Video updated: "${item ? item.title : req.params.id}"`);
+    broadcastChange('videos', 'update', item || { _id: req.params.id });
     res.json(item || { success: true });
   } catch (e) { res.status(400).json({ error: e.message }); }
 });
 
 app.delete('/api/videos/:id', adminAuth, async (req, res) => {
   try {
-    await safeDelete(Video, req.params.id);
-    res.json({ success: true });
+    const title = req.query.title;
+    const deleted = await safeDelete(Video, req.params.id, title ? { title } : null);
+    console.log(`🗑️  Video deleted from MongoDB: ${req.params.id}`, deleted ? deleted.title : '(deleted)');
+    broadcastChange('videos', 'delete', { id: req.params.id, item: deleted });
+    res.json({ success: true, deleted: !!deleted, item: deleted });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -339,6 +544,8 @@ app.get('/api/feedback', adminAuth, async (req, res) => {
 app.post('/api/feedback', async (req, res) => {
   try {
     const fb = await Feedback.create(req.body);
+    console.log(`⭐  Feedback received from "${fb.name}"`);
+    broadcastChange('feedback', 'create', fb);
     res.status(201).json(fb);
   } catch (e) { res.status(400).json({ error: e.message }); }
 });
@@ -346,30 +553,31 @@ app.post('/api/feedback', async (req, res) => {
 app.patch('/api/feedback/:id/read', adminAuth, async (req, res) => {
   try {
     const fb = await safeUpdate(Feedback, req.params.id, { status: 'read' });
+    broadcastChange('feedback', 'update', fb);
     res.json(fb || { success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 app.delete('/api/feedback/:id', adminAuth, async (req, res) => {
   try {
-    await safeDelete(Feedback, req.params.id);
-    res.json({ success: true });
+    const deleted = await safeDelete(Feedback, req.params.id);
+    broadcastChange('feedback', 'delete', { id: req.params.id });
+    res.json({ success: true, deleted: !!deleted });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 // ════════════════════════════════════════════════════════════════
 // CUSTOM ORDER ROUTES (User Furniture Requests)
 // ════════════════════════════════════════════════════════════════
-
-// POST - any user can submit a custom order request
 app.post('/api/custom-orders', async (req, res) => {
   try {
     const order = await CustomOrder.create(req.body);
+    console.log(`📦  New Custom Order placed by "${order.name}" [${order.furnitureType}]`);
+    broadcastChange('custom-orders', 'create', order);
     res.status(201).json(order);
   } catch (e) { res.status(400).json({ error: e.message }); }
 });
 
-// GET all custom orders - admin only
 app.get('/api/custom-orders', adminAuth, async (req, res) => {
   try {
     const { status } = req.query;
@@ -379,7 +587,6 @@ app.get('/api/custom-orders', adminAuth, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// GET single custom order - admin only
 app.get('/api/custom-orders/:id', adminAuth, async (req, res) => {
   try {
     let order = null;
@@ -391,37 +598,126 @@ app.get('/api/custom-orders/:id', adminAuth, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// PATCH update status / admin notes / quoted price - admin only
 app.patch('/api/custom-orders/:id', adminAuth, async (req, res) => {
   try {
     const update = { ...req.body, updatedAt: new Date() };
     const order = await safeUpdate(CustomOrder, req.params.id, update);
+    console.log(`📦  Custom Order updated: [${req.params.id}] status=${order ? order.status : 'updated'}`);
+    broadcastChange('custom-orders', 'update', order);
     res.json(order || { success: true });
   } catch (e) { res.status(400).json({ error: e.message }); }
 });
 
-// DELETE custom order - admin only
 app.delete('/api/custom-orders/:id', adminAuth, async (req, res) => {
   try {
-    await safeDelete(CustomOrder, req.params.id);
-    res.json({ success: true });
+    const deleted = await safeDelete(CustomOrder, req.params.id);
+    console.log(`🗑️  Custom Order deleted from MongoDB: ${req.params.id}`);
+    broadcastChange('custom-orders', 'delete', { id: req.params.id });
+    res.json({ success: true, deleted: !!deleted });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ════════════════════════════════════════════════════════════════
+// SITE STATS ROUTES
+// ════════════════════════════════════════════════════════════════
+app.get('/api/stats', async (req, res) => {
+  try {
+    let stats = await Stat.find().sort({ order: 1, _id: 1 });
+    if (stats.length === 0) {
+      const defaults = [
+        { value: '15+', label: 'Years Experience', order: 1 },
+        { value: '5000+', label: 'Happy Clients', order: 2 },
+        { value: '200+', label: 'Furniture Designs', order: 3 },
+        { value: '50+', label: 'Cities Delivered', order: 4 }
+      ];
+      stats = await Stat.insertMany(defaults);
+    }
+    res.json(stats);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/stats', adminAuth, async (req, res) => {
+  try {
+    const { value, label, order } = req.body;
+    if (!value || !label) return res.status(400).json({ error: 'Value and label are required' });
+    const stat = await Stat.create({
+      value,
+      label,
+      order: order !== undefined ? Number(order) : 0
+    });
+    broadcastChange('stats', 'create', stat);
+    res.status(201).json(stat);
+  } catch (e) { res.status(400).json({ error: e.message }); }
+});
+
+app.put('/api/stats/:id', adminAuth, async (req, res) => {
+  try {
+    const { value, label, order } = req.body;
+    const update = {};
+    if (value !== undefined) update.value = value;
+    if (label !== undefined) update.label = label;
+    if (order !== undefined) update.order = Number(order);
+    const updated = await safeUpdate(Stat, req.params.id, update);
+    broadcastChange('stats', 'update', updated);
+    res.json(updated || { success: true });
+  } catch (e) { res.status(400).json({ error: e.message }); }
+});
+
+app.put('/api/stats', adminAuth, async (req, res) => {
+  try {
+    const items = req.body;
+    if (Array.isArray(items)) {
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        if (item._id && mongoose.Types.ObjectId.isValid(item._id)) {
+          await Stat.findByIdAndUpdate(item._id, {
+            value: item.value,
+            label: item.label,
+            order: item.order !== undefined ? item.order : i + 1
+          });
+        }
+      }
+      const all = await Stat.find().sort({ order: 1, _id: 1 });
+      broadcastChange('stats', 'update_all', all);
+      return res.json(all);
+    }
+    res.status(400).json({ error: 'Expected array of stats' });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.delete('/api/stats/:id', adminAuth, async (req, res) => {
+  try {
+    const deleted = await safeDelete(Stat, req.params.id);
+    broadcastChange('stats', 'delete', { id: req.params.id });
+    res.json({ success: true, deleted: !!deleted });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 // ─── Admin Login ──────────────────────────────────────────────
 app.post('/api/admin/login', (req, res) => {
   const { password } = req.body;
-  if (password === process.env.ADMIN_PASSWORD) {
-    res.json({ success: true, token: process.env.ADMIN_PASSWORD });
+  if (password === ADMIN_PASSWORD) {
+    res.json({ success: true, token: ADMIN_PASSWORD });
   } else {
-    res.status(401).json({ error: 'Wrong password' });
+    res.status(401).json({ error: 'Wrong admin password' });
   }
 });
 
 // ─── Health Check ─────────────────────────────────────────────
-app.get('/api/health', (_, res) => res.json({ status: 'ok', time: new Date() }));
+app.get('/api/health', (_, res) => res.json({ status: 'ok', connectedClients: sseClients.size, time: new Date() }));
+
+// ─── Static Frontend Serving (Live Deployment) ────────────────
+const clientDist = path.join(__dirname, '../furniture-website/dist/furniture-website/browser');
+if (fs.existsSync(clientDist)) {
+  app.use(express.static(clientDist));
+  app.use((req, res, next) => {
+    if (req.path.startsWith('/api') || req.path.startsWith('/uploads')) return next();
+    res.sendFile(path.join(clientDist, 'index.html'));
+  });
+}
 
 // ─── Start Server ─────────────────────────────────────────────
 app.listen(PORT, () => {
   console.log(`🚀  Bhavesh Furniture API running at http://localhost:${PORT}`);
+  console.log(`⚡  Live Database Real-Time SSE Stream active at http://localhost:${PORT}/api/live-sync`);
 });

@@ -73,15 +73,17 @@ export class Admin implements OnInit, OnDestroy {
   constructor(private furnitureService: FurnitureService) {}
 
   ngOnInit() {
-    // For strict security: always require password authentication upon opening Admin Panel
-    this.furnitureService.adminLogout();
-    this.isLoggedIn = false;
     this.categories = this.furnitureService.getCategories();
+    if (this.furnitureService.isAdminLoggedIn()) {
+      this.isLoggedIn = true;
+      this.loadData();
+    } else {
+      this.isLoggedIn = false;
+    }
   }
 
   ngOnDestroy() {
-    // Automatically revoke admin session when leaving the admin panel
-    this.logout();
+    // Admin session remains active in sessionStorage until user clicks Logout
   }
 
   // ---- Auth ----
@@ -303,7 +305,9 @@ export class Admin implements OnInit, OnDestroy {
   deleteItem(item: FurnitureItem) {
     const id = String(item._id || item.id);
     if (confirm(`Delete "${item.name}"?`)) {
-      this.furnitureService.deleteFurnitureItem(id).subscribe();
+      this.furnitureService.deleteFurnitureItem(id, item.name).subscribe({
+        error: (err) => alert(`Failed to delete: ${err?.error?.error || err.message || 'Unknown error'}`)
+      });
     }
   }
 
@@ -406,7 +410,9 @@ export class Admin implements OnInit, OnDestroy {
   deleteVideo(vid: VideoItem) {
     const id = String(vid._id || vid.id);
     if (confirm(`Delete video "${vid.title}"?`)) {
-      this.furnitureService.deleteVideo(id).subscribe();
+      this.furnitureService.deleteVideo(id, vid.title).subscribe({
+        error: (err) => alert(`Failed to delete: ${err?.error?.error || err.message || 'Unknown error'}`)
+      });
     }
   }
 
@@ -474,7 +480,9 @@ export class Admin implements OnInit, OnDestroy {
   deleteWork(item: WorkInfo) {
     const id = String(item._id || item.id);
     if (confirm(`Delete service "${item.title}"?`)) {
-      this.furnitureService.deleteWorkInfo(id).subscribe();
+      this.furnitureService.deleteWorkInfo(id, item.title).subscribe({
+        error: (err) => alert(`Failed to delete: ${err?.error?.error || err.message || 'Unknown error'}`)
+      });
     }
   }
 
@@ -572,10 +580,13 @@ export class Admin implements OnInit, OnDestroy {
   deleteTeam(member: TeamMember) {
     const id = String(member._id || member.id);
     if (confirm(`Are you sure you want to remove team member "${member.name}"?`)) {
-      this.furnitureService.deleteTeamMember(id).subscribe({
+      this.furnitureService.deleteTeamMember(id, member.name).subscribe({
         next: () => {
           this.teamActionMsg = `✓ Team member "${member.name}" was removed successfully.`;
           setTimeout(() => this.teamActionMsg = '', 3000);
+        },
+        error: (err) => {
+          alert(`Failed to delete team member from database: ${err?.error?.error || err.message || 'Unknown error'}`);
         }
       });
     }

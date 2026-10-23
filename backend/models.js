@@ -79,11 +79,18 @@ const CustomOrderSchema = new mongoose.Schema({
   updatedAt:    { type: Date, default: Date.now }
 });
 
+const StatSchema = new mongoose.Schema({
+  value: { type: String, required: true },
+  label: { type: String, required: true },
+  order: { type: Number, default: 0 }
+});
+
 module.exports = {
   Furniture:    mongoose.model('Furniture', FurnitureSchema),
   Feedback:     mongoose.model('Feedback', FeedbackSchema),
   WorkInfo:     mongoose.model('WorkInfo', WorkInfoSchema),
   TeamMember:   mongoose.model('TeamMember', TeamMemberSchema),
   Video:        mongoose.model('Video', VideoSchema),
-  CustomOrder:  mongoose.model('CustomOrder', CustomOrderSchema)
+  CustomOrder:  mongoose.model('CustomOrder', CustomOrderSchema),
+  Stat:         mongoose.model('Stat', StatSchema)
 };

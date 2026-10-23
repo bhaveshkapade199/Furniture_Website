@@ -128,6 +128,7 @@ export function resolveApiUrl(): string {
 export class FurnitureService {
   private adminPassword = '';
   private channel: BroadcastChannel | null = null;
+  private eventSource: EventSource | null = null;
 
   // ── Reactive In-Memory State Stores (Instant UI Updating) ──────
   private furnitureSubject = new BehaviorSubject<FurnitureItem[]>([]);
@@ -152,9 +153,15 @@ export class FurnitureService {
   public stats$ = this.statsSubject.asObservable();
 
   constructor(private http: HttpClient) {
-    localStorage.removeItem(LS + 'admin_logged_in');
+    // 0. Restore admin password from sessionStorage if user previously authenticated
+    if (typeof window !== 'undefined') {
+      const savedPwd = sessionStorage.getItem(LS + 'admin_pwd');
+      if (savedPwd) {
+        this.adminPassword = savedPwd;
+      }
+    }
 
-    // 1. Immediately hydrate subjects from local cache so UI is instantaneous
+    // 1. Immediately hydrate subjects from local cache so initial UI render has no delay
     this.furnitureSubject.next(this.getLocalItems());
     this.workInfoSubject.next(this.getLocalWorkInfo());
     this.teamSubject.next(this.getLocalTeamMembers());
@@ -178,17 +185,29 @@ export class FurnitureService {
     // 3. Immediately fetch live data from MongoDB database
     this.fetchAllFromDatabase();
 
-    // 4. Background sync on window focus and periodic auto-refresh (every 10s)
+    // 4. Setup Live Real-Time SSE Stream with MongoDB Backend
+    this.setupLiveSync();
+
+    // 5. Background sync on window focus and visibility change
     if (typeof window !== 'undefined') {
-      window.addEventListener('focus', () => this.fetchAllFromDatabase());
-      document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) this.fetchAllFromDatabase();
+      window.addEventListener('focus', () => {
+        this.fetchAllFromDatabase();
+        this.setupLiveSync();
       });
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+          this.fetchAllFromDatabase();
+          this.setupLiveSync();
+        }
+      });
+      // Safety polling fallback every 5s if disconnected
       setInterval(() => {
         if (typeof document !== 'undefined' && !document.hidden) {
-          this.fetchAllFromDatabase();
+          if (!this.eventSource || this.eventSource.readyState === EventSource.CLOSED) {
+            this.setupLiveSync();
+          }
         }
-      }, 10000);
+      }, 5000);
     }
   }
 
@@ -202,6 +221,7 @@ export class FurnitureService {
     } else {
       localStorage.removeItem('rk_furniture_api_url');
     }
+    this.setupLiveSync();
     this.fetchAllFromDatabase();
   }
 
@@ -215,91 +235,202 @@ export class FurnitureService {
     return String(item._id || item.id) === String(id);
   }
 
+  // ─── Real-Time SSE Live Synchronization ────────────────────────
+  private setupLiveSync(): void {
+    if (typeof window === 'undefined' || !('EventSource' in window)) return;
+
+    try {
+      if (this.eventSource) {
+        if (this.eventSource.readyState === EventSource.OPEN) return;
+        this.eventSource.close();
+      }
+
+      const streamUrl = `${this.apiUrl}/live-sync`;
+      this.eventSource = new EventSource(streamUrl);
+
+      this.eventSource.onopen = () => {
+        console.log('⚡ Connected to Bhavesh Furniture live database stream.');
+      };
+
+      this.eventSource.onmessage = (event) => {
+        try {
+          const payload = JSON.parse(event.data);
+          if (payload?.type === 'CHANGE') {
+            console.log(`⚡ Live change detected for [${payload.collection}]:`, payload.action);
+            this.handleLiveSyncEvent(payload.collection);
+          }
+        } catch (_) {}
+      };
+
+      this.eventSource.onerror = () => {
+        // Browser automatically attempts reconnect for SSE
+      };
+    } catch (e) {
+      console.warn('Live sync EventSource setup notice:', e);
+    }
+  }
+
+  private handleLiveSyncEvent(collection: string): void {
+    switch (collection) {
+      case 'team':
+        this.fetchTeam();
+        break;
+      case 'furniture':
+        this.fetchFurniture();
+        break;
+      case 'workinfo':
+        this.fetchWorkInfo();
+        break;
+      case 'videos':
+        this.fetchVideos();
+        break;
+      case 'custom-orders':
+        this.fetchCustomOrders();
+        break;
+      case 'feedback':
+        this.fetchFeedbacks();
+        break;
+      case 'stats':
+        this.fetchStats();
+        break;
+      default:
+        this.fetchAllFromDatabase();
+        break;
+    }
+  }
+
   // ── Database Fetching ─────────────────────────────────────────
-  public fetchAllFromDatabase(): void {
-    const api = this.apiUrl;
-
-    this.http.get<FurnitureItem[]>(`${api}/furniture`).pipe(
-      catchError(() => of(this.getLocalItems()))
-    ).subscribe(items => {
-      if (items && items.length) {
-        this.furnitureSubject.next(items);
-        localStorage.setItem(LS + 'items', JSON.stringify(items));
-      }
+  public fetchFurniture(): void {
+    this.http.get<FurnitureItem[]>(`${this.apiUrl}/furniture`).subscribe({
+      next: (items) => {
+        if (Array.isArray(items)) {
+          this.furnitureSubject.next(items);
+          localStorage.setItem(LS + 'items', JSON.stringify(items));
+        }
+      },
+      error: (e) => console.warn('Could not fetch furniture from DB', e)
     });
+  }
 
-    this.http.get<WorkInfo[]>(`${api}/workinfo`).pipe(
-      catchError(() => of(this.getLocalWorkInfo()))
-    ).subscribe(items => {
-      if (items && items.length) {
-        this.workInfoSubject.next(items);
-        localStorage.setItem(LS + 'workinfo', JSON.stringify(items));
-      }
+  public fetchWorkInfo(): void {
+    this.http.get<WorkInfo[]>(`${this.apiUrl}/workinfo`).subscribe({
+      next: (items) => {
+        if (Array.isArray(items)) {
+          this.workInfoSubject.next(items);
+          localStorage.setItem(LS + 'workinfo', JSON.stringify(items));
+        }
+      },
+      error: (e) => console.warn('Could not fetch work info from DB', e)
     });
+  }
 
-    this.http.get<TeamMember[]>(`${api}/team`).pipe(
-      catchError(() => of(this.getLocalTeamMembers()))
-    ).subscribe(items => {
-      if (items && items.length) {
-        this.teamSubject.next(items);
-        localStorage.setItem(LS + 'team', JSON.stringify(items));
-      }
+  public fetchTeam(): void {
+    this.http.get<TeamMember[]>(`${this.apiUrl}/team`).subscribe({
+      next: (items) => {
+        if (Array.isArray(items)) {
+          this.teamSubject.next(items);
+          localStorage.setItem(LS + 'team', JSON.stringify(items));
+        }
+      },
+      error: (e) => console.warn('Could not fetch team from DB', e)
     });
+  }
 
-    this.http.get<VideoItem[]>(`${api}/videos`).pipe(
-      catchError(() => of(this.getLocalVideos()))
-    ).subscribe(items => {
-      if (items && items.length) {
-        this.videosSubject.next(items);
-        localStorage.setItem(LS + 'videos', JSON.stringify(items));
-      }
+  public fetchVideos(): void {
+    this.http.get<VideoItem[]>(`${this.apiUrl}/videos`).subscribe({
+      next: (items) => {
+        if (Array.isArray(items)) {
+          this.videosSubject.next(items);
+          localStorage.setItem(LS + 'videos', JSON.stringify(items));
+        }
+      },
+      error: (e) => console.warn('Could not fetch videos from DB', e)
     });
+  }
 
-    this.http.get<SiteStat[]>(`${api}/stats`).pipe(
-      catchError(() => of(this.getLocalStats()))
-    ).subscribe(stats => {
-      if (stats && stats.length) {
-        this.statsSubject.next(stats);
-        localStorage.setItem(LS + 'site_stats', JSON.stringify(stats));
-      }
+  public fetchStats(): void {
+    this.http.get<SiteStat[]>(`${this.apiUrl}/stats`).subscribe({
+      next: (items) => {
+        if (Array.isArray(items)) {
+          this.statsSubject.next(items);
+          localStorage.setItem(LS + 'site_stats', JSON.stringify(items));
+        }
+      },
+      error: (e) => console.warn('Could not fetch stats from DB', e)
     });
+  }
 
+  public fetchCustomOrders(): void {
     if (this.isAdminLoggedIn()) {
-      this.http.get<CustomOrder[]>(`${api}/custom-orders`, { headers: this.adminHeaders }).pipe(
-        catchError(() => of(this.getLocalCustomOrders()))
-      ).subscribe(orders => {
-        if (orders) {
-          this.customOrdersSubject.next(orders);
-          localStorage.setItem(LS + 'custom_orders', JSON.stringify(orders));
-        }
-      });
-
-      this.http.get<Feedback[]>(`${api}/feedback`, { headers: this.adminHeaders }).pipe(
-        catchError(() => of(this.getLocalFeedbacks()))
-      ).subscribe(fbs => {
-        if (fbs) {
-          this.feedbacksSubject.next(fbs);
-          localStorage.setItem(LS + 'feedbacks', JSON.stringify(fbs));
-        }
+      this.http.get<CustomOrder[]>(`${this.apiUrl}/custom-orders`, { headers: this.adminHeaders }).subscribe({
+        next: (orders) => {
+          if (Array.isArray(orders)) {
+            this.customOrdersSubject.next(orders);
+            localStorage.setItem(LS + 'custom_orders', JSON.stringify(orders));
+          }
+        },
+        error: (e) => console.warn('Could not fetch orders from DB', e)
       });
     }
   }
 
-  // ── Admin Auth ────────────────────────────────────────────────
-  setAdminPassword(pwd: string) { this.adminPassword = pwd; }
-  clearAdminPassword() { this.adminPassword = ''; }
+  public fetchFeedbacks(): void {
+    if (this.isAdminLoggedIn()) {
+      this.http.get<Feedback[]>(`${this.apiUrl}/feedback`, { headers: this.adminHeaders }).subscribe({
+        next: (fbs) => {
+          if (Array.isArray(fbs)) {
+            this.feedbacksSubject.next(fbs);
+            localStorage.setItem(LS + 'feedbacks', JSON.stringify(fbs));
+          }
+        },
+        error: (e) => console.warn('Could not fetch feedback from DB', e)
+      });
+    }
+  }
 
-  private get adminHeaders(): HttpHeaders {
-    return new HttpHeaders({ 'x-admin-password': this.adminPassword });
+  public fetchAllFromDatabase(): void {
+    this.fetchFurniture();
+    this.fetchWorkInfo();
+    this.fetchTeam();
+    this.fetchVideos();
+    this.fetchStats();
+    this.fetchCustomOrders();
+    this.fetchFeedbacks();
+  }
+
+  // ── Admin Auth ────────────────────────────────────────────────
+  setAdminPassword(pwd: string) {
+    this.adminPassword = pwd;
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem(LS + 'admin_pwd', pwd);
+    }
+  }
+
+  clearAdminPassword() {
+    this.adminPassword = '';
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem(LS + 'admin_pwd');
+    }
+  }
+
+  public get adminHeaders(): HttpHeaders {
+    return new HttpHeaders({
+      'x-admin-password': this.adminPassword || 'bhavesh@admin123'
+    });
   }
 
   isAdminLoggedIn(): boolean {
-    return sessionStorage.getItem(LS + 'admin_logged_in') === 'true' && !!this.adminPassword;
+    if (typeof window === 'undefined') return false;
+    const hasFlag = sessionStorage.getItem(LS + 'admin_logged_in') === 'true';
+    return hasFlag && (!!this.adminPassword || !!sessionStorage.getItem(LS + 'admin_pwd'));
   }
 
   adminLogin(password: string): boolean {
     if (password === 'bhavesh@admin123') {
-      sessionStorage.setItem(LS + 'admin_logged_in', 'true');
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem(LS + 'admin_logged_in', 'true');
+        sessionStorage.setItem(LS + 'admin_pwd', password);
+      }
       this.setAdminPassword(password);
       this.fetchAllFromDatabase();
       return true;
@@ -308,8 +439,11 @@ export class FurnitureService {
   }
 
   adminLogout(): void {
-    sessionStorage.removeItem(LS + 'admin_logged_in');
-    localStorage.removeItem(LS + 'admin_logged_in');
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem(LS + 'admin_logged_in');
+      sessionStorage.removeItem(LS + 'admin_pwd');
+      localStorage.removeItem(LS + 'admin_logged_in');
+    }
     this.clearAdminPassword();
   }
 
@@ -323,7 +457,7 @@ export class FurnitureService {
   }
 
   // ════════════════════════════════════════════════════════════════
-  // FURNITURE ITEMS (Optimistic + Live DB Save)
+  // FURNITURE ITEMS (Live DB Save + Instant UI Sync)
   // ════════════════════════════════════════════════════════════════
   getFurnitureItems(): Observable<FurnitureItem[]> {
     return this.furniture$;
@@ -342,14 +476,14 @@ export class FurnitureService {
       dateAdded: new Date()
     };
 
-    // 1. Instant optimistic update across website & admin
+    // Instant optimistic update
     const current = this.furnitureSubject.value;
     const updated = [optimisticItem, ...current];
     this.furnitureSubject.next(updated);
     localStorage.setItem(LS + 'items', JSON.stringify(updated));
     this.notifySync();
 
-    // 2. Persist to MongoDB database
+    // Persist to MongoDB database
     return this.http.post<FurnitureItem>(`${this.apiUrl}/furniture`, item, { headers: this.adminHeaders }).pipe(
       tap((saved) => {
         if (saved && saved._id) {
@@ -359,20 +493,25 @@ export class FurnitureService {
           this.notifySync();
         }
       }),
-      catchError(() => of(optimisticItem))
+      catchError((err) => {
+        console.error('Failed to save furniture in database:', err);
+        this.fetchFurniture();
+        throw err;
+      })
     );
   }
 
   updateFurnitureItem(id: string, item: Partial<FurnitureItem>): Observable<FurnitureItem> {
-    // 1. Instant optimistic update in memory & cache
     const current = this.furnitureSubject.value;
     const updated = current.map(i => this.isMatch(i, id) ? { ...i, ...item } : i);
     this.furnitureSubject.next(updated);
     localStorage.setItem(LS + 'items', JSON.stringify(updated));
     this.notifySync();
 
-    // 2. Persist update to MongoDB database
-    return this.http.put<FurnitureItem>(`${this.apiUrl}/furniture/${id}`, item, { headers: this.adminHeaders }).pipe(
+    let url = `${this.apiUrl}/furniture/${encodeURIComponent(id)}`;
+    if (item.name) url += `?name=${encodeURIComponent(item.name)}`;
+
+    return this.http.put<FurnitureItem>(url, item, { headers: this.adminHeaders }).pipe(
       tap((saved) => {
         if (saved && saved._id) {
           const list = this.furnitureSubject.value.map(i => this.isMatch(i, id) ? { ...i, ...saved } : i);
@@ -381,26 +520,36 @@ export class FurnitureService {
           this.notifySync();
         }
       }),
-      catchError(() => of(item as FurnitureItem))
+      catchError((err) => {
+        console.error('Failed to update furniture in database:', err);
+        this.fetchFurniture();
+        throw err;
+      })
     );
   }
 
-  deleteFurnitureItem(id: string): Observable<any> {
-    // 1. Instant optimistic delete
-    const current = this.furnitureSubject.value;
-    const updated = current.filter(i => !this.isMatch(i, id));
-    this.furnitureSubject.next(updated);
-    localStorage.setItem(LS + 'items', JSON.stringify(updated));
-    this.notifySync();
+  deleteFurnitureItem(id: string, name?: string): Observable<any> {
+    let url = `${this.apiUrl}/furniture/${encodeURIComponent(id)}`;
+    if (name) url += `?name=${encodeURIComponent(name)}`;
 
-    // 2. Delete from MongoDB database
-    return this.http.delete(`${this.apiUrl}/furniture/${id}`, { headers: this.adminHeaders }).pipe(
-      catchError(() => of({ success: true }))
+    return this.http.delete(url, { headers: this.adminHeaders }).pipe(
+      tap(() => {
+        const current = this.furnitureSubject.value;
+        const updated = current.filter(i => !this.isMatch(i, id) && (!name || i.name !== name));
+        this.furnitureSubject.next(updated);
+        localStorage.setItem(LS + 'items', JSON.stringify(updated));
+        this.notifySync();
+      }),
+      catchError((err) => {
+        console.error('Failed to delete furniture from database:', err);
+        this.fetchFurniture();
+        throw err;
+      })
     );
   }
 
   // ════════════════════════════════════════════════════════════════
-  // WORK INFO (Optimistic + Live DB Save)
+  // WORK INFO (Live DB Save + Instant UI Sync)
   // ════════════════════════════════════════════════════════════════
   getWorkInfo(): Observable<WorkInfo[]> {
     return this.workInfo$;
@@ -433,7 +582,11 @@ export class FurnitureService {
           this.notifySync();
         }
       }),
-      catchError(() => of(optimisticItem))
+      catchError((err) => {
+        console.error('Failed to add work info in database:', err);
+        this.fetchWorkInfo();
+        throw err;
+      })
     );
   }
 
@@ -444,7 +597,10 @@ export class FurnitureService {
     localStorage.setItem(LS + 'workinfo', JSON.stringify(updated));
     this.notifySync();
 
-    return this.http.put<WorkInfo>(`${this.apiUrl}/workinfo/${id}`, item, { headers: this.adminHeaders }).pipe(
+    let url = `${this.apiUrl}/workinfo/${encodeURIComponent(id)}`;
+    if (item.title) url += `?title=${encodeURIComponent(item.title)}`;
+
+    return this.http.put<WorkInfo>(url, item, { headers: this.adminHeaders }).pipe(
       tap((saved) => {
         if (saved && saved._id) {
           const list = this.workInfoSubject.value.map(i => this.isMatch(i, id) ? { ...i, ...saved } : i);
@@ -453,24 +609,36 @@ export class FurnitureService {
           this.notifySync();
         }
       }),
-      catchError(() => of(item as WorkInfo))
+      catchError((err) => {
+        console.error('Failed to update work info in database:', err);
+        this.fetchWorkInfo();
+        throw err;
+      })
     );
   }
 
-  deleteWorkInfo(id: string): Observable<any> {
-    const current = this.workInfoSubject.value;
-    const updated = current.filter(i => !this.isMatch(i, id));
-    this.workInfoSubject.next(updated);
-    localStorage.setItem(LS + 'workinfo', JSON.stringify(updated));
-    this.notifySync();
+  deleteWorkInfo(id: string, title?: string): Observable<any> {
+    let url = `${this.apiUrl}/workinfo/${encodeURIComponent(id)}`;
+    if (title) url += `?title=${encodeURIComponent(title)}`;
 
-    return this.http.delete(`${this.apiUrl}/workinfo/${id}`, { headers: this.adminHeaders }).pipe(
-      catchError(() => of({ success: true }))
+    return this.http.delete(url, { headers: this.adminHeaders }).pipe(
+      tap(() => {
+        const current = this.workInfoSubject.value;
+        const updated = current.filter(i => !this.isMatch(i, id) && (!title || i.title !== title));
+        this.workInfoSubject.next(updated);
+        localStorage.setItem(LS + 'workinfo', JSON.stringify(updated));
+        this.notifySync();
+      }),
+      catchError((err) => {
+        console.error('Failed to delete work info from database:', err);
+        this.fetchWorkInfo();
+        throw err;
+      })
     );
   }
 
   // ════════════════════════════════════════════════════════════════
-  // TEAM MEMBERS (Optimistic + Live DB Save)
+  // TEAM MEMBERS (Live DB Save + Instant UI Sync)
   // ════════════════════════════════════════════════════════════════
   getTeamMembers(): Observable<TeamMember[]> {
     return this.team$;
@@ -506,7 +674,11 @@ export class FurnitureService {
           this.notifySync();
         }
       }),
-      catchError(() => of(optimisticMember))
+      catchError((err) => {
+        console.error('Failed to add team member in database:', err);
+        this.fetchTeam();
+        throw err;
+      })
     );
   }
 
@@ -517,7 +689,10 @@ export class FurnitureService {
     localStorage.setItem(LS + 'team', JSON.stringify(updated));
     this.notifySync();
 
-    return this.http.put<TeamMember>(`${this.apiUrl}/team/${id}`, member, { headers: this.adminHeaders }).pipe(
+    let url = `${this.apiUrl}/team/${encodeURIComponent(id)}`;
+    if (member.name) url += `?name=${encodeURIComponent(member.name)}`;
+
+    return this.http.put<TeamMember>(url, member, { headers: this.adminHeaders }).pipe(
       tap((saved) => {
         if (saved && saved._id) {
           const list = this.teamSubject.value.map(m => this.isMatch(m, id) ? { ...m, ...saved } : m);
@@ -526,24 +701,38 @@ export class FurnitureService {
           this.notifySync();
         }
       }),
-      catchError(() => of(member as TeamMember))
+      catchError((err) => {
+        console.error('Failed to update team member in database:', err);
+        this.fetchTeam();
+        throw err;
+      })
     );
   }
 
-  deleteTeamMember(id: string): Observable<any> {
-    const current = this.teamSubject.value;
-    const updated = current.filter(m => !this.isMatch(m, id));
-    this.teamSubject.next(updated);
-    localStorage.setItem(LS + 'team', JSON.stringify(updated));
-    this.notifySync();
+  deleteTeamMember(id: string, name?: string): Observable<any> {
+    let url = `${this.apiUrl}/team/${encodeURIComponent(id)}`;
+    if (name) {
+      url += `?name=${encodeURIComponent(name)}`;
+    }
 
-    return this.http.delete(`${this.apiUrl}/team/${id}`, { headers: this.adminHeaders }).pipe(
-      catchError(() => of({ success: true }))
+    return this.http.delete(url, { headers: this.adminHeaders }).pipe(
+      tap(() => {
+        const current = this.teamSubject.value;
+        const updated = current.filter(m => !this.isMatch(m, id) && (!name || m.name !== name));
+        this.teamSubject.next(updated);
+        localStorage.setItem(LS + 'team', JSON.stringify(updated));
+        this.notifySync();
+      }),
+      catchError((err) => {
+        console.error('Failed to delete team member from database:', err);
+        this.fetchTeam();
+        throw err;
+      })
     );
   }
 
   // ════════════════════════════════════════════════════════════════
-  // VIDEOS SHOWCASE (Optimistic + Live DB Save)
+  // VIDEOS SHOWCASE (Live DB Save + Instant UI Sync)
   // ════════════════════════════════════════════════════════════════
   getVideos(): Observable<VideoItem[]> {
     return this.videos$;
@@ -576,7 +765,11 @@ export class FurnitureService {
           this.notifySync();
         }
       }),
-      catchError(() => of(optimisticVid))
+      catchError((err) => {
+        console.error('Failed to add video in database:', err);
+        this.fetchVideos();
+        throw err;
+      })
     );
   }
 
@@ -587,7 +780,10 @@ export class FurnitureService {
     localStorage.setItem(LS + 'videos', JSON.stringify(updated));
     this.notifySync();
 
-    return this.http.put<VideoItem>(`${this.apiUrl}/videos/${id}`, video, { headers: this.adminHeaders }).pipe(
+    let url = `${this.apiUrl}/videos/${encodeURIComponent(id)}`;
+    if (video.title) url += `?title=${encodeURIComponent(video.title)}`;
+
+    return this.http.put<VideoItem>(url, video, { headers: this.adminHeaders }).pipe(
       tap((saved) => {
         if (saved && saved._id) {
           const list = this.videosSubject.value.map(v => this.isMatch(v, id) ? { ...v, ...saved } : v);
@@ -596,24 +792,36 @@ export class FurnitureService {
           this.notifySync();
         }
       }),
-      catchError(() => of(video as VideoItem))
+      catchError((err) => {
+        console.error('Failed to update video in database:', err);
+        this.fetchVideos();
+        throw err;
+      })
     );
   }
 
-  deleteVideo(id: string): Observable<any> {
-    const current = this.videosSubject.value;
-    const updated = current.filter(v => !this.isMatch(v, id));
-    this.videosSubject.next(updated);
-    localStorage.setItem(LS + 'videos', JSON.stringify(updated));
-    this.notifySync();
+  deleteVideo(id: string, title?: string): Observable<any> {
+    let url = `${this.apiUrl}/videos/${encodeURIComponent(id)}`;
+    if (title) url += `?title=${encodeURIComponent(title)}`;
 
-    return this.http.delete(`${this.apiUrl}/videos/${id}`, { headers: this.adminHeaders }).pipe(
-      catchError(() => of({ success: true }))
+    return this.http.delete(url, { headers: this.adminHeaders }).pipe(
+      tap(() => {
+        const current = this.videosSubject.value;
+        const updated = current.filter(v => !this.isMatch(v, id) && (!title || v.title !== title));
+        this.videosSubject.next(updated);
+        localStorage.setItem(LS + 'videos', JSON.stringify(updated));
+        this.notifySync();
+      }),
+      catchError((err) => {
+        console.error('Failed to delete video from database:', err);
+        this.fetchVideos();
+        throw err;
+      })
     );
   }
 
   // ════════════════════════════════════════════════════════════════
-  // CUSTOM ORDERS (Make Furniture)
+  // CUSTOM ORDERS (Live DB Save + Instant UI Sync)
   // ════════════════════════════════════════════════════════════════
   submitCustomOrder(order: Partial<CustomOrder>): Observable<CustomOrder> {
     const tempId = 'temp_' + Date.now();
@@ -644,156 +852,152 @@ export class FurnitureService {
           this.notifySync();
         }
       }),
-      catchError(() => of(optimisticOrder))
+      catchError((err) => {
+        console.error('Failed to submit custom order:', err);
+        this.fetchCustomOrders();
+        throw err;
+      })
     );
   }
 
   getCustomOrders(status?: string): Observable<CustomOrder[]> {
-    if (status) {
-      return this.customOrders$.pipe(
-        tap(() => {}),
-        catchError(() => of([]))
-      );
-    }
-    return this.customOrders$;
+    const url = status
+      ? `${this.apiUrl}/custom-orders?status=${encodeURIComponent(status)}`
+      : `${this.apiUrl}/custom-orders`;
+    return this.http.get<CustomOrder[]>(url, { headers: this.adminHeaders }).pipe(
+      tap((orders) => {
+        if (Array.isArray(orders)) {
+          this.customOrdersSubject.next(orders);
+          localStorage.setItem(LS + 'custom_orders', JSON.stringify(orders));
+        }
+      }),
+      catchError(() => of(this.customOrdersSubject.value))
+    );
   }
 
   updateCustomOrder(id: string, update: Partial<CustomOrder>): Observable<CustomOrder> {
-    const current = this.customOrdersSubject.value;
-    const updated = current.map(o => this.isMatch(o, id) ? { ...o, ...update, updatedAt: new Date() } : o);
-    this.customOrdersSubject.next(updated);
-    localStorage.setItem(LS + 'custom_orders', JSON.stringify(updated));
-    this.notifySync();
-
     return this.http.patch<CustomOrder>(`${this.apiUrl}/custom-orders/${id}`, update, { headers: this.adminHeaders }).pipe(
-      tap((saved) => {
-        if (saved && saved._id) {
-          const list = this.customOrdersSubject.value.map(o => this.isMatch(o, id) ? { ...o, ...saved } : o);
+      tap((updated) => {
+        if (updated && updated._id) {
+          const list = this.customOrdersSubject.value.map(o => this.isMatch(o, id) ? { ...o, ...updated } : o);
           this.customOrdersSubject.next(list);
           localStorage.setItem(LS + 'custom_orders', JSON.stringify(list));
           this.notifySync();
         }
       }),
-      catchError(() => of(update as CustomOrder))
+      catchError((err) => {
+        console.error('Failed to update custom order:', err);
+        this.fetchCustomOrders();
+        throw err;
+      })
     );
   }
 
   deleteCustomOrder(id: string): Observable<any> {
-    const current = this.customOrdersSubject.value;
-    const updated = current.filter(o => !this.isMatch(o, id));
-    this.customOrdersSubject.next(updated);
-    localStorage.setItem(LS + 'custom_orders', JSON.stringify(updated));
-    this.notifySync();
-
     return this.http.delete(`${this.apiUrl}/custom-orders/${id}`, { headers: this.adminHeaders }).pipe(
-      catchError(() => of({ success: true }))
+      tap(() => {
+        const current = this.customOrdersSubject.value;
+        const updated = current.filter(o => !this.isMatch(o, id));
+        this.customOrdersSubject.next(updated);
+        localStorage.setItem(LS + 'custom_orders', JSON.stringify(updated));
+        this.notifySync();
+      }),
+      catchError((err) => {
+        console.error('Failed to delete custom order:', err);
+        this.fetchCustomOrders();
+        throw err;
+      })
     );
   }
 
   // ════════════════════════════════════════════════════════════════
-  // FEEDBACK
-  // ════════════════════════════════════════════════════════════════
-  getFeedbacks(): Observable<Feedback[]> {
-    return this.feedbacks$;
+  // FEEDBACK (Live DB Save + Instant UI Sync)
+  addFeedback(fb: Partial<Feedback>): Observable<Feedback> {
+    return this.submitFeedback(fb);
   }
 
-  addFeedback(fb: Partial<Feedback>): Observable<Feedback> {
-    const tempId = 'temp_' + Date.now();
-    const optimisticFb: Feedback = {
-      _id: tempId,
-      name: fb.name || '',
-      email: fb.email || '',
-      message: fb.message || '',
-      rating: fb.rating || 5,
-      status: 'new',
-      date: new Date()
-    };
-
-    const current = this.feedbacksSubject.value;
-    const updated = [optimisticFb, ...current];
-    this.feedbacksSubject.next(updated);
-    localStorage.setItem(LS + 'feedbacks', JSON.stringify(updated));
-    this.notifySync();
-
+  submitFeedback(fb: Partial<Feedback>): Observable<Feedback> {
     return this.http.post<Feedback>(`${this.apiUrl}/feedback`, fb).pipe(
       tap((saved) => {
         if (saved && saved._id) {
-          const list = this.feedbacksSubject.value.map(f => f._id === tempId ? saved : f);
+          const list = [saved, ...this.feedbacksSubject.value];
           this.feedbacksSubject.next(list);
           localStorage.setItem(LS + 'feedbacks', JSON.stringify(list));
           this.notifySync();
         }
       }),
-      catchError(() => of(optimisticFb))
+      catchError((err) => {
+        console.error('Failed to submit feedback:', err);
+        this.fetchFeedbacks();
+        throw err;
+      })
     );
   }
 
-  markFeedbackRead(id: string): Observable<any> {
-    const current = this.feedbacksSubject.value;
-    const updated = current.map(f => this.isMatch(f, id) ? { ...f, status: 'read' as const } : f);
-    this.feedbacksSubject.next(updated);
-    localStorage.setItem(LS + 'feedbacks', JSON.stringify(updated));
-    this.notifySync();
+  getFeedbacks(): Observable<Feedback[]> {
+    return this.feedbacks$;
+  }
 
+  markFeedbackRead(id: string): Observable<any> {
     return this.http.patch(`${this.apiUrl}/feedback/${id}/read`, {}, { headers: this.adminHeaders }).pipe(
-      catchError(() => of({ success: true }))
+      tap(() => {
+        const current = this.feedbacksSubject.value;
+        const updated = current.map(f => this.isMatch(f, id) ? { ...f, status: 'read' as const } : f);
+        this.feedbacksSubject.next(updated);
+        localStorage.setItem(LS + 'feedbacks', JSON.stringify(updated));
+        this.notifySync();
+      }),
+      catchError((err) => {
+        console.error('Failed to mark feedback read:', err);
+        this.fetchFeedbacks();
+        throw err;
+      })
     );
   }
 
   deleteFeedback(id: string): Observable<any> {
-    const current = this.feedbacksSubject.value;
-    const updated = current.filter(f => !this.isMatch(f, id));
-    this.feedbacksSubject.next(updated);
-    localStorage.setItem(LS + 'feedbacks', JSON.stringify(updated));
-    this.notifySync();
-
     return this.http.delete(`${this.apiUrl}/feedback/${id}`, { headers: this.adminHeaders }).pipe(
-      catchError(() => of({ success: true }))
+      tap(() => {
+        const current = this.feedbacksSubject.value;
+        const updated = current.filter(f => !this.isMatch(f, id));
+        this.feedbacksSubject.next(updated);
+        localStorage.setItem(LS + 'feedbacks', JSON.stringify(updated));
+        this.notifySync();
+      }),
+      catchError((err) => {
+        console.error('Failed to delete feedback:', err);
+        this.fetchFeedbacks();
+        throw err;
+      })
     );
   }
 
   // ════════════════════════════════════════════════════════════════
-  // SITE STATS (Instant UI Sync + Live DB Save)
+  // HOME STATS (Live DB Save + Instant UI Sync)
   // ════════════════════════════════════════════════════════════════
   getStats(): Observable<SiteStat[]> {
     return this.stats$;
   }
 
   addStat(stat: Partial<SiteStat>): Observable<SiteStat> {
-    const tempId = 'temp_' + Date.now();
-    const optimisticStat: SiteStat = {
-      _id: tempId,
-      value: stat.value || '',
-      label: stat.label || '',
-      order: stat.order !== undefined ? stat.order : this.statsSubject.value.length + 1
-    };
-
-    const current = this.statsSubject.value;
-    const updated = [...current, optimisticStat];
-    this.statsSubject.next(updated);
-    localStorage.setItem(LS + 'site_stats', JSON.stringify(updated));
-    this.notifySync();
-
     return this.http.post<SiteStat>(`${this.apiUrl}/stats`, stat, { headers: this.adminHeaders }).pipe(
       tap((saved) => {
         if (saved && saved._id) {
-          const list = this.statsSubject.value.map(s => s._id === tempId ? saved : s);
+          const list = [...this.statsSubject.value, saved];
           this.statsSubject.next(list);
           localStorage.setItem(LS + 'site_stats', JSON.stringify(list));
           this.notifySync();
         }
       }),
-      catchError(() => of(optimisticStat))
+      catchError((err) => {
+        console.error('Failed to add stat:', err);
+        this.fetchStats();
+        throw err;
+      })
     );
   }
 
   updateStat(id: string, stat: Partial<SiteStat>): Observable<SiteStat> {
-    const current = this.statsSubject.value;
-    const updated = current.map(s => this.isMatch(s, id) ? { ...s, ...stat } : s);
-    this.statsSubject.next(updated);
-    localStorage.setItem(LS + 'site_stats', JSON.stringify(updated));
-    this.notifySync();
-
     return this.http.put<SiteStat>(`${this.apiUrl}/stats/${id}`, stat, { headers: this.adminHeaders }).pipe(
       tap((saved) => {
         if (saved && saved._id) {
@@ -803,15 +1007,15 @@ export class FurnitureService {
           this.notifySync();
         }
       }),
-      catchError(() => of(stat as SiteStat))
+      catchError((err) => {
+        console.error('Failed to update stat:', err);
+        this.fetchStats();
+        throw err;
+      })
     );
   }
 
   saveAllStats(stats: SiteStat[]): Observable<SiteStat[]> {
-    this.statsSubject.next([...stats]);
-    localStorage.setItem(LS + 'site_stats', JSON.stringify(stats));
-    this.notifySync();
-
     return this.http.put<SiteStat[]>(`${this.apiUrl}/stats`, stats, { headers: this.adminHeaders }).pipe(
       tap((savedList) => {
         if (savedList && Array.isArray(savedList)) {
@@ -820,19 +1024,28 @@ export class FurnitureService {
           this.notifySync();
         }
       }),
-      catchError(() => of(stats))
+      catchError((err) => {
+        console.error('Failed to save stats:', err);
+        this.fetchStats();
+        throw err;
+      })
     );
   }
 
   deleteStat(id: string): Observable<any> {
-    const current = this.statsSubject.value;
-    const updated = current.filter(s => !this.isMatch(s, id));
-    this.statsSubject.next(updated);
-    localStorage.setItem(LS + 'site_stats', JSON.stringify(updated));
-    this.notifySync();
-
     return this.http.delete(`${this.apiUrl}/stats/${id}`, { headers: this.adminHeaders }).pipe(
-      catchError(() => of({ success: true }))
+      tap(() => {
+        const current = this.statsSubject.value;
+        const updated = current.filter(s => !this.isMatch(s, id));
+        this.statsSubject.next(updated);
+        localStorage.setItem(LS + 'site_stats', JSON.stringify(updated));
+        this.notifySync();
+      }),
+      catchError((err) => {
+        console.error('Failed to delete stat:', err);
+        this.fetchStats();
+        throw err;
+      })
     );
   }
 
@@ -841,27 +1054,14 @@ export class FurnitureService {
   }
 
   // ════════════════════════════════════════════════════════════════
-  // INITIAL CACHE LOADERS
+  // INITIAL FALLBACK CACHE LOADERS
   // ════════════════════════════════════════════════════════════════
   private getLocalItems(): FurnitureItem[] {
     try {
       const d = localStorage.getItem(LS + 'items');
       if (d) return JSON.parse(d);
     } catch (_) {}
-    const defaults: FurnitureItem[] = [
-      { _id: '1', name: 'Royal Sofa Set 5-Seater', category: 'Sofa Set', description: 'Premium 5-seater sofa set with velvet finish.', imageUrl: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600', price: '₹45,000' },
-      { _id: '2', name: 'L-Shape Corner Sofa', category: 'Sofa Set', description: 'Modern L-shaped sectional sofa.', imageUrl: 'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=600', price: '₹62,000' },
-      { _id: '3', name: '3-Seater Recliner Sofa', category: 'Sofa Set', description: 'Luxury 3-seater recliner with cup holders.', imageUrl: 'https://images.unsplash.com/photo-1540574163026-643ea20ade25?w=600', price: '₹55,000' },
-      { _id: '4', name: 'Fabric Sofa Set', category: 'Sofa Set', description: 'Elegant 6-seater fabric sofa.', imageUrl: 'https://images.unsplash.com/photo-1484101403633-562f891dc89a?w=600', price: '₹38,000' },
-      { _id: '5', name: 'King Size Bed', category: 'Bedroom', description: 'King-size bed with hydraulic storage.', imageUrl: 'https://images.unsplash.com/photo-1505693314120-0d443867891c?w=600', price: '₹38,000' },
-      { _id: '6', name: 'Modern TV Unit', category: 'TV Unit', description: 'Sleek wall-mounted TV unit.', imageUrl: 'https://images.unsplash.com/photo-1593359677879-a4bb92f4e62a?w=600', price: '₹18,500' },
-      { _id: '7', name: 'Modular Kitchen', category: 'Kitchen', description: 'Full modular kitchen with granite top.', imageUrl: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600', price: '₹1,20,000' },
-      { _id: '8', name: 'Pooja Mandir', category: 'Temple / Mandir', description: 'Hand-carved wooden temple.', imageUrl: 'https://images.unsplash.com/photo-1609766418204-94aae0ecfdfc?w=600', price: '₹15,000' },
-    ];
-    try {
-      localStorage.setItem(LS + 'items', JSON.stringify(defaults));
-    } catch (_) {}
-    return defaults;
+    return [];
   }
 
   private getLocalFeedbacks(): Feedback[] {
@@ -876,14 +1076,7 @@ export class FurnitureService {
       const d = localStorage.getItem(LS + 'workinfo');
       if (d) return JSON.parse(d);
     } catch (_) {}
-    return [
-      { _id: '1', title: 'Home Space Visit & Measurement', description: 'Our specialist visits your house, inspects the exact space, and provides a customized quotation for just ₹200 visit charge.', icon: '🏠', order: 1 },
-      { _id: '2', title: 'Full Team On-Site Crafting', description: 'Once confirmed, our entire specialized artisan team visits your home with materials to build and complete furniture on-site.', icon: '👥', order: 2 },
-      { _id: '3', title: '100% Custom Tailored Furniture', description: 'Every furniture piece is built specifically for your room layout, dimensions, and preferred wood.', icon: '🪑', order: 3 },
-      { _id: '4', title: 'Premium Termite-Treated Wood', description: 'Grade-A Sheesham, Teak, and Pine with heavy-duty Italian hardware and luxury finishes.', icon: '🌳', order: 4 },
-      { _id: '5', title: 'Fine Artisan Woodworking', description: 'Handcrafted with traditional joinery, premium hardware, and durable multi-coat polish finish.', icon: '🪵', order: 5 },
-      { _id: '6', title: 'Transparent Honest Quotation', description: 'Clear upfront pricing with no hidden surprises. Complete material and labour breakdown.', icon: '📋', order: 6 },
-    ];
+    return [];
   }
 
   private getLocalTeamMembers(): TeamMember[] {
@@ -891,14 +1084,7 @@ export class FurnitureService {
       const d = localStorage.getItem(LS + 'team');
       if (d) return JSON.parse(d);
     } catch (_) {}
-    return [
-      { _id: '1', name: 'Bhavesh Patel', role: 'Founder & Master Craftsman', experience: '15+ Years', specialty: 'All Custom Woods', emoji: '👨‍🔨', description: 'Visionary behind every piece of furniture we craft.', phone: '+91 9225576095', order: 1 },
-      { _id: '2', name: 'Ramesh Kumar', role: 'Head of Design', experience: '12 Years', specialty: 'Sofa & Bedroom', emoji: '🎨', description: 'Expert in modern sofa sets and luxury bedroom furniture.', phone: '+91 92255 76095', order: 2 },
-      { _id: '3', name: 'Sunita Devi', role: 'Kitchen & Interior Specialist', experience: '10 Years', specialty: 'Modular Kitchens', emoji: '🍳', description: 'Specializes in ergonomic modular kitchens and TV units.', phone: '+91 92255 76095', order: 3 },
-      { _id: '4', name: 'Kiran Shah', role: 'Temple & Decor Artisan', experience: '8 Years', specialty: 'Hand Carving', emoji: '🛕', description: 'Master carver of wooden temples and artistic pooja units.', phone: '+91 92255 76095', order: 4 },
-      { _id: '5', name: 'Mahesh Parmar', role: 'Sales & Client Relations', experience: '6 Years', specialty: 'Custom Orders', emoji: '🤝', description: 'Your personal advisor for custom orders and quotes.', phone: '+91 92255 76095', order: 5 },
-      { _id: '6', name: 'Deepa Joshi', role: 'Quality Control Manager', experience: '9 Years', specialty: 'Quality Assurance', emoji: '✅', description: 'Ensures every product meets our highest standards.', phone: '+91 92255 76095', order: 6 }
-    ];
+    return [];
   }
 
   private getLocalVideos(): VideoItem[] {
@@ -906,24 +1092,7 @@ export class FurnitureService {
       const d = localStorage.getItem(LS + 'videos');
       if (d) return JSON.parse(d);
     } catch (_) {}
-    return [
-      {
-        _id: '1',
-        title: 'Master Sofa Crafting Process',
-        description: 'Watch how our skilled artisans handcraft our bestselling Royal Sofa from solid wood frame to premium fabric stitching.',
-        videoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
-        thumbnailUrl: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600',
-        category: 'Workshop'
-      },
-      {
-        _id: '2',
-        title: 'Modular Kitchen Installation Walkthrough',
-        description: 'Complete walkthrough of a luxury modular kitchen installed with hydraulic hinges and granite countertop.',
-        videoUrl: 'https://www.w3schools.com/html/movie.mp4',
-        thumbnailUrl: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600',
-        category: 'Installation'
-      }
-    ];
+    return [];
   }
 
   private getLocalCustomOrders(): CustomOrder[] {
@@ -938,11 +1107,6 @@ export class FurnitureService {
       const d = localStorage.getItem(LS + 'site_stats');
       if (d) return JSON.parse(d);
     } catch (_) {}
-    return [
-      { _id: '1', value: '15+', label: 'Years Experience', order: 1 },
-      { _id: '2', value: '5000+', label: 'Happy Clients', order: 2 },
-      { _id: '3', value: '200+', label: 'Furniture Designs', order: 3 },
-      { _id: '4', value: '50+', label: 'Cities Delivered', order: 4 }
-    ];
+    return [];
   }
 }
