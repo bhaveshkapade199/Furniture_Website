@@ -1,14 +1,15 @@
 const mongoose = require('mongoose');
 
 const FurnitureSchema = new mongoose.Schema({
-  name:          { type: String, required: true },
-  category:      { type: String, required: true },
-  description:   { type: String, default: '' },
-  imageUrl:      { type: String, required: true },
-  videoUrl:      { type: String, default: '' },
-  price:         { type: String, default: '' },
-  shareableLink: { type: String },
-  dateAdded:     { type: Date, default: Date.now }
+  name:             { type: String, required: true },
+  category:         { type: String, required: true },
+  description:      { type: String, default: '' },
+  imageUrl:         { type: String, required: true },
+  additionalImages: { type: [String], default: [] },
+  videoUrl:         { type: String, default: '' },
+  price:            { type: String, default: '' },
+  shareableLink:    { type: String },
+  dateAdded:        { type: Date, default: Date.now }
 });
 
 const FeedbackSchema = new mongoose.Schema({
