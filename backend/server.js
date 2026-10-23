@@ -1,13 +1,13 @@
-const path     = require('path');
+const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
-const express  = require('express');
+const express = require('express');
 const mongoose = require('mongoose');
-const cors     = require('cors');
-const fs       = require('fs');
-const multer   = require('multer');
+const cors = require('cors');
+const fs = require('fs');
+const multer = require('multer');
 const { Furniture, Feedback, WorkInfo, TeamMember, Video, CustomOrder, Stat } = require('./models');
 
-const app  = express();
+const app = express();
 const PORT = process.env.PORT || 5000;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'bhavesh@admin123';
 
@@ -109,16 +109,7 @@ async function seedDefaults() {
   if (count === 0) {
     console.log('🌱  Seeding default furniture items…');
     const defaults = [
-      { name: 'Royal Sofa Set 5-Seater', category: 'Sofa Set', description: 'Premium 5-seater sofa set with velvet finish.', imageUrl: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600', price: '₹45,000' },
-      { name: 'L-Shape Corner Sofa',     category: 'Sofa Set', description: 'Modern L-shaped sectional sofa with premium fabric.', imageUrl: 'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=600', price: '₹62,000' },
-      { name: '3-Seater Recliner Sofa',  category: 'Sofa Set', description: 'Luxury 3-seater recliner sofa with cup holders.', imageUrl: 'https://images.unsplash.com/photo-1540574163026-643ea20ade25?w=600', price: '₹55,000' },
-      { name: 'Fabric Sofa Set',         category: 'Sofa Set', description: 'Elegant 6-seater fabric sofa in ash grey.', imageUrl: 'https://images.unsplash.com/photo-1484101403633-562f891dc89a?w=600', price: '₹38,000' },
-      { name: 'King Size Bed',           category: 'Bedroom',  description: 'Luxurious king-size bed with hydraulic storage.', imageUrl: 'https://images.unsplash.com/photo-1505693314120-0d443867891c?w=600', price: '₹38,000' },
-      { name: '4-Door Wardrobe',         category: 'Bedroom',  description: 'Spacious 4-door wardrobe with mirror & shelves.', imageUrl: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600', price: '₹28,000' },
-      { name: 'Modern TV Unit',          category: 'TV Unit',  description: 'Sleek wall-mounted TV unit with LED backlight.', imageUrl: 'https://images.unsplash.com/photo-1593359677879-a4bb92f4e62a?w=600', price: '₹18,500' },
-      { name: 'Modular Kitchen',         category: 'Kitchen',  description: 'Full modular kitchen with granite top.', imageUrl: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600', price: '₹1,20,000' },
-      { name: 'Pooja Mandir',            category: 'Temple / Mandir', description: 'Hand-carved wooden temple with LED lighting.', imageUrl: 'https://images.unsplash.com/photo-1609766418204-94aae0ecfdfc?w=600', price: '₹15,000' },
-      { name: 'Dining Table 6-Seater',   category: 'Dining Room', description: 'Solid sheesham wood dining table for 6 persons.', imageUrl: 'https://images.unsplash.com/photo-1617806118233-18e1de247200?w=600', price: '₹28,000' },
+
     ];
     for (const item of defaults) {
       const saved = await Furniture.create(item);
@@ -131,11 +122,11 @@ async function seedDefaults() {
   if (wiCount === 0) {
     await WorkInfo.insertMany([
       { title: 'Home Space Visit & Measurement', description: 'Our specialist visits your house, inspects the exact space, and provides a customized quotation for just ₹200 visit charge.', icon: '🏠', order: 1 },
-      { title: 'Full Team On-Site Crafting',     description: 'Once confirmed, our entire specialized artisan team visits your home with materials to build and complete furniture on-site.', icon: '👥', order: 2 },
+      { title: 'Full Team On-Site Crafting', description: 'Once confirmed, our entire specialized artisan team visits your home with materials to build and complete furniture on-site.', icon: '👥', order: 2 },
       { title: '100% Custom Tailored Furniture', description: 'Every furniture piece is built specifically for your room layout, dimensions, and preferred wood.', icon: '🪑', order: 3 },
-      { title: 'Premium Termite-Treated Wood',   description: 'Grade-A Sheesham, Teak, and Pine with heavy-duty Italian hardware and luxury finishes.', icon: '🌳', order: 4 },
-      { title: 'Fine Artisan Woodworking',     description: 'Handcrafted with traditional joinery, premium hardware, and durable multi-coat polish finish.', icon: '🪵', order: 5 },
-      { title: 'Transparent Honest Quotation',   description: 'Clear upfront pricing with no hidden surprises. Complete material and labour breakdown.', icon: '📋', order: 6 },
+      { title: 'Premium Termite-Treated Wood', description: 'Grade-A Sheesham, Teak, and Pine with heavy-duty Italian hardware and luxury finishes.', icon: '🌳', order: 4 },
+      { title: 'Fine Artisan Woodworking', description: 'Handcrafted with traditional joinery, premium hardware, and durable multi-coat polish finish.', icon: '🪵', order: 5 },
+      { title: 'Transparent Honest Quotation', description: 'Clear upfront pricing with no hidden surprises. Complete material and labour breakdown.', icon: '📋', order: 6 },
     ]);
   }
 
@@ -143,12 +134,6 @@ async function seedDefaults() {
   if (tmCount === 0) {
     console.log('🌱  Seeding default team members…');
     await TeamMember.insertMany([
-      { name: 'Bhavesh Patel',  role: 'Founder & Master Craftsman',   experience: '15+ Years', specialty: 'All Custom Woods', emoji: '👨‍🔨', description: 'Visionary behind every piece of furniture we craft. 15+ years of master woodworking experience.', phone: '+91 92255 76095', order: 1 },
-      { name: 'Ramesh Kumar',   role: 'Head of Design',                experience: '12 Years',  specialty: 'Sofa & Bedroom',   emoji: '🎨', description: 'Expert in modern sofa sets, luxury recliners, and contemporary bedroom furniture.', phone: '+91 98765 43211', order: 2 },
-      { name: 'Sunita Devi',    role: 'Kitchen & Interior Specialist', experience: '10 Years',  specialty: 'Modular Kitchens', emoji: '🍳', description: 'Specializes in ergonomic modular kitchens, storage solutions, and TV entertainment units.', phone: '+91 98765 43212', order: 3 },
-      { name: 'Kiran Shah',     role: 'Temple & Decor Artisan',        experience: '8 Years',   specialty: 'Hand Carving',     emoji: '🛕', description: 'Master carver of sacred wooden temples, mandirs, and intricate artistic wood carvings.', phone: '+91 98765 43213', order: 4 },
-      { name: 'Mahesh Parmar',  role: 'Sales & Client Relations',      experience: '6 Years',   specialty: 'Custom Orders',    emoji: '🤝', description: 'Your personal advisor for quotes, site visits, custom requirements, and timely delivery.', phone: '+91 98765 43214', order: 5 },
-      { name: 'Deepa Joshi',    role: 'Quality Control Manager',       experience: '9 Years',   specialty: 'Quality Assurance',emoji: '✅', description: 'Thoroughly inspects every joint, polish finish, fabric quality, and packaging before dispatch.', phone: '+91 98765 43215', order: 6 }
     ]);
   }
 
@@ -210,7 +195,7 @@ async function pollDirectMongoChanges() {
         broadcastChange(name, 'direct_db_change', { count: docs.length });
       }
       collectionFingerprints[name] = currentFingerprint;
-    } catch (_) {}
+    } catch (_) { }
   }
 }
 
@@ -225,8 +210,8 @@ function startMongoDirectWatcher() {
 // ─── Helper: Admin Auth ───────────────────────────────────────
 function adminAuth(req, res, next) {
   const pwd = req.headers['x-admin-password'] ||
-              (req.headers['authorization'] && req.headers['authorization'].replace(/^Bearer\s+/i, '')) ||
-              req.query.adminPassword;
+    (req.headers['authorization'] && req.headers['authorization'].replace(/^Bearer\s+/i, '')) ||
+    req.query.adminPassword;
   if (!pwd || pwd !== ADMIN_PASSWORD) {
     console.warn(`🔒 Unauthorized admin request to ${req.method} ${req.url}`);
     return res.status(401).json({ error: 'Unauthorized: Invalid admin credentials' });
@@ -243,7 +228,7 @@ async function safeDelete(Model, id, extraFilter = null) {
     try {
       deleted = await Model.findByIdAndDelete(id);
       if (deleted) return deleted;
-    } catch (_) {}
+    } catch (_) { }
   }
 
   // 2. Match by custom string _id
@@ -251,7 +236,7 @@ async function safeDelete(Model, id, extraFilter = null) {
     try {
       deleted = await Model.findOneAndDelete({ _id: id });
       if (deleted) return deleted;
-    } catch (_) {}
+    } catch (_) { }
   }
 
   // 3. Match by numeric order or custom numeric id
@@ -260,7 +245,7 @@ async function safeDelete(Model, id, extraFilter = null) {
     try {
       deleted = await Model.findOneAndDelete({ $or: [{ order: num }, { id: num }] });
       if (deleted) return deleted;
-    } catch (_) {}
+    } catch (_) { }
   }
 
   // 4. Fallback: match by extra filter (e.g. name or title)
@@ -268,7 +253,7 @@ async function safeDelete(Model, id, extraFilter = null) {
     try {
       deleted = await Model.findOneAndDelete(extraFilter);
       if (deleted) return deleted;
-    } catch (_) {}
+    } catch (_) { }
   }
 
   return null;
@@ -287,7 +272,7 @@ async function safeUpdate(Model, id, update, extraFilter = null, options = { new
     try {
       updated = await Model.findByIdAndUpdate(id, cleanUpdate, options);
       if (updated) return updated;
-    } catch (_) {}
+    } catch (_) { }
   }
 
   // 2. Match by custom string _id
@@ -295,7 +280,7 @@ async function safeUpdate(Model, id, update, extraFilter = null, options = { new
     try {
       updated = await Model.findOneAndUpdate({ _id: id }, cleanUpdate, options);
       if (updated) return updated;
-    } catch (_) {}
+    } catch (_) { }
   }
 
   // 3. Match by numeric order or custom numeric id
@@ -304,7 +289,7 @@ async function safeUpdate(Model, id, update, extraFilter = null, options = { new
     try {
       updated = await Model.findOneAndUpdate({ $or: [{ order: num }, { id: num }] }, cleanUpdate, options);
       if (updated) return updated;
-    } catch (_) {}
+    } catch (_) { }
   }
 
   // 4. Fallback: match by extra filter
@@ -312,7 +297,7 @@ async function safeUpdate(Model, id, update, extraFilter = null, options = { new
     try {
       updated = await Model.findOneAndUpdate(extraFilter, cleanUpdate, options);
       if (updated) return updated;
-    } catch (_) {}
+    } catch (_) { }
   }
 
   return null;
